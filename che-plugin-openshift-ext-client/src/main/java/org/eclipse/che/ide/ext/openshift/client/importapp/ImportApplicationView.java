@@ -97,7 +97,7 @@ public interface ImportApplicationView extends View<ImportApplicationView.Action
      * @param name
      *         project name
      */
-    void setProjectName(String name);
+    void setProjectName(String name, boolean fireValueChanged);
 
     /**
      * Display the project's description.

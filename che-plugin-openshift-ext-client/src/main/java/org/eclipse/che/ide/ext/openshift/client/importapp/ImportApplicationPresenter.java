@@ -13,10 +13,16 @@ package org.eclipse.che.ide.ext.openshift.client.importapp;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
+import org.eclipse.che.api.project.gwt.client.ProjectTypeServiceClient;
 import org.eclipse.che.api.project.shared.dto.ProjectDescriptor;
+import org.eclipse.che.api.project.shared.dto.ProjectTypeDefinition;
+import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.ide.api.event.ConfigureProjectEvent;
@@ -34,6 +40,7 @@ import org.eclipse.che.ide.ext.openshift.shared.dto.BuildConfig;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Project;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
+import org.eclipse.che.ide.rest.Unmarshallable;
 import org.eclipse.che.ide.util.NameUtils;
 import org.eclipse.che.ide.websocket.rest.RequestCallback;
 
@@ -44,7 +51,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Presenter, which handles logic for importing OpenShift application to Codenvy.
+ * Presenter, which handles logic for importing OpenShift application to Che.
  *
  * @author Anna Shumilova
  * @author Vitaliy Guliy
@@ -59,16 +66,19 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
     private final ImportProjectNotificationSubscriber importProjectNotificationSubscriber;
     private final DtoUnmarshallerFactory              dtoUnmarshallerFactory;
     private final EventBus                            eventBus;
+    private final List<String>                        cheProjects;
+    private final List<Project>                       projectList;
+    private final Map<String, List<BuildConfig>>      buildConfigMap;
+    private final NotificationManager                 notificationManager;
+    private       BuildConfig                         selectedBuildConfig;
+    private       ProjectTypeServiceClient            projectTypeServiceClient;
 
-    private final List<String>                   cheProjects;
-    private final List<Project>                  projectList;
-    private final Map<String, List<BuildConfig>> buildConfigMap;
-    private       BuildConfig                    selectedBuildConfig;
 
     @Inject
     public ImportApplicationPresenter(OpenshiftLocalizationConstant locale, ImportApplicationView view,
                                       OpenshiftServiceClient openShiftClient,
                                       ProjectServiceClient projectServiceClient,
+                                      ProjectTypeServiceClient projectTypeServiceClient,
                                       DtoUnmarshallerFactory dtoUnmarshallerFactory,
                                       NotificationManager notificationManager,
                                       OpenshiftAuthenticator openshiftAuthenticator,
@@ -81,8 +91,10 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
         this.view.setDelegate(this);
         this.openShiftClient = openShiftClient;
         this.projectServiceClient = projectServiceClient;
+        this.projectTypeServiceClient = projectTypeServiceClient;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.dtoFactory = dtoFactory;
+        this.notificationManager = notificationManager;
         this.importProjectNotificationSubscriber = importProjectNotificationSubscriber;
         this.eventBus = eventBus;
         this.locale = locale;
@@ -98,7 +110,7 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
         selectedBuildConfig = null;
 
         view.setErrorMessage("");
-        view.setProjectName("");
+        view.setProjectName("", false);
         view.setProjectDescription("");
         view.setApplicationInfo(null);
 
@@ -131,15 +143,25 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
                     cheProjects.add(project.getName());
                 }
 
-                loadOpenshiftProjects();
+                loadOpenShiftProjects();
             }
-        });
+        }).catchError(handleError());
+    }
+
+    private Operation<PromiseError> handleError() {
+        return new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError arg) throws OperationException {
+                final ServiceError serviceError = dtoFactory.createDtoFromJson(arg.getMessage(), ServiceError.class);
+                notificationManager.showError(serviceError.getMessage());
+            }
+        };
     }
 
     /**
      * Load OpenShift Project and Application data.
      */
-    private void loadOpenshiftProjects() {
+    private void loadOpenShiftProjects() {
         openShiftClient.getProjects().then(new Operation<List<Project>>() {
             @Override
             public void apply(List<Project> result) throws OperationException {
@@ -153,7 +175,7 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
                     getBuildConfigs(project.getMetadata().getName());
                 }
             }
-        });
+        }).catchError(handleError());
     }
 
     /**
@@ -172,7 +194,7 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
                     view.setBuildConfigs(buildConfigMap);
                 }
             }
-        });
+        }).catchError(handleError());
     }
 
     @Override
@@ -232,7 +254,7 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
                     dtoUnmarshallerFactory.newWSUnmarshaller(Void.class)) {
                 @Override
                 protected void onSuccess(final Void result) {
-                    createProject(projectConfig);
+                    resolveProject(projectConfig);
                 }
 
                 @Override
@@ -246,12 +268,45 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
     }
 
     /**
-     * Creates Codenvy project from imported sources.
+     * Resolves project's type.
+     *
+     * @param projectConfig
+     *         project's config
+     */
+    private void resolveProject(final ProjectConfigDto projectConfig) {
+        final String projectName = projectConfig.getName();
+        Unmarshallable<List<SourceEstimation>> unmarshaller = dtoUnmarshallerFactory.newListUnmarshaller(SourceEstimation.class);
+        projectServiceClient.resolveSources(projectName, new AsyncRequestCallback<List<SourceEstimation>>(unmarshaller) {
+            @Override
+            protected void onSuccess(List<SourceEstimation> result) {
+                for (SourceEstimation estimation : result) {
+                    final Promise<ProjectTypeDefinition> projectTypePromise = projectTypeServiceClient.getProjectType(estimation.getType());
+                    projectTypePromise.then(new Operation<ProjectTypeDefinition>() {
+                        @Override
+                        public void apply(ProjectTypeDefinition arg) throws OperationException {
+                            if (arg.getPrimaryable()) {
+                                updateProject(projectConfig.withType(arg.getId()));
+                            }
+                        }
+                    });
+                }
+            }
+
+            @Override
+            protected void onFailure(Throwable exception) {
+                importProjectNotificationSubscriber.onFailure(exception.getMessage());
+                createProjectFailure(exception);
+            }
+        });
+    }
+
+    /**
+     * Updates Che project's type.
      *
      * @param projectConfig
      *         project config
      */
-    private void createProject(ProjectConfigDto projectConfig) {
+    private void updateProject(ProjectConfigDto projectConfig) {
         try {
             projectServiceClient.updateProject(projectConfig.getName(), projectConfig, new AsyncRequestCallback<ProjectDescriptor>(
                     dtoUnmarshallerFactory.newUnmarshaller(ProjectDescriptor.class)) {
@@ -312,7 +367,7 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
             view.enableNameField(true);
             view.enableDescriptionField(true);
 
-            view.setProjectName(buildConfig.getMetadata().getName());
+            view.setProjectName(buildConfig.getMetadata().getName(), true);
             view.setApplicationInfo(buildConfig);
         }
 

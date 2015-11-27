@@ -22,13 +22,13 @@
     <artifactId>che-plugin-openshift-parent</artifactId>
     <packaging>pom</packaging>
     <name>Che Plugin :: Openshift :: Parent</name>
-    <properties>
-        <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>
-    </properties>
     <modules>
         <module>che-plugin-openshift-oauth2</module>
         <module>che-plugin-openshift-ext-shared</module>
         <module>che-plugin-openshift-ext-server</module>
         <module>che-plugin-openshift-ext-client</module>
     </modules>
+    <properties>
+        <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>
+    </properties>
 </project>
