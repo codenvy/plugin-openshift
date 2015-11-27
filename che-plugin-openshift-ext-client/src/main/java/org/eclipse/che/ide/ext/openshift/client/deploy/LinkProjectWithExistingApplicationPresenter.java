@@ -12,12 +12,14 @@ package org.eclipse.che.ide.ext.openshift.client.deploy;
 
 import com.google.inject.Inject;
 
+import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.git.gwt.client.GitServiceClient;
 import org.eclipse.che.api.git.shared.Remote;
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
 import org.eclipse.che.api.project.shared.dto.ProjectDescriptor;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -55,6 +57,7 @@ public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthent
     private final ProjectServiceClient                   projectServiceClient;
     private final GitServiceClient                       gitService;
     private final DtoUnmarshallerFactory                 dtoUnmarshaller;
+    private final DtoFactory                             dtoFactory;
     private final Map<String, List<BuildConfig>>         buildConfigMap;
     private       BuildConfig                            selectedBuildConfig;
 
@@ -80,11 +83,11 @@ public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthent
         this.locale = locale;
         this.notificationManager = notificationManager;
         this.dialogFactory = dialogFactory;
+        this.dtoFactory = dtoFactory;
         this.openShiftClient = openShiftClient;
         this.projectServiceClient = projectServiceClient;
         this.gitService = gitService;
         this.dtoUnmarshaller = dtoUnmarshaller;
-
         buildConfigMap = new HashMap<>();
     }
 
@@ -137,6 +140,7 @@ public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthent
      * Prepare the view state to be shown.
      */
     private void prepareView() {
+        buildConfigMap.clear();
         selectedBuildConfig = null;
         view.enableLinkButton(false);
         view.setBuildConfigGitUrl("");
@@ -169,7 +173,17 @@ public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthent
                 notificationManager.showInfo(locale.linkProjectWithExistingUpdateBuildConfigSuccess(
                         result.getMetadata().getName()));
             }
-        });
+        }).catchError(handleError());
+    }
+
+    private Operation<PromiseError> handleError() {
+        return new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError arg) throws OperationException {
+                final ServiceError serviceError = dtoFactory.createDtoFromJson(arg.getMessage(), ServiceError.class);
+                notificationManager.showError(serviceError.getMessage());
+            }
+        };
     }
 
     /**
@@ -244,7 +258,7 @@ public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthent
                     getBuildConfigs(project.getMetadata().getName());
                 }
             }
-        });
+        }).catchError(handleError());
     }
 
     /**
@@ -257,9 +271,8 @@ public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthent
             @Override
             public void apply(List<BuildConfig> result) throws OperationException {
                 buildConfigMap.put(namespace, result);
-                //TODO update by portions?
                 view.setBuildConfigs(buildConfigMap);
             }
-        });//TODO add catching of error
+        }).catchError(handleError());
     }
 }

@@ -244,8 +244,11 @@ public class ImportApplicationViewImpl extends Window implements ImportApplicati
     }
 
     @Override
-    public void setProjectName(String name) {
+    public void setProjectName(String name, boolean fireValueChanged) {
         projectName.setValue(name);
+        if (fireValueChanged) {
+            delegate.onProjectNameChanged(name);
+        }
     }
 
     @Override
