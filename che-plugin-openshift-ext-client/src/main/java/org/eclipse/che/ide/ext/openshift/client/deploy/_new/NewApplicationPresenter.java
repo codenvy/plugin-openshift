@@ -55,6 +55,7 @@ import org.eclipse.che.ide.ext.openshift.shared.dto.DeploymentConfig;
 import org.eclipse.che.ide.ext.openshift.shared.dto.DeploymentConfigSpec;
 import org.eclipse.che.ide.ext.openshift.shared.dto.DeploymentTriggerImageChangeParams;
 import org.eclipse.che.ide.ext.openshift.shared.dto.DeploymentTriggerPolicy;
+import org.eclipse.che.ide.ext.openshift.shared.dto.DockerImageMetadata;
 import org.eclipse.che.ide.ext.openshift.shared.dto.EnvVar;
 import org.eclipse.che.ide.ext.openshift.shared.dto.GitBuildSource;
 import org.eclipse.che.ide.ext.openshift.shared.dto.ImageChangeTrigger;
@@ -78,6 +79,7 @@ import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.util.Pair;
 
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -85,7 +87,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonMap;
@@ -126,17 +127,17 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
     public static final String API_VERSION = "v1";
 
     @Inject
-    public NewApplicationPresenter(final NewApplicationView view,
-                                   final AppContext appContext,
-                                   final DialogFactory dialogFactory,
-                                   final OpenshiftLocalizationConstant locale,
-                                   final GitServiceClient gitService,
-                                   final DtoUnmarshallerFactory dtoUnmarshaller,
-                                   final OpenshiftServiceClient osService,
-                                   final DtoFactory dtoFactory,
-                                   final ProjectServiceClient projectService,
-                                   final EventBus eventBus,
-                                   final NotificationManager notificationManager,
+    public NewApplicationPresenter(NewApplicationView view,
+                                   AppContext appContext,
+                                   DialogFactory dialogFactory,
+                                   OpenshiftLocalizationConstant locale,
+                                   GitServiceClient gitService,
+                                   DtoUnmarshallerFactory dtoUnmarshaller,
+                                   OpenshiftServiceClient osService,
+                                   DtoFactory dtoFactory,
+                                   ProjectServiceClient projectService,
+                                   EventBus eventBus,
+                                   NotificationManager notificationManager,
                                    OpenshiftAuthenticator openshiftAuthenticator,
                                    OpenshiftAuthorizationHandler openshiftAuthorizationHandler) {
         super(openshiftAuthenticator, openshiftAuthorizationHandler, locale, notificationManager);
@@ -180,15 +181,14 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
             //Check is Git repository:
             ProjectDescriptor projectDescriptor = appContext.getCurrentProject().getRootProject();
             List<String> listVcsProvider = projectDescriptor.getAttributes().get("vcs.provider.name");
-            if (listVcsProvider != null && !listVcsProvider.isEmpty() && listVcsProvider.contains("git")) {
+            if (listVcsProvider != null && listVcsProvider.contains("git")) {
                 getGitRemoteRepositories(projectDescriptor);
             } else {
-                dialogFactory.createMessageDialog(locale.notGitRepositoryWarningTitle(), 
-                                                  locale.notGitRepositoryWarning(projectDescriptor.getName()), 
+                dialogFactory.createMessageDialog(locale.notGitRepositoryWarningTitle(),
+                                                  locale.notGitRepositoryWarning(projectDescriptor.getName()),
                                                   null).show();
             }
         }
-
     }
 
     private void getGitRemoteRepositories(final ProjectDescriptor projectDescriptor) {
@@ -201,7 +201,8 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
                                           loadOpenShiftData();
                                       } else {
                                           dialogFactory.createMessageDialog(locale.noGitRemoteRepositoryWarningTitle(),
-                                                                            locale.noGitRemoteRepositoryWarning(projectDescriptor.getName()), 
+                                                                            locale.noGitRemoteRepositoryWarning(
+                                                                                    projectDescriptor.getName()),
                                                                             null).show();
                                       }
                                   }
@@ -214,9 +215,9 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
     }
 
     private void loadOpenShiftData() {
-        final ProjectDescriptor descriptor = checkNotNull(appContext.getCurrentProject()).getRootProject();
-        view.show();
+        final ProjectDescriptor descriptor = appContext.getCurrentProject().getRootProject();
         view.setApplicationName(descriptor.getName());
+        view.show();
 
         osService.getProjects().then(new Operation<List<Project>>() {
             @Override
@@ -250,7 +251,6 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
         }));
     }
 
-
     @Override
     public void onCancelClicked() {
         view.hide();
@@ -258,28 +258,24 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
 
     @Override
     public void onDeployClicked() {
-        Promise<Project> projectPromise = null;
-
-        if (mode == CREATE_NEW_PROJECT) {
-            String osProjectName = view.getOpenShiftProjectName();
-            String osProjectDisplayName = view.getOpenShiftProjectDisplayName();
-            String osProjectDescription = view.getOpenShiftProjectDescription();
-            //create new project
-            ProjectRequest request = newDto(ProjectRequest.class)
-                    .withApiVersion(API_VERSION)
-                    .withDisplayName(osProjectDisplayName)
-                    .withDescription(osProjectDescription)
-                    .withMetadata(newDto(ObjectMeta.class)
-                                          .withName(osProjectName));
-            projectPromise = osService.createProject(request);
-        } else if (mode == SELECT_EXISTING_PROJECT) {
-            Project osSelectedProject = view.getOpenShiftSelectedProject();
-            checkNotNull(osSelectedProject);
-            projectPromise = Promises.resolve(osSelectedProject);
+        Promise<Project> projectPromise;
+        switch (mode) {
+            case CREATE_NEW_PROJECT:
+                String osProjectName = view.getOpenShiftProjectName();
+                String osProjectDisplayName = view.getOpenShiftProjectDisplayName();
+                String osProjectDescription = view.getOpenShiftProjectDescription();
+                //create new project
+                ProjectRequest request = newDto(ProjectRequest.class).withApiVersion(API_VERSION)
+                                                                     .withDisplayName(osProjectDisplayName)
+                                                                     .withDescription(osProjectDescription)
+                                                                     .withMetadata(newDto(ObjectMeta.class).withName(osProjectName));
+                projectPromise = osService.createProject(request);
+                break;
+            case SELECT_EXISTING_PROJECT:
+            default:
+                Project osSelectedProject = view.getOpenShiftSelectedProject();
+                projectPromise = Promises.resolve(osSelectedProject);
         }
-
-        checkNotNull(projectPromise);
-        checkNotNull(osAppName);
 
         projectPromise.then(new Operation<Project>() {
             @Override
@@ -292,20 +288,13 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
                     labels.put(label.getFirst(), label.getSecond());
                 }
 
-                Object exposedPorts =
-                        (osActiveStreamTag.getImage().getDockerImageMetadata().getConfig() != null) ? osActiveStreamTag.getImage()
-                                                                                                                       .getDockerImageMetadata()
-                                                                                                                       .getConfig()
-                                                                                                                       .getExposedPorts()
-                                                                                                    : osActiveStreamTag.getImage()
-                                                                                                                       .getDockerImageMetadata()
-                                                                                                                       .getContainerConfig()
-                                                                                                                       .getExposedPorts();
+                final DockerImageMetadata imageMetadata = osActiveStreamTag.getImage().getDockerImageMetadata();
+                Object exposedPorts = (imageMetadata.getConfig() != null) ? imageMetadata.getConfig().getExposedPorts()
+                                                                          : imageMetadata.getContainerConfig().getExposedPorts();
                 List<ContainerPort> ports = parsePorts(exposedPorts);
 
                 String namespace = project.getMetadata().getName();
-
-                List<Promise<?>> promises = new ArrayList();
+                List<Promise<?>> promises = new ArrayList<>();
                 promises.add(osService.createImageStream(generateImageStream(namespace, labels)));
                 promises.add(osService.createBuildConfig(generateBuildConfig(namespace, labels)));
                 promises.add(osService.createDeploymentConfig(generateDeploymentConfig(namespace, labels)));
@@ -324,15 +313,16 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
                                         .showInfo(locale.deployProjectSuccess(appContext.getCurrentProject().getRootProject().getName()));
                                 setupMixin(project);
                             }
-                        }).catchError(new Operation<PromiseError>() {
-                    @Override
-                    public void apply(PromiseError arg) throws OperationException {
-                        //TODO remove notification, show error only on popup:
-                        final ServiceError serviceError = dtoFactory.createDtoFromJson(arg.getMessage(), ServiceError.class);
-                        notificationManager.showError(serviceError.getMessage());
-                        view.showError(serviceError.getMessage());
-                    }
-                });
+                        })
+                        .catchError(new Operation<PromiseError>() {
+                            @Override
+                            public void apply(PromiseError arg) throws OperationException {
+                                //TODO remove notification, show error only on popup:
+                                final ServiceError serviceError = dtoFactory.createDtoFromJson(arg.getMessage(), ServiceError.class);
+                                notificationManager.showError(serviceError.getMessage());
+                                view.showError(serviceError.getMessage());
+                            }
+                        });
             }
         });
     }
@@ -393,15 +383,9 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
                     @Override
                     public Promise<ImageStreamTag> apply(ImageStreamTag streamTag) throws FunctionException {
                         osActiveStreamTag = streamTag;
-                        List<String> envs =
-                                (streamTag.getImage().getDockerImageMetadata().getConfig() != null) ? streamTag.getImage()
-                                                                                                               .getDockerImageMetadata()
-                                                                                                               .getConfig()
-                                                                                                               .getEnv()
-                                                                                                    : streamTag.getImage()
-                                                                                                               .getDockerImageMetadata()
-                                                                                                               .getContainerConfig()
-                                                                                                               .getEnv();
+                        final DockerImageMetadata dockerImageMetadata = streamTag.getImage().getDockerImageMetadata();
+                        List<String> envs = (dockerImageMetadata.getConfig() != null) ? dockerImageMetadata.getConfig().getEnv()
+                                                                                      : dockerImageMetadata.getContainerConfig().getEnv();
                         List<Pair<String, String>> variables = new ArrayList<>();
                         for (String env : envs) {
                             String[] keyValuePair = env.split("=");
@@ -433,7 +417,6 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
         validate();
     }
 
-
     private void validate() {
         boolean valid = true;
         String osProjectName = view.getOpenShiftProjectName();
@@ -444,86 +427,69 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
             if (Strings.isNullOrEmpty(osProjectName) || !osProjectName.matches("[a-z0-9]([-a-z0-9]*[a-z0-9])?")) {
                 valid = false;
             }
+        } else if (mode == SELECT_EXISTING_PROJECT){
+            if (view.getOpenShiftSelectedProject() == null) {
+                valid = false;
+            }
         }
 
         view.setDeployButtonEnabled(valid && osImageStreams != null && view.getActiveImage() != null);
     }
 
     private ImageStream generateImageStream(String namespace, Map<String, String> labels) {
-        checkNotNull(namespace);
-        return newDto(ImageStream.class)
-                .withApiVersion(API_VERSION)
-                .withKind("ImageStream")
-                .withMetadata(newDto(ObjectMeta.class)
-                                      .withName(osAppName)
-                                      .withLabels(labels)
-                                      .withNamespace(namespace));
+        return newDto(ImageStream.class).withApiVersion(API_VERSION)
+                                        .withKind("ImageStream")
+                                        .withMetadata(newDto(ObjectMeta.class).withName(osAppName)
+                                                                              .withLabels(labels)
+                                                                              .withNamespace(namespace));
     }
 
 
     private BuildConfig generateBuildConfig(String namespace, Map<String, String> labels) {
-        checkNotNull(osActiveStreamTag);
-        checkNotNull(namespace);
-
         BuildSource source = newDto(BuildSource.class).withType("Git")
                                                       .withGit(newDto(GitBuildSource.class)
                                                                        .withRef("master") //load branch
                                                                        .withUri(projectRemotes.get(0).getUrl()));
 
-        SourceBuildStrategy sourceStrategy = newDto(SourceBuildStrategy.class)
-                .withFrom(newDto(ObjectReference.class)
-                                  .withKind("ImageStreamTag")
-                                  .withName(osActiveStreamTag.getMetadata().getName())
-                                  .withNamespace("openshift"));
+        SourceBuildStrategy sourceStrategy = newDto(SourceBuildStrategy.class).withFrom(newDto(ObjectReference.class)
+                                                                                                .withKind("ImageStreamTag")
+                                                                                                .withName(osActiveStreamTag.getMetadata()
+                                                                                                                           .getName())
+                                                                                                .withNamespace("openshift"));
 
-        BuildStrategy strategy = newDto(BuildStrategy.class)
-                .withType("Source")
-                .withSourceStrategy(sourceStrategy);
+        BuildStrategy strategy = newDto(BuildStrategy.class).withType("Source")
+                                                            .withSourceStrategy(sourceStrategy);
 
-        BuildTriggerPolicy generic = newDto(BuildTriggerPolicy.class)
-                .withType("generic")
-                .withGeneric(newDto(WebHookTrigger.class)
-                                     .withSecret(generateSecret()));
+        BuildTriggerPolicy generic = newDto(BuildTriggerPolicy.class).withType("generic")
+                                                                     .withGeneric(newDto(WebHookTrigger.class)
+                                                                                          .withSecret(generateSecret()));
 
-        BuildTriggerPolicy github = newDto(BuildTriggerPolicy.class)
-                .withType("github")
-                .withGithub(newDto(WebHookTrigger.class)
-                                    .withSecret(generateSecret()));
+        BuildTriggerPolicy github = newDto(BuildTriggerPolicy.class).withType("github")
+                                                                    .withGithub(newDto(WebHookTrigger.class)
+                                                                                        .withSecret(generateSecret()));
 
-        BuildTriggerPolicy imageChange = newDto(BuildTriggerPolicy.class)
-                .withType("imageChange")
-                .withImageChange(newDto(ImageChangeTrigger.class));
+        BuildTriggerPolicy imageChange = newDto(BuildTriggerPolicy.class).withType("imageChange")
+                                                                         .withImageChange(newDto(ImageChangeTrigger.class));
 
-        List<BuildTriggerPolicy> triggers = newArrayList(generic, github, imageChange);
+        BuildTriggerPolicy configChange = newDto(BuildTriggerPolicy.class).withType("ConfigChange");
 
-        BuildOutput output = newDto(BuildOutput.class)
-                .withTo(newDto(ObjectReference.class)
-                                .withName(osAppName + ":latest")
-                                .withKind("ImageStreamTag"));
+        BuildOutput output = newDto(BuildOutput.class).withTo(newDto(ObjectReference.class).withName(osAppName + ":latest")
+                                                                                           .withKind("ImageStreamTag"));
 
-        BuildConfigSpec spec = newDto(BuildConfigSpec.class)
-                .withSource(source)
-                .withStrategy(strategy)
-                .withTriggers(triggers)
-                .withOutput(output);
+        final BuildConfigSpec spec = newDto(BuildConfigSpec.class).withSource(source)
+                                                                  .withStrategy(strategy)
+                                                                  .withTriggers(newArrayList(generic, github, imageChange, configChange))
+                                                                  .withOutput(output);
 
-        return newDto(BuildConfig.class)
-                .withApiVersion(API_VERSION)
-                .withKind("BuildConfig")
-                .withMetadata(newDto(ObjectMeta.class).withName(osAppName)
-                                                      .withLabels(labels)
-                                                      .withNamespace(namespace))
-                .withSpec(spec);
-    }
-
-    private <T> T newDto(Class<T> clas) {
-        return dtoFactory.createDto(clas);
+        return newDto(BuildConfig.class).withApiVersion(API_VERSION)
+                                        .withKind("BuildConfig")
+                                        .withMetadata(newDto(ObjectMeta.class).withName(osAppName)
+                                                                              .withLabels(labels)
+                                                                              .withNamespace(namespace))
+                                        .withSpec(spec);
     }
 
     private DeploymentConfig generateDeploymentConfig(String namespace, Map<String, String> labels) {
-        checkNotNull(osActiveStreamTag);
-        checkNotNull(namespace);
-
         Object exposedPorts = osActiveStreamTag.getImage().getDockerImageMetadata().getContainerConfig().getExposedPorts();
         List<ContainerPort> ports = parsePorts(exposedPorts);
 
@@ -538,9 +504,10 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
                             .withValue(variable.getSecond()));
         }
 
+        final String steamTagName = osActiveStreamTag.getMetadata().getName();
         PodSpec podSpec = newDto(PodSpec.class)
                 .withContainers(newArrayList(newDto(Container.class)
-                                                     .withImage(osActiveStreamTag.getMetadata().getName())
+                                                     .withImage(steamTagName)
                                                      .withName(osAppName)
                                                      .withPorts(ports)
                                                      .withEnv(env)));
@@ -550,26 +517,15 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
                                       .withLabels(templateLabels))
                 .withSpec(podSpec);
 
-        DeploymentTriggerImageChangeParams imageChangeParams = newDto(DeploymentTriggerImageChangeParams.class)
-                .withAutomatic(true)
-                .withContainerNames(newArrayList(osAppName))
-                .withFrom(newDto(ObjectReference.class)
-                                  .withKind("ImageStreamTag")
-                                  .withName(osActiveStreamTag.getMetadata()
-                                                             .getName()));
-
         DeploymentTriggerPolicy imageChange = newDto(DeploymentTriggerPolicy.class)
                 .withType("ImageChange")
-                .withImageChangeParams(imageChangeParams);
+                .withImageChangeParams(newDto(DeploymentTriggerImageChangeParams.class).withAutomatic(true)
+                                                                                       .withContainerNames(newArrayList(osAppName))
+                                                                                       .withFrom(newDto(ObjectReference.class)
+                                                                                                         .withKind("ImageStreamTag")
+                                                                                                         .withName(steamTagName)));
 
-        DeploymentTriggerPolicy configChange = newDto(DeploymentTriggerPolicy.class)
-                .withType("ConfigChange");
-
-        DeploymentConfigSpec spec = newDto(DeploymentConfigSpec.class)
-                .withReplicas(1)
-                .withSelector(Collections.singletonMap("deploymentconfig", osAppName))
-                .withTemplate(template)
-                .withTriggers(newArrayList(imageChange, configChange));
+        DeploymentTriggerPolicy configChange = newDto(DeploymentTriggerPolicy.class).withType("ConfigChange");
 
         return newDto(DeploymentConfig.class)
                 .withApiVersion(API_VERSION)
@@ -578,44 +534,33 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
                                       .withName(osAppName)
                                       .withLabels(labels)
                                       .withNamespace(namespace))
-                .withSpec(spec);
+                .withSpec(newDto(DeploymentConfigSpec.class).withReplicas(1)
+                                                            .withSelector(Collections.singletonMap("deploymentconfig", osAppName))
+                                                            .withTemplate(template)
+                                                            .withTriggers(newArrayList(imageChange, configChange)));
     }
 
     private Service generateService(String namespace, ContainerPort port, Map<String, String> labels) {
-        if (port == null) {
-            return null;
-        }
-
-        checkNotNull(namespace);
-
-        return newDto(Service.class)
-                .withApiVersion(API_VERSION)
-                .withKind("Service")
-                .withMetadata(newDto(ObjectMeta.class)
-                                      .withName(osAppName)
-                                      .withLabels(labels)
-                                      .withNamespace(namespace))
-                .withSpec(newDto(ServiceSpec.class)
-                                  .withPorts(newArrayList(newDto(ServicePort.class)
-                                                                  .withPort(port.getContainerPort())
-                                                                  .withTargetPort(port.getContainerPort())
-                                                                  .withProtocol(port.getProtocol())))
-                                  .withSelector(singletonMap("deploymentconfig", osAppName)));
+        final ServicePort servicePort = newDto(ServicePort.class).withPort(port.getContainerPort())
+                                                                 .withTargetPort(port.getContainerPort())
+                                                                 .withProtocol(port.getProtocol());
+        return newDto(Service.class).withApiVersion(API_VERSION)
+                                    .withKind("Service")
+                                    .withMetadata(newDto(ObjectMeta.class).withName(osAppName)
+                                                                          .withLabels(labels)
+                                                                          .withNamespace(namespace))
+                                    .withSpec(newDto(ServiceSpec.class).withPorts(newArrayList(servicePort))
+                                                                       .withSelector(singletonMap("deploymentconfig", osAppName)));
     }
 
-    private Route generateRoute(String namespace, Map<String, String> labels) {
-        checkNotNull(namespace);
-        return newDto(Route.class)
-                .withKind("Route")
-                .withApiVersion(API_VERSION)
-                .withMetadata(newDto(ObjectMeta.class)
-                                      .withName(osAppName)
-                                      .withLabels(labels)
-                                      .withNamespace(namespace))
-                .withSpec(newDto(RouteSpec.class)
-                                  .withTo(newDto(ObjectReference.class)
-                                                  .withKind("Service")
-                                                  .withName(osAppName)));
+    private Route generateRoute(@NotNull String namespace, Map<String, String> labels) {
+        return newDto(Route.class).withKind("Route")
+                                  .withApiVersion(API_VERSION)
+                                  .withMetadata(newDto(ObjectMeta.class).withName(osAppName)
+                                                                        .withLabels(labels)
+                                                                        .withNamespace(namespace))
+                                  .withSpec(newDto(RouteSpec.class).withTo(newDto(ObjectReference.class).withKind("Service")
+                                                                                                        .withName(osAppName)));
     }
 
     private List<ContainerPort> parsePorts(Object exposedPorts) {
@@ -635,12 +580,15 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
             if (split.length != 2) {
                 continue;
             }
-            containerPorts.add(newDto(ContainerPort.class)
-                                       .withContainerPort(Integer.valueOf(split[0]))
-                                       .withProtocol(split[1].toUpperCase()));
+            containerPorts.add(newDto(ContainerPort.class).withContainerPort(Integer.valueOf(split[0]))
+                                                          .withProtocol(split[1].toUpperCase()));
         }
 
         return containerPorts;
+    }
+
+    private <T> T newDto(Class<T> clazz) {
+        return dtoFactory.createDto(clazz);
     }
 
     /**

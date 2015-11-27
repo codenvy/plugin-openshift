@@ -17,7 +17,6 @@ import org.eclipse.che.ide.ext.openshift.shared.dto.ProjectRequest;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Template;
 
 /**
- *
  * @author Vlad Zhukovskiy
  */
 @DTO
