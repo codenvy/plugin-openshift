@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.openshift.client.project.wizard;
 
-import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.gwt.core.client.JsArrayMixed;
 import com.google.gwt.json.client.JSONObject;
@@ -63,8 +62,8 @@ import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConst
  * @author Vitaliy Guliy
  */
 public class CreateProjectWizard extends AbstractWizard<NewApplicationRequest> {
-
-    public static final String APPLICATION_NAME = "APPLICATION_NAME";
+    private static final String APPLICATION_PARAMETER_NAME = "APPLICATION_NAME";
+    private static final String APPLICATION_LABEL_NAME     = "application";
 
     private final OpenshiftServiceClient openshiftClient;
     private final DtoFactory             dtoFactory;
@@ -83,22 +82,6 @@ public class CreateProjectWizard extends AbstractWizard<NewApplicationRequest> {
 
     @Override
     public void complete(@NotNull final CompleteCallback callback) {
-        Parameter appNameParam = null;
-
-        for (Parameter parameter : dataObject.getTemplate().getParameters()) {
-            if (APPLICATION_NAME.equals(parameter.getName())) {
-                appNameParam = parameter;
-                break;
-            }
-        }
-
-        if (appNameParam == null) {
-            appNameParam = dtoFactory.createDto(Parameter.class).withName(APPLICATION_NAME);
-            dataObject.getTemplate().getParameters().add(appNameParam);
-        }
-
-        appNameParam.setValue(dataObject.getProjectConfigDto().getName());
-
         getProject().thenPromise(setUpMixinType())
                     .thenPromise(processTemplate())
                     .thenPromise(processTemplateMetadata())
@@ -154,7 +137,11 @@ public class CreateProjectWizard extends AbstractWizard<NewApplicationRequest> {
         return new Function<Project, Promise<Template>>() {
             @Override
             public Promise<Template> apply(final Project project) throws FunctionException {
-                return openshiftClient.processTemplate(project.getMetadata().getName(), dataObject.getTemplate());
+                final Template template = dataObject.getTemplate();
+
+                setUpApplicationName(template);
+
+                return openshiftClient.processTemplate(project.getMetadata().getName(), template);
             }
         };
     }
@@ -166,12 +153,11 @@ public class CreateProjectWizard extends AbstractWizard<NewApplicationRequest> {
                 List<Promise<?>> promises = new ArrayList<>();
 
                 for (Object o : template.getObjects()) {
-                    final JSONObject object = (JSONObject) o;
+                    final JSONObject object = (JSONObject)o;
                     final JSONValue metadata = object.get("metadata");
                     final String namespace = dataObject.getProjectConfigDto().getAttributes().get(OPENSHIFT_NAMESPACE_VARIABLE_NAME).get(0);
-                    ((JSONObject) metadata).put("namespace", new JSONString(namespace));
-                    final String kind = ((JSONString) object.get("kind")).stringValue();
-
+                    ((JSONObject)metadata).put("namespace", new JSONString(namespace));
+                    final String kind = ((JSONString)object.get("kind")).stringValue();
                     switch (kind) {
                         case "DeploymentConfig":
                             DeploymentConfig dConfig = dtoFactory.createDtoFromJson(object.toString(), DeploymentConfig.class);
@@ -195,9 +181,10 @@ public class CreateProjectWizard extends AbstractWizard<NewApplicationRequest> {
                             }
 
                             dataObject.getProjectConfigDto()
-                                    .withSource(dtoFactory.createDto(SourceStorageDto.class).withType("git")
-                                            .withLocation(gitSource.getUri())
-                                            .withParameters(importOptions));
+                                      .withSource(dtoFactory.createDto(SourceStorageDto.class)
+                                                            .withType("git")
+                                                            .withLocation(gitSource.getUri())
+                                                            .withParameters(importOptions));
 
                             promises.add(openshiftClient.createBuildConfig(bConfig));
                             break;
@@ -219,5 +206,45 @@ public class CreateProjectWizard extends AbstractWizard<NewApplicationRequest> {
                 return Promises.all(promises.toArray(new Promise<?>[promises.size()]));
             }
         };
+    }
+
+    private void setUpApplicationName(Template template) {
+        Parameter appNameParam = null;
+        for (Parameter parameter : template.getParameters()) {
+            if (APPLICATION_PARAMETER_NAME.equals(parameter.getName())) {
+                appNameParam = parameter;
+                break;
+            }
+        }
+
+        if (appNameParam == null) {
+            appNameParam = dtoFactory.createDto(Parameter.class).withName(APPLICATION_PARAMETER_NAME);
+            template.getParameters().add(appNameParam);
+        }
+
+        appNameParam.setValue(dataObject.getProjectConfigDto().getName());
+
+        for (Object object : template.getObjects()) {
+            setUpApplicationParameter(object);
+        }
+    }
+
+    private void setUpApplicationParameter(Object object) {
+        final JSONObject jsonObject = (JSONObject)object;
+        final JSONObject metadata = getJsonObjectOrNull(jsonObject, "metadata");
+        if (metadata != null) {
+            final JSONObject labels = getJsonObjectOrNull(metadata, "labels");
+            if (labels != null) {
+                labels.put(APPLICATION_LABEL_NAME, new JSONString("${" + APPLICATION_PARAMETER_NAME + "}"));
+            }
+        }
+    }
+
+    private JSONObject getJsonObjectOrNull(JSONObject source, String objectName) {
+        final JSONValue jsonValue = source.get(objectName);
+        if (jsonValue == null || !(jsonValue instanceof JSONObject)) {
+            return null;
+        }
+        return ((JSONObject)jsonValue);
     }
 }
