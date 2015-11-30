@@ -173,9 +173,7 @@ public class ConfigureProjectViewImpl implements ConfigureProjectView {
         if (rewriteCheProjectName) {
             cheProjectNameInput.setValue(osProjectNameInput.getValue(), true);
         }
-        if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-            return;
-        }
+        
         delegate.onOpenShiftNewProjectNameChanged();
     }
 
@@ -194,9 +192,7 @@ public class ConfigureProjectViewImpl implements ConfigureProjectView {
         if (rewriteCheProjectDescription) {
             cheProjectDescriptionInput.setValue(osProjectDescriptionInput.getValue(), true);
         }
-        if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-            return;
-        }
+
         delegate.onOpenShiftDescriptionChanged();
     }
 

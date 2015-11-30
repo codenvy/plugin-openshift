@@ -16,9 +16,8 @@ import elemental.html.TableElement;
 
 import com.google.gwt.cell.client.ButtonCell;
 import com.google.gwt.cell.client.Cell;
-import com.google.gwt.cell.client.EditTextCell;
-import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextInputCell;
+import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -52,7 +51,6 @@ import org.eclipse.che.ide.ui.cellview.CellTableResources;
 import org.eclipse.che.ide.ui.list.SimpleList;
 import org.eclipse.che.ide.ui.listbox.CustomListBox;
 import org.eclipse.che.ide.ui.window.Window;
-import org.eclipse.che.ide.util.Pair;
 import org.eclipse.che.ide.util.dom.Elements;
 
 import java.util.Collections;
@@ -105,14 +103,14 @@ public class NewApplicationViewImpl extends Window implements NewApplicationView
     ScrollPanel osProjectListPanel;
 
     @UiField(provided = true)
-    CellTable<Pair<String, String>> environmentVariables;
+    CellTable<KeyValue> environmentVariables;
 
-    private ListDataProvider<Pair<String, String>> environmentVariablesProvider;
+    private ListDataProvider<KeyValue> environmentVariablesProvider;
 
     @UiField(provided = true)
-    CellTable<Pair<String, String>> environmentLabels;
+    CellTable<KeyValue> environmentLabels;
 
-    private ListDataProvider<Pair<String, String>> environmentLabelsProvider;
+    private ListDataProvider<KeyValue> environmentLabelsProvider;
 
     private SimpleList<Project> projectsList;
 
@@ -140,10 +138,10 @@ public class NewApplicationViewImpl extends Window implements NewApplicationView
         setTitle(locale.deployProjectWindowTitle());
         getWidget().getElement().getStyle().setPadding(0, Style.Unit.PX);
 
-        environmentVariablesProvider = new ListDataProvider<Pair<String, String>>();
+        environmentVariablesProvider = new ListDataProvider<KeyValue>();
         environmentVariables = createCellTable(cellTableResources, environmentVariablesProvider);
 
-        environmentLabelsProvider = new ListDataProvider<Pair<String, String>>();
+        environmentLabelsProvider = new ListDataProvider<KeyValue>();
         environmentLabels = createCellTable(cellTableResources, environmentLabelsProvider);
 
         setWidget(uiBinder.createAndBindUi(this));
@@ -203,41 +201,56 @@ public class NewApplicationViewImpl extends Window implements NewApplicationView
                           });
     }
 
-    private CellTable createCellTable(CellTableResources cellTableResources, final ListDataProvider<Pair<String, String>> dataProvider) {
-        CellTable<Pair<String, String>> table = new CellTable<Pair<String, String>>(10, cellTableResources);
+    private CellTable createCellTable(CellTableResources cellTableResources, final ListDataProvider<KeyValue> dataProvider) {
+        CellTable<KeyValue> table = new CellTable<KeyValue>(10, cellTableResources);
         table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
         dataProvider.addDataDisplay(table);
 
-        Column<Pair<String, String>, String> nameColumn = new Column<Pair<String, String>, String>(new EditTextCell()) {
+        final Column<KeyValue, String> nameColumn = new Column<KeyValue, String>(new TextInputCell()) {
             @Override
-            public String getValue(Pair<String, String> object) {
-                return object.getFirst();
+            public String getValue(KeyValue object) {
+                return object.getKey();
             }
         };
 
-        Column<Pair<String, String>, String> valueColumn = new Column<Pair<String, String>, String>(new TextInputCell()) {
+        nameColumn.setFieldUpdater(new FieldUpdater<KeyValue, String>() {
             @Override
-            public String getValue(Pair<String, String> object) {
-                return object.getSecond();
+            public void update(int index, KeyValue object, String value) {
+                object.setKey(value);
+            }
+        });
+
+
+        Column<KeyValue, String> valueColumn = new Column<KeyValue, String>(new TextInputCell()) {
+            @Override
+            public String getValue(KeyValue object) {
+                return object.getValue();
             }
         };
 
-        Column<Pair<String, String>, String> removeColumn = new Column<Pair<String, String>, String>(new ButtonCell()) {
+        valueColumn.setFieldUpdater(new FieldUpdater<KeyValue, String>() {
             @Override
-            public String getValue(Pair<String, String> object) {
+            public void update(int index, KeyValue object, String value) {
+                object.setValue(value);
+            }
+        });
+
+        Column<KeyValue, String> removeColumn = new Column<KeyValue, String>(new ButtonCell()) {
+            @Override
+            public String getValue(KeyValue object) {
                 return "-";
             }
 
             @Override
-            public void render(Cell.Context context, Pair<String, String> object, SafeHtmlBuilder sb) {
+            public void render(Cell.Context context, KeyValue object, SafeHtmlBuilder sb) {
                 Button removeButton = new Button();
                 super.render(context, object, sb.appendHtmlConstant(removeButton.getHTML()));
             }
         };
 
-        removeColumn.setFieldUpdater(new FieldUpdater<Pair<String, String>, String>() {
+        removeColumn.setFieldUpdater(new FieldUpdater<KeyValue, String>() {
             @Override
-            public void update(int index, Pair<String, String> object, String value) {
+            public void update(int index, KeyValue object, String value) {
                 dataProvider.getList().remove(object);
             }
         });
@@ -272,13 +285,13 @@ public class NewApplicationViewImpl extends Window implements NewApplicationView
 
     @UiHandler("addVariableButton")
     public void onAddVariable(ClickEvent event) {
-        environmentVariablesProvider.getList().add(new Pair<String, String>("", ""));
+        environmentVariablesProvider.getList().add(new KeyValue("", ""));
         environmentVariablesProvider.refresh();
     }
 
     @UiHandler("addLabelButton")
     public void onAddLabel(ClickEvent event) {
-        environmentLabelsProvider.getList().add(new Pair<String, String>("", ""));
+        environmentLabelsProvider.getList().add(new KeyValue("", ""));
         environmentLabelsProvider.refresh();
     }
 
@@ -368,26 +381,26 @@ public class NewApplicationViewImpl extends Window implements NewApplicationView
     }
 
     @Override
-    public void setEnvironmentVariables(List<Pair<String, String>> variables) {
+    public void setEnvironmentVariables(List<KeyValue> variables) {
         environmentVariablesProvider.getList().clear();
         environmentVariablesProvider.getList().addAll(variables);
         environmentVariablesProvider.refresh();
     }
 
     @Override
-    public List<Pair<String, String>> getEnvironmentVariables() {
+    public List<KeyValue> getEnvironmentVariables() {
         return environmentVariablesProvider.getList();
     }
 
     @Override
-    public void setLabels(List<Pair<String, String>> labels) {
+    public void setLabels(List<KeyValue> labels) {
         environmentLabelsProvider.getList().clear();
         environmentLabelsProvider.getList().addAll(labels);
         environmentLabelsProvider.refresh();
     }
 
     @Override
-    public List<Pair<String, String>> getLabels() {
+    public List<KeyValue> getLabels() {
         return environmentLabelsProvider.getList();
     }
 
