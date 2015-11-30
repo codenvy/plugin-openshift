@@ -97,6 +97,7 @@ public class ConfigureProjectViewImpl implements ConfigureProjectView {
     private ActionDelegate delegate;
     private DockPanel      widget;
     private boolean        rewriteCheProjectName;
+    private boolean        rewriteCheProjectDescription;
 
     @Inject
     public ConfigureProjectViewImpl(Resources resources, final OpenshiftResources openshiftResources) {
@@ -167,7 +168,7 @@ public class ConfigureProjectViewImpl implements ConfigureProjectView {
 
     @UiHandler({"osProjectNameInput"})
     public void onOpenShiftProjectNameChanged(KeyUpEvent event) {
-        if (isRewriteCheProjectName()) {
+        if (rewriteCheProjectName) {
             cheProjectNameInput.setValue(osProjectNameInput.getValue(), true);
         }
         if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
@@ -179,21 +180,31 @@ public class ConfigureProjectViewImpl implements ConfigureProjectView {
     @UiHandler({"cheProjectNameInput"})
     public void onCheProjectNameChanged(KeyUpEvent event) {
         if (cheProjectNameInput.getValue().isEmpty()) {
-            setRewriteCheProjectName(true);
+            rewriteCheProjectName=true;
         } else {
-            setRewriteCheProjectName(false);
+            rewriteCheProjectName=false;
         }
         delegate.onCheNewProjectNameChanged();
     }
 
     @UiHandler({"osProjectDescriptionInput"})
     public void onOpenShiftProjectDescriptionChanged(KeyUpEvent event) {
-        cheProjectDescriptionInput.setValue(osProjectDescriptionInput.getValue(), true);
+        if (rewriteCheProjectDescription) {
+            cheProjectDescriptionInput.setValue(osProjectDescriptionInput.getValue(), true);
+        }
+        if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+            return;
+        }
         delegate.onOpenShiftDescriptionChanged();
     }
 
     @UiHandler({"cheProjectDescriptionInput"})
     public void onCheProjectDescriptionChanged(KeyUpEvent event) {
+        if (cheProjectDescriptionInput.getValue().isEmpty()) {
+            rewriteCheProjectDescription=true;
+        } else {
+            rewriteCheProjectDescription=false;
+        }
         delegate.onCheDescriptionChanged();
     }
 
@@ -210,12 +221,15 @@ public class ConfigureProjectViewImpl implements ConfigureProjectView {
     @Override
     public void resetControls() {
         rewriteCheProjectName = true;
+        rewriteCheProjectDescription = true;
         osProjectNameInput.setValue("", true);
+        osProjectNameErrorLabel.setText("");
         osProjectDisplayNameInput.setValue("", true);
         osProjectDescriptionInput.setValue("", true);
         osNewProjectButton.setValue(Boolean.TRUE, true);
 
         cheProjectNameInput.setValue("", true);
+        cheProjectNameErrorLabel.setText("");
         cheProjectDescriptionInput.setValue("", true);
 
         projectsList.render(Collections.<Project>emptyList());
@@ -273,14 +287,6 @@ public class ConfigureProjectViewImpl implements ConfigureProjectView {
     public void hideCheProjectNameError() {
         cheProjectNameInput.removeStyleName(openshiftResources.css().inputError());
         cheProjectNameErrorLabel.setText("");
-    }
-
-    private boolean isRewriteCheProjectName() {
-        return rewriteCheProjectName;
-    }
-
-    private void setRewriteCheProjectName(boolean rewriteCheProjectName) {
-        this.rewriteCheProjectName = rewriteCheProjectName;
     }
 
     @Override
