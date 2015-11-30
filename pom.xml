@@ -29,6 +29,31 @@
         <module>che-plugin-openshift-ext-client</module>
     </modules>
     <properties>
+        <com.openshift.restclient.version>3.0.0.Final</com.openshift.restclient.version>
         <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>
     </properties>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.openshift</groupId>
+                <artifactId>openshift-restclient-java</artifactId>
+                <version>${com.openshift.restclient.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>slf4j-api</artifactId>
+                        <groupId>org.slf4j</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>slf4j-log4j12</artifactId>
+                        <groupId>org.slf4j</groupId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-openshift-ext-shared</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>
