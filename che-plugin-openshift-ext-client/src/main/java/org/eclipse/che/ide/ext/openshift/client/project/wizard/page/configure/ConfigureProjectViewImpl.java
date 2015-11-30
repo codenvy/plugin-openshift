@@ -163,6 +163,8 @@ public class ConfigureProjectViewImpl implements ConfigureProjectView {
         osExistProjectListPanel.setVisible(!enabled);
         if (enabled) {
             delegate.onExistProjectSelected();
+        } else  {
+            hideOsProjectNameError();
         }
     }
 
