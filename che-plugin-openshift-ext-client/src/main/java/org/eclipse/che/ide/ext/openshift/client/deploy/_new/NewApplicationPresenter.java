@@ -504,7 +504,7 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
                             .withValue(variable.getSecond()));
         }
 
-        final String steamTagName = osActiveStreamTag.getMetadata().getName();
+        final String steamTagName = osAppName + ":latest";
         PodSpec podSpec = newDto(PodSpec.class)
                 .withContainers(newArrayList(newDto(Container.class)
                                                      .withImage(steamTagName)
