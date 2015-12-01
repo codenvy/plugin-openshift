@@ -21,7 +21,7 @@
     <inherits name="com.google.gwt.inject.Inject"/>
     <inherits name="org.eclipse.che.api.Auth"/>
     <inherits name="org.eclipse.che.api.Core"/>
-    <inherits name="com.google.common.base.Base"/>
+    <inherits name="org.eclipse.che.ide.Util"/>
 
     <source path="client"/>
     <source path="shared"/>

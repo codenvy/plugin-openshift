@@ -279,4 +279,16 @@ public interface OpenshiftLocalizationConstant extends Messages {
 
     @Key("project.is.not.linked.to.openshift.error")
     String projectIsNotLinkedToOpenShiftError(String projectName);
+
+    @Key("buildconfig.has.invalid.output.error")
+    String buildConfigHasInvalidOutputError();
+
+    @Key("buildconfig.has.invalid.tag.name.error")
+    String buildConfigHasInvalidTagName(String tagName);
+
+    @Key("imagestream.has.invalid.tag.error")
+    String imageSteamHasInvalidTagError(String imageStreamName, String tagName);
+
+    @Key("imagestream.does.not.have.tag.error")
+    String imageStreamDoesNotHaveAnyTag(String imageStreamName, String tagName);
 }

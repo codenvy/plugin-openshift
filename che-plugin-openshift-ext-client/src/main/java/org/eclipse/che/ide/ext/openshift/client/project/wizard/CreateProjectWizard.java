@@ -138,9 +138,7 @@ public class CreateProjectWizard extends AbstractWizard<NewApplicationRequest> {
             @Override
             public Promise<Template> apply(final Project project) throws FunctionException {
                 final Template template = dataObject.getTemplate();
-
                 setUpApplicationName(template);
-
                 return openshiftClient.processTemplate(project.getMetadata().getName(), template);
             }
         };
@@ -208,6 +206,12 @@ public class CreateProjectWizard extends AbstractWizard<NewApplicationRequest> {
         };
     }
 
+    /**
+     * Sets value for application name parameter and add it to all objects in template
+     *
+     * @param template
+     *         template for setting of application name
+     */
     private void setUpApplicationName(Template template) {
         Parameter appNameParam = null;
         for (Parameter parameter : template.getParameters()) {
@@ -225,13 +229,18 @@ public class CreateProjectWizard extends AbstractWizard<NewApplicationRequest> {
         appNameParam.setValue(dataObject.getProjectConfigDto().getName());
 
         for (Object object : template.getObjects()) {
-            setUpApplicationParameter(object);
+            setUpApplicationName(object);
         }
     }
 
-    private void setUpApplicationParameter(Object object) {
-        final JSONObject jsonObject = (JSONObject)object;
-        final JSONObject metadata = getJsonObjectOrNull(jsonObject, "metadata");
+    /**
+     * Add application name parameter in object
+     *App
+     * @param object
+     *         object for setting of application name parameter
+     */
+    private void setUpApplicationName(Object object) {
+        final JSONObject metadata = getJsonObjectOrNull((JSONObject)object, "metadata");
         if (metadata != null) {
             final JSONObject labels = getJsonObjectOrNull(metadata, "labels");
             if (labels != null) {
