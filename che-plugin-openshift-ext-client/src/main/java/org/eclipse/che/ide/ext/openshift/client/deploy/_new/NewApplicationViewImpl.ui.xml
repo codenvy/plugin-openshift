@@ -64,6 +64,7 @@
                     <g:RadioButton name="createMode" text="{locale.deployProjectWindowChooseExistingProject}" ui:field="choseExistProject"/>
                 </g:FlowPanel>
                 <g:ScrollPanel ui:field="osProjectListPanel" visible="false" height="103px"/>
+                <g:Label ui:field="emptyProjectsMessage" text="{locale.deployProjectWindowNoProjects}" visible="false"/>
             </g:FlowPanel>
         </g:center>
         <g:east size="400">
@@ -83,7 +84,7 @@
                     <g:center>
                         <g:ScrollPanel addStyleNames="{resources.css.deployApplicationTable}">
                             <g:SimplePanel>
-                                <c:CellTable pageSize='7' ui:field='environmentVariables' width="100%" tableLayoutFixed="true"/>
+                                <c:CellTable ui:field='environmentVariables' width="100%" tableLayoutFixed="true"/>
                             </g:SimplePanel>
                         </g:ScrollPanel>
                     </g:center>
@@ -100,7 +101,7 @@
                     <g:center>
                         <g:ScrollPanel addStyleNames="{resources.css.deployApplicationTable}">
                             <g:SimplePanel>
-                                <c:CellTable pageSize='7' ui:field='environmentLabels' width="100%" tableLayoutFixed="true"/>
+                                <c:CellTable ui:field='environmentLabels' width="100%" tableLayoutFixed="true"/>
                             </g:SimplePanel>
                         </g:ScrollPanel>
                     </g:center>

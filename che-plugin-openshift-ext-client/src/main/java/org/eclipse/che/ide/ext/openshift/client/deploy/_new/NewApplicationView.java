@@ -19,7 +19,7 @@ import java.util.List;
 
 /**
  * View for deploying Che project to new OpenShift application.
- * 
+ *
  * @author Vlad Zhukovskiy
  */
 @ImplementedBy(NewApplicationViewImpl.class)
@@ -175,6 +175,13 @@ public interface NewApplicationView extends View<NewApplicationView.ActionDelega
      * @param enabled
      */
     void setDeployButtonEnabled(boolean enabled);
+
+    /**
+     * Set the animation state of Deploy button.
+     *
+     * @param show
+     */
+    void showLoader(boolean show);
 
     /**
      * Set error message to display.

@@ -214,6 +214,9 @@ public interface OpenshiftLocalizationConstant extends Messages {
     @Key("deploy.project.window.choose.existing.project")
     String deployProjectWindowChooseExistingProject();
 
+    @Key("deploy.project.window.no.projects")
+    String deployProjectWindowNoProjects();
+
     @Key("deploy.project.window.deploy.section")
     String deployProjectWindowDeploySection();
 
