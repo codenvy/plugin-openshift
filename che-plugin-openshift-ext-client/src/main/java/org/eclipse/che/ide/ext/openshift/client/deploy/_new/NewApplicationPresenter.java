@@ -121,7 +121,6 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
     private       List<ImageStream>             osImageStreams;
     private       ImageStreamTag                osActiveStreamTag;
     private       String                        osAppName;
-    private       NewApplicationView.Mode       mode;
 
     public static final String API_VERSION = "v1";
 
@@ -259,7 +258,8 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
     @Override
     public void onDeployClicked() {
         Promise<Project> projectPromise;
-        switch (mode) {
+        view.showLoader(true);
+        switch (view.getMode()) {
             case CREATE_NEW_PROJECT:
                 String osProjectName = view.getOpenShiftProjectName();
                 String osProjectDisplayName = view.getOpenShiftProjectDisplayName();
@@ -308,6 +308,7 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
                         .then(new Operation<JsArrayMixed>() {
                             @Override
                             public void apply(JsArrayMixed arg) throws OperationException {
+                                view.showLoader(false);
                                 view.hide();
                                 notificationManager
                                         .showInfo(locale.deployProjectSuccess(appContext.getCurrentProject().getRootProject().getName()));
@@ -317,14 +318,23 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
                         .catchError(new Operation<PromiseError>() {
                             @Override
                             public void apply(PromiseError arg) throws OperationException {
-                                //TODO remove notification, show error only on popup:
-                                final ServiceError serviceError = dtoFactory.createDtoFromJson(arg.getMessage(), ServiceError.class);
-                                notificationManager.showError(serviceError.getMessage());
-                                view.showError(serviceError.getMessage());
+                                handleError(arg);
                             }
                         });
             }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError arg) throws OperationException {
+                handleError(arg);
+            }
         });
+    }
+
+    private void handleError(PromiseError error) {
+        view.showLoader(false);
+        final ServiceError serviceError = dtoFactory.createDtoFromJson(error.getMessage(), ServiceError.class);
+        notificationManager.showError(serviceError.getMessage());
+        view.showError(serviceError.getMessage());
     }
 
     private void setupMixin(Project project) {
@@ -413,7 +423,6 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
 
     @Override
     public void onModeChanged(NewApplicationView.Mode mode) {
-        this.mode = mode;
         validate();
     }
 
@@ -422,18 +431,18 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
         String osProjectName = view.getOpenShiftProjectName();
         //TODO add check for application name
 
-        if (mode == CREATE_NEW_PROJECT) {
+        if (view.getMode() == CREATE_NEW_PROJECT) {
             //TODO check existing OpenShift projects
             if (Strings.isNullOrEmpty(osProjectName) || !osProjectName.matches("[a-z0-9]([-a-z0-9]*[a-z0-9])?")) {
                 valid = false;
             }
-        } else if (mode == SELECT_EXISTING_PROJECT){
+        } else if (view.getMode() == SELECT_EXISTING_PROJECT) {
             if (view.getOpenShiftSelectedProject() == null) {
                 valid = false;
             }
         }
 
-        view.setDeployButtonEnabled(valid && osImageStreams != null && view.getActiveImage() != null);
+        view.setDeployButtonEnabled(valid && view.getActiveImage() != null && view.getApplicationName() != null);
     }
 
     private ImageStream generateImageStream(String namespace, Map<String, String> labels) {

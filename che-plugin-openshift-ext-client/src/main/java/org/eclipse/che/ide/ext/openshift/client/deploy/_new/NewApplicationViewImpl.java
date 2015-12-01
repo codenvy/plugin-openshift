@@ -16,8 +16,8 @@ import elemental.html.TableElement;
 
 import com.google.gwt.cell.client.ButtonCell;
 import com.google.gwt.cell.client.Cell;
-import com.google.gwt.cell.client.TextInputCell;
 import com.google.gwt.cell.client.FieldUpdater;
+import com.google.gwt.cell.client.TextInputCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -35,6 +35,7 @@ import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextArea;
@@ -102,6 +103,9 @@ public class NewApplicationViewImpl extends Window implements NewApplicationView
     @UiField
     ScrollPanel osProjectListPanel;
 
+    @UiField
+    Label emptyProjectsMessage;
+
     @UiField(provided = true)
     CellTable<KeyValue> environmentVariables;
 
@@ -156,6 +160,7 @@ public class NewApplicationViewImpl extends Window implements NewApplicationView
                         delegate.onDeployClicked();
                     }
                 });
+        deployBtn.addStyleName(coreResources.Css().buttonLoader());
         addButtonToFooter(deployBtn);
 
         cancelBtn = createButton(constants.cancel(), "deployCheProject-cancel-button", new ClickHandler() {
@@ -177,32 +182,32 @@ public class NewApplicationViewImpl extends Window implements NewApplicationView
         tableElement.setWidth("100%");
 
         return SimpleList.create((SimpleList.View)tableElement, coreResources.defaultSimpleListCss(),
-                          new SimpleList.ListItemRenderer<Project>() {
-                              @Override
-                              public void render(Element listItemBase, Project itemData) {
-                                  SpanElement container = Elements.createSpanElement();
-                                  container.setInnerText(itemData.getMetadata().getName());
-                                  listItemBase.appendChild(container);
-                              }
-                          },
-                          new SimpleList.ListEventDelegate<Project>() {
-                              @Override
-                              public void onListItemClicked(Element listItemBase, Project itemData) {
-                                  if (choseExistProject.getValue()) {
-                                      projectsList.getSelectionModel().setSelectedItem(itemData);
-                                      delegate.onActiveProjectChanged(itemData);
-                                  }
-                              }
+                                 new SimpleList.ListItemRenderer<Project>() {
+                                     @Override
+                                     public void render(Element listItemBase, Project itemData) {
+                                         SpanElement container = Elements.createSpanElement();
+                                         container.setInnerText(itemData.getMetadata().getName());
+                                         listItemBase.appendChild(container);
+                                     }
+                                 },
+                                 new SimpleList.ListEventDelegate<Project>() {
+                                     @Override
+                                     public void onListItemClicked(Element listItemBase, Project itemData) {
+                                         if (choseExistProject.getValue()) {
+                                             projectsList.getSelectionModel().setSelectedItem(itemData);
+                                             delegate.onActiveProjectChanged(itemData);
+                                         }
+                                     }
 
-                              @Override
-                              public void onListItemDoubleClicked(Element listItemBase, Project itemData) {
+                                     @Override
+                                     public void onListItemDoubleClicked(Element listItemBase, Project itemData) {
 
-                              }
-                          });
+                                     }
+                                 });
     }
 
     private CellTable createCellTable(CellTableResources cellTableResources, final ListDataProvider<KeyValue> dataProvider) {
-        CellTable<KeyValue> table = new CellTable<KeyValue>(10, cellTableResources);
+        CellTable<KeyValue> table = new CellTable<KeyValue>(50, cellTableResources);
         table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
         dataProvider.addDataDisplay(table);
 
@@ -285,13 +290,13 @@ public class NewApplicationViewImpl extends Window implements NewApplicationView
 
     @UiHandler("addVariableButton")
     public void onAddVariable(ClickEvent event) {
-        environmentVariablesProvider.getList().add(new KeyValue("", ""));
+        environmentVariablesProvider.getList().add(0, new KeyValue("", ""));
         environmentVariablesProvider.refresh();
     }
 
     @UiHandler("addLabelButton")
     public void onAddLabel(ClickEvent event) {
-        environmentLabelsProvider.getList().add(new KeyValue("", ""));
+        environmentLabelsProvider.getList().add(0, new KeyValue("", ""));
         environmentLabelsProvider.refresh();
     }
 
@@ -343,12 +348,15 @@ public class NewApplicationViewImpl extends Window implements NewApplicationView
 
     @Override
     public void setProjects(List<Project> projects) {
-        if (projects == null || projects.isEmpty()) {
-            return;
-        }
+        boolean projectsAvailable = projects != null && !projects.isEmpty();
+        emptyProjectsMessage.setVisible(!projectsAvailable);
+        osProjectListPanel.setVisible(projectsAvailable);
 
-        projectsList.render(projects);
+        if (projectsAvailable) {
+            projectsList.render(projects);
+        }
     }
+
 
     @Override
     public void setImages(List<String> images) {
@@ -366,10 +374,22 @@ public class NewApplicationViewImpl extends Window implements NewApplicationView
 
     @UiHandler({"createNewProject", "choseExistProject"})
     public void onCreateModeChanged(ValueChangeEvent<Boolean> event) {
+        changeMode();
+    }
+
+    /**
+     * Makes all the UI changes which rely on mode state.
+     */
+    private void changeMode() {
         projectName.setEnabled(createNewProject.getValue());
         displayName.setEnabled(createNewProject.getValue());
         description.setEnabled(createNewProject.getValue());
-        osProjectListPanel.setVisible(!createNewProject.getValue());
+
+        if (createNewProject.getValue()) {
+            projectsList.getSelectionModel().clearSelection();
+        } else if (projectsList.size() > 0) {
+            projectsList.getSelectionModel().setSelectedItem(0);
+        }
 
         delegate.onModeChanged(createNewProject.getValue() ? CREATE_NEW_PROJECT : SELECT_EXISTING_PROJECT);
         delegate.onActiveProjectChanged(projectsList.getSelectionModel().getSelectedItem());
@@ -415,6 +435,17 @@ public class NewApplicationViewImpl extends Window implements NewApplicationView
     }
 
     @Override
+    public void showLoader(boolean show) {
+        setBlocked(show);
+        deployBtn.setEnabled(!show);
+        if (show) {
+            deployBtn.setHTML("<i></i>");
+        } else {
+            deployBtn.setText(locale.deployProjectWindowDeploy());
+        }
+    }
+
+    @Override
     public void showError(String error) {
         //TODO display error on window
     }
@@ -430,7 +461,7 @@ public class NewApplicationViewImpl extends Window implements NewApplicationView
             createNewProject.setValue(true);
         }
 
-        delegate.onModeChanged(mode);
+        changeMode();
     }
 
     @Override
