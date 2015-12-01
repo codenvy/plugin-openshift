@@ -91,14 +91,14 @@ public interface OpenshiftLocalizationConstant extends Messages {
     @Key("import.application.info")
     String importApplicationInfo();
 
-    @Key("import.application.source.url")
-    String importApplicationSourceUrl();
+    @Key("application.source.url")
+    String applicationSourceUrl();
 
-    @Key("import.application.branch.name")
-    String importApplicationBranchName();
+    @Key("application.source.reference")
+    String applicationSourceReference();
 
-    @Key("import.application.context.dir")
-    String importApplicationContextDir();
+    @Key("application.source.context.dir")
+    String applicationSourceContextDir();
 
     @Key("import.application.no.projects")
     String importApplicationNoProjects();
@@ -130,20 +130,77 @@ public interface OpenshiftLocalizationConstant extends Messages {
     @Key("no.application.url")
     String noApplicationUrlLabel();
 
+    @Key("update.application.url.failed")
+    String updateApplicationUrlFailed();
+
+    @Key("application.config.action")
+    String applicationConfigAction();
+
+    @Key("application.config.title")
+    String applicationConfigViewTitle(String application);
+
+    @Key("application.config.build.config.title")
+    String applicationConfigsBuildConfigTitle();
+
+    @Key("application.config.build.source.title")
+    String applicationConfigsBuildSourceTitle();
+
+    @Key("application.config.build.webhooks.title")
+    String applicationConfigsBuildWebhooksTitle();
+
+    @Key("application.config.build.webhooks.description")
+    String applicationConfigsBuildWebhooksTitleDescription();
+
+    @Key("application.config.route.config.title")
+    String applicationConfigsRouteConfigTitle();
+
+    @Key("application.config.route.url.title")
+    String applicationConfigsRouteUrlTitle();
+
+    @Key("application.config.route.description")
+    String applicationConfigsRouteDescription();
+
+    @Key("application.config.route.host")
+    String applicationConfigsRouteHost();
+
+    @Key("application.config.deploy.config.title")
+    String applicationConfigsDeployConfigTitle();
+
+    @Key("application.config.replication.config.title")
+    String applicationConfigsReplicationConfigTitle();
+
+    @Key("application.config.restore.button")
+    String applicationConfigsRestoreButton();
+
+    @Key("application.config.save.button")
+    String applicationConfigsSaveButton();
+
+    @Key("application.config.replication.info.title")
+    String applicationConfigsReplicationInfoTitle();
+
+    @Key("application.config.replication.description")
+    String applicationConfigsReplicationDescription();
+
+    @Key("application.config.replication.number")
+    String applicationConfigsReplicationNumber();
+
+    @Key("application.config.no.replication.ctrl")
+    String applicationConfigsNoReplicationCtrl();
+
+    @Key("application.config.replication.retrieve.failed")
+    String applicationConfigsReplicationRetrieveFailed();
+
+    @Key("application.config.scaled.success")
+    String applicationConfigsScaledSuccess(int replicas);
+
     @Key("button.close")
     String buttonClose();
 
     @Key("get.routes.error")
     String getRoutesError();
 
-    @Key("show.webhooks.tooltip")
-    String showWebhooksTooltip();
-
-    @Key("webhook.url.title")
-    String webhookWindowTitle();
-
-    @Key("webhooks.urls.title")
-    String webhooksWindowTitle();
+    @Key("update.routes.error")
+    String updateRoutesError();
 
     @Key("no.webhook.url")
     String noWebhookLabel();

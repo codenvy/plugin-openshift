@@ -8,36 +8,38 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ext.openshift.client.webhooks;
+package org.eclipse.che.ide.ext.openshift.client.config;
 
+import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.ImplementedBy;
 
 import org.eclipse.che.ide.api.mvp.View;
-import org.eclipse.che.ide.ext.openshift.shared.dto.WebHook;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
- * The view of {@link ShowWebhooksPresenter}.
+ * The view of {@link ConfigureApplicationPresenter} for managing
+ * OpenShift application configs.
  *
- * @author Sergii Leschenko
+ * @author Anna Shumilova
  */
-@ImplementedBy(ShowWebhooksViewImpl.class)
-public interface ShowWebhooksView extends View<ShowWebhooksView.ActionDelegate> {
-    /** Needs for delegate some function into webhooks view. */
+@ImplementedBy(ConfigureConfigureApplicationViewImpl.class)
+public interface ConfigureApplicationView extends View<ConfigureApplicationView.ActionDelegate> {
+    /** Needs for delegate some function into application config view. */
     interface ActionDelegate {
         /** Performs any actions appropriate in response to the user having pressed the Close button. */
         void onCloseClicked();
+
+        void onConfigSelected(ConfigPresenter view);
     }
 
-    /**
-     * Set application webhooks into field on the view.
-     *
-     * @param webhooks
-     *         application webhooks what will be shown on view
-     */
-    void setWebhooks(@NotNull List<WebHook> webhooks);
+    AcceptsOneWidget getContentPanel();
+
+    void setConfigs(List<ConfigPresenter> configs);
+
+    void selectConfig(ConfigPresenter config);
+
+    void setTitle(String title);
 
     /** Close dialog. */
     void close();

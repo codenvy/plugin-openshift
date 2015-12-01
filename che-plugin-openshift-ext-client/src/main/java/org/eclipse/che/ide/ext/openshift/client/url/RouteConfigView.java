@@ -18,29 +18,27 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
- * The view of {@link ShowApplicationUrlPresenter}.
+ * The view of {@link RouteConfigPresenter}.
  *
  * @author Sergii Leschenko
  */
-@ImplementedBy(ShowApplicationUrlViewImpl.class)
-public interface ShowApplicationUrlView extends View<ShowApplicationUrlView.ActionDelegate> {
+@ImplementedBy(RouteConfigViewImpl.class)
+public interface RouteConfigView extends View<RouteConfigView.ActionDelegate> {
     /** Needs for delegate some function into application url view. */
     interface ActionDelegate {
-        /** Performs any actions appropriate in response to the user having pressed the Close button. */
-        void onCloseClicked();
+
+        void onRouteUrlsChanged();
+
+        void onResetRouteUrls();
+
+        void onSaveRouteUrls();
     }
 
-    /**
-     * Set application URLs into field on the view.
-     *
-     * @param URLs
-     *         application URLs what will be shown on view
-     */
-    void setURLs(@NotNull List<String> URLs);
+    void showApplicationURLs(@NotNull List<String> URLs);
 
-    /** Close dialog. */
-    void close();
+    void enableSaveRouteButton(boolean enabled);
 
-    /** Show dialog. */
-    void showDialog();
+    void enableResetRouteButton(boolean enabled);
+
+    List<String> getRouteURLs();
 }

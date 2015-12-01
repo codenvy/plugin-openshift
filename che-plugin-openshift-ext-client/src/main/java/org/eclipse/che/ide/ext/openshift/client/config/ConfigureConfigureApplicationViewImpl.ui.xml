@@ -14,36 +14,20 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
     <ui:with field='resources' type='org.eclipse.che.ide.ext.openshift.client.OpenshiftResources'/>
-
+    <ui:with field='locale' type='org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant'/>
     <ui:style>
-        .emptyBorder {
-            margin: 6px;
-            width: 450px;
-        }
-
-        .emptyBorder div input {
-            cursor: pointer;
-            min-height: 20px;
-        }
-
-        .emptyBorder div input + div {
-            height: 22px;
-        }
-
-        .linkInput div {
-            margin-bottom: 1px;
-        }
-
-        .linkInput input {
-            width: 415px;
-            margin-top: 1px;
-            margin-bottom: 9px;
-            display: inline;
-            float: left;
+        .content {
+            margin-left: 10px;
+            box-sizing: border-box;
         }
     </ui:style>
-    <g:FlowPanel styleName="{style.emptyBorder}">
-        <g:FlowPanel ui:field="urlsPanel" styleName="{style.linkInput}"/>
-    </g:FlowPanel>
+    <g:DockLayoutPanel unit="PX" width="600px" height="400px">
+        <g:west size="250.0">
+            <g:SimplePanel ui:field="configsPanel" addStyleNames="{resources.css.configList}"/>
+        </g:west>
+        <g:center>
+            <g:SimplePanel height="100%" ui:field="contentPanel" addStyleNames="{style.content}"/>
+        </g:center>
+    </g:DockLayoutPanel>
 
 </ui:UiBinder>

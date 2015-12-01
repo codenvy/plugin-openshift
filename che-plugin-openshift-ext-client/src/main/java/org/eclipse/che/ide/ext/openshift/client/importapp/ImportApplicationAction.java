@@ -43,17 +43,11 @@ public class ImportApplicationAction extends AbstractPerspectiveAction {
         this.presenter = presenter;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
         event.getPresentation().setEnabled(true);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void actionPerformed(ActionEvent e) {
         eventLogger.log(this);

@@ -55,15 +55,15 @@
 
                 <g:Label text="{locale.importApplicationInfo}" styleName="{resources.css.sectionTitle}" addStyleNames="{style.spacing}"/>
                 <g:FlowPanel addStyleNames="{style.spacing}" width="100%" height="40px">
-                    <g:Label text="{locale.importApplicationSourceUrl}" addStyleNames="{style.label} {style.floatLeft}"/>
+                    <g:Label text="{locale.applicationSourceUrl}" addStyleNames="{style.label} {style.floatLeft}"/>
                     <g:Label ui:field="sourceUrl"/>
                 </g:FlowPanel>
                 <g:FlowPanel ui:field="branchPanel" addStyleNames="{style.floatLeft}" width="100%" visible="false">
-                    <g:Label text="{locale.importApplicationBranchName}" addStyleNames="{style.label} {style.floatLeft}"/>
+                    <g:Label text="{locale.applicationSourceReference}" addStyleNames="{style.label} {style.floatLeft}"/>
                     <g:Label ui:field="branchName" addStyleNames="{style.floatLeft}"/>
                 </g:FlowPanel>
                 <g:FlowPanel ui:field="contextDirPanel" addStyleNames="{style.floatLeft}" width="100%" visible="false">
-                    <g:Label text="{locale.importApplicationContextDir}" addStyleNames="{style.label} {style.floatLeft}"/>
+                    <g:Label text="{locale.applicationSourceContextDir}" addStyleNames="{style.label} {style.floatLeft}"/>
                     <g:Label ui:field="contextDir" addStyleNames="{style.floatLeft}"/>
                 </g:FlowPanel>
             </g:FlowPanel>

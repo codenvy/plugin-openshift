@@ -458,7 +458,7 @@ public class OpenshiftServiceClientImpl implements OpenshiftServiceClient {
             @Override
             public void makeCall(AsyncCallback<ReplicationController> callback) {
                 asyncRequestFactory.createRequest(PUT, openshiftPath + "/namespace/" + controller.getMetadata().getNamespace()
-                                                       + "/replicationcontroller" + controller.getMetadata().getName(), controller, false)
+                                                       + "/replicationcontroller/" + controller.getMetadata().getName(), controller, false)
                                    .header(CONTENT_TYPE, MimeType.APPLICATION_JSON)
                                    .header(ACCEPT, MimeType.APPLICATION_JSON)
                                    .loader(loader, "Updating replication controller...")
