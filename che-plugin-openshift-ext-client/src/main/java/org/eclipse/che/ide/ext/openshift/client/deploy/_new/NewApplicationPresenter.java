@@ -77,7 +77,6 @@ import org.eclipse.che.ide.ext.openshift.shared.dto.WebHookTrigger;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
-import org.eclipse.che.ide.util.Pair;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -163,9 +162,10 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
         projectRemotes = null;
 
         view.setDeployButtonEnabled(false);
-        view.setLabels(Collections.<Pair<String, String>>emptyList());
-        view.setEnvironmentVariables(Collections.<Pair<String, String>>emptyList());
+        view.setLabels(Collections.<KeyValue>emptyList());
+        view.setEnvironmentVariables(Collections.<KeyValue>emptyList());
         view.setApplicationName(null);
+        view.setOpenShiftProjectName(null);
         view.setOpenShiftProjectDisplayName(null);
         view.setOpenShiftProjectDescription(null);
         view.setMode(CREATE_NEW_PROJECT);
@@ -246,7 +246,7 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
                 });
 
                 view.setImages(imageNames);
-                view.setLabels(Collections.<Pair<String, String>>emptyList());
+                view.setLabels(Collections.<KeyValue>emptyList());
             }
         }));
     }
@@ -284,8 +284,8 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
                 labels.put("generatedby", "Che");
                 labels.put("application", osAppName);
 
-                for (Pair<String, String> label : view.getLabels()) {
-                    labels.put(label.getFirst(), label.getSecond());
+                for (KeyValue label : view.getLabels()) {
+                    labels.put(label.getKey(), label.getValue());
                 }
 
                 final DockerImageMetadata imageMetadata = osActiveStreamTag.getImage().getDockerImageMetadata();
@@ -386,13 +386,13 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
                         final DockerImageMetadata dockerImageMetadata = streamTag.getImage().getDockerImageMetadata();
                         List<String> envs = (dockerImageMetadata.getConfig() != null) ? dockerImageMetadata.getConfig().getEnv()
                                                                                       : dockerImageMetadata.getContainerConfig().getEnv();
-                        List<Pair<String, String>> variables = new ArrayList<>();
+                        List<KeyValue> variables = new ArrayList<>();
                         for (String env : envs) {
                             String[] keyValuePair = env.split("=");
                             if (keyValuePair.length != 2) {
                                 continue;
                             }
-                            variables.add(new Pair<>(keyValuePair[0], keyValuePair[1]));
+                            variables.add(new KeyValue(keyValuePair[0], keyValuePair[1]));
                         }
                         view.setEnvironmentVariables(variables);
                         return Promises.resolve(streamTag);
@@ -498,10 +498,10 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
 
         List<EnvVar> env = newArrayList();
 
-        for (Pair<String, String> variable : view.getEnvironmentVariables()) {
+        for (KeyValue variable : view.getEnvironmentVariables()) {
             env.add(newDto(EnvVar.class)
-                            .withName(variable.getFirst())
-                            .withValue(variable.getSecond()));
+                            .withName(variable.getKey())
+                            .withValue(variable.getValue()));
         }
 
         final String steamTagName = osAppName + ":latest";

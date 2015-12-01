@@ -14,10 +14,8 @@ import com.google.inject.ImplementedBy;
 
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Project;
-import org.eclipse.che.ide.util.Pair;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * View for deploying Che project to new OpenShift application.
@@ -148,28 +146,28 @@ public interface NewApplicationView extends View<NewApplicationView.ActionDelega
      * @param variables
      *         environment variables
      */
-    void setEnvironmentVariables(List<Pair<String, String>> variables);
+    void setEnvironmentVariables(List<KeyValue> variables);
 
     /**
      * Get the list of OpenShift environment variables.
      *
      * @return environment variables
      */
-    List<Pair<String, String>> getEnvironmentVariables();
+    List<KeyValue> getEnvironmentVariables();
 
     /**
      * Set the list of OpenShift labels to display.
      *
      * @param labels
      */
-    void setLabels(List<Pair<String, String>> labels);
+    void setLabels(List<KeyValue> labels);
 
     /**
      * Get the list of OpenShift application labels.
      *
      * @return labels
      */
-    List<Pair<String, String>> getLabels();
+    List<KeyValue> getLabels();
 
     /**
      * Set the enabled state of Deploy button.

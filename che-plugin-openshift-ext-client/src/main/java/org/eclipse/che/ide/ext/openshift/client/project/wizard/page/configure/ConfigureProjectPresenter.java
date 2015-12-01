@@ -191,6 +191,7 @@ public class ConfigureProjectPresenter extends AbstractWizardPage<NewApplication
 
     @Override
     public void onExistProjectSelected() {
+        view.hideOsProjectNameError();
         updateDelegate.updateControls();
     }
 
