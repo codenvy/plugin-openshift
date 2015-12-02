@@ -16,7 +16,6 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
 import org.eclipse.che.api.project.gwt.client.ProjectTypeServiceClient;
-import org.eclipse.che.api.project.shared.dto.ProjectDescriptor;
 import org.eclipse.che.api.project.shared.dto.ProjectTypeDefinition;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.promises.client.Operation;
@@ -135,11 +134,11 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
      * Load che projects for following verifications.
      */
     private void loadCheProjects() {
-        projectServiceClient.getProjects(false).then(new Operation<List<ProjectDescriptor>>() {
+        projectServiceClient.getProjects(false).then(new Operation<List<ProjectConfigDto>>() {
             @Override
-            public void apply(List<ProjectDescriptor> result) throws OperationException {
+            public void apply(List<ProjectConfigDto> result) throws OperationException {
                 cheProjects.clear();
-                for (ProjectDescriptor project : result) {
+                for (ProjectConfigDto project : result) {
                     cheProjects.add(project.getName());
                 }
 
@@ -308,10 +307,10 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
      */
     private void updateProject(ProjectConfigDto projectConfig) {
         try {
-            projectServiceClient.updateProject(projectConfig.getName(), projectConfig, new AsyncRequestCallback<ProjectDescriptor>(
-                    dtoUnmarshallerFactory.newUnmarshaller(ProjectDescriptor.class)) {
+            projectServiceClient.updateProject(projectConfig.getName(), projectConfig, new AsyncRequestCallback<ProjectConfigDto>(
+                    dtoUnmarshallerFactory.newUnmarshaller(ProjectConfigDto.class)) {
                 @Override
-                protected void onSuccess(ProjectDescriptor result) {
+                protected void onSuccess(ProjectConfigDto result) {
                     view.animateImportButton(false);
                     view.setBlocked(false);
                     view.closeView();

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.openshift.client.build;
 
-import org.eclipse.che.api.project.shared.dto.ProjectDescriptor;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
@@ -18,6 +17,7 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
+import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -68,9 +68,9 @@ public class StartBuildAction extends AbstractPerspectiveAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        final ProjectDescriptor projectDescriptor = appContext.getCurrentProject().getRootProject();
-        final String namespace = getAttributeValue(projectDescriptor, OPENSHIFT_NAMESPACE_VARIABLE_NAME);
-        final String application = getAttributeValue(projectDescriptor, OPENSHIFT_APPLICATION_VARIABLE_NAME);
+        final ProjectConfigDto projectConfig = appContext.getCurrentProject().getRootProject();
+        final String namespace = getAttributeValue(projectConfig, OPENSHIFT_NAMESPACE_VARIABLE_NAME);
+        final String application = getAttributeValue(projectConfig, OPENSHIFT_APPLICATION_VARIABLE_NAME);
 
         openshiftService.getBuildConfigs(namespace, application)
                         .thenPromise(new Function<List<BuildConfig>, Promise<BuildConfig>>() {
@@ -113,8 +113,8 @@ public class StartBuildAction extends AbstractPerspectiveAction {
     }
 
     /** Returns first value of attribute of null if it is absent in project descriptor */
-    private String getAttributeValue(ProjectDescriptor projectDescriptor, String attribute) {
-        final List<String> values = projectDescriptor.getAttributes().get(attribute);
+    private String getAttributeValue(ProjectConfigDto projectConfig, String attribute) {
+        final List<String> values = projectConfig.getAttributes().get(attribute);
         if (values == null || values.isEmpty()) {
             return null;
         }

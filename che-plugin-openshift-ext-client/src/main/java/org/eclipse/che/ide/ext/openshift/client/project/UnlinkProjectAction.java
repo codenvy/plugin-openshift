@@ -15,7 +15,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
-import org.eclipse.che.api.project.shared.dto.ProjectDescriptor;
+import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -76,20 +76,20 @@ public class UnlinkProjectAction extends AbstractPerspectiveAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         eventLogger.log(this);
-        final ProjectDescriptor projectDescription = appContext.getCurrentProject().getRootProject();
-        List<String> mixins = projectDescription.getMixins();
+        final ProjectConfigDto projectConfig = appContext.getCurrentProject().getRootProject();
+        List<String> mixins = projectConfig.getMixins();
         if (mixins.contains(OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID)) {
             mixins.remove(OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID);
 
-            Map<String, List<String>> attributes = projectDescription.getAttributes();
+            Map<String, List<String>> attributes = projectConfig.getAttributes();
             attributes.remove(OpenshiftProjectTypeConstants.OPENSHIFT_APPLICATION_VARIABLE_NAME);
             attributes.remove(OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME);
 
-            projectServiceClient.updateProject(projectDescription.getPath(), projectDescription,
-                                               new AsyncRequestCallback<ProjectDescriptor>(
-                                                       unmarshallerFactory.newUnmarshaller(ProjectDescriptor.class)) {
+            projectServiceClient.updateProject(projectConfig.getPath(), projectConfig,
+                                               new AsyncRequestCallback<ProjectConfigDto>(
+                                                       unmarshallerFactory.newUnmarshaller(ProjectConfigDto.class)) {
                                                    @Override
-                                                   protected void onSuccess(ProjectDescriptor result) {
+                                                   protected void onSuccess(ProjectConfigDto result) {
                                                        appContext.getCurrentProject().setRootProject(result);
                                                        notificationManager.showInfo(locale.unlinkProjectSuccessful(result.getName()));
                                                    }

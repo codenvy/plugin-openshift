@@ -14,10 +14,10 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
-import org.eclipse.che.api.project.shared.dto.ProjectDescriptor;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -68,10 +68,10 @@ public class ShowApplicationUrlPresenter implements ShowApplicationUrlView.Actio
         if (currentProject == null) {
             return;
         }
-        final ProjectDescriptor projectDescription = currentProject.getRootProject();
+        final ProjectConfigDto projectConfig = currentProject.getRootProject();
 
-        service.getRoutes(getAttributeValue(projectDescription, OPENSHIFT_NAMESPACE_VARIABLE_NAME),
-                          getAttributeValue(projectDescription, OPENSHIFT_APPLICATION_VARIABLE_NAME))
+        service.getRoutes(getAttributeValue(projectConfig, OPENSHIFT_NAMESPACE_VARIABLE_NAME),
+                          getAttributeValue(projectConfig, OPENSHIFT_APPLICATION_VARIABLE_NAME))
                .then(showRoute())
                .catchError(onShowRoutesFailed());
     }
@@ -101,8 +101,8 @@ public class ShowApplicationUrlPresenter implements ShowApplicationUrlView.Actio
     }
 
     /** Returns first value of attribute of null if it is absent in project descriptor */
-    private String getAttributeValue(ProjectDescriptor projectDescriptor, String attibuteValue) {
-        final List<String> values = projectDescriptor.getAttributes().get(attibuteValue);
+    private String getAttributeValue(ProjectConfigDto projectConfig, String attibuteValue) {
+        final List<String> values = projectConfig.getAttributes().get(attibuteValue);
         if (values == null || values.isEmpty()) {
             return null;
         }
