@@ -13,14 +13,14 @@ package org.eclipse.che.ide.ext.openshift.server.inject;
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 
-import org.eclipse.che.api.project.server.type.ProjectType;
+import org.eclipse.che.api.core.model.project.type.ProjectType;
 import org.eclipse.che.ide.ext.openshift.server.OpenshiftProjectType;
 import org.eclipse.che.ide.ext.openshift.server.rest.BuildConfigService;
 import org.eclipse.che.ide.ext.openshift.server.rest.BuildService;
 import org.eclipse.che.ide.ext.openshift.server.rest.DeploymentConfigService;
 import org.eclipse.che.ide.ext.openshift.server.rest.ImageStreamService;
-import org.eclipse.che.ide.ext.openshift.server.rest.OpenshiftExceptionMapper;
 import org.eclipse.che.ide.ext.openshift.server.rest.OpenshiftApiInfoService;
+import org.eclipse.che.ide.ext.openshift.server.rest.OpenshiftExceptionMapper;
 import org.eclipse.che.ide.ext.openshift.server.rest.ProjectService;
 import org.eclipse.che.ide.ext.openshift.server.rest.ReplicationControllerService;
 import org.eclipse.che.ide.ext.openshift.server.rest.RouteService;

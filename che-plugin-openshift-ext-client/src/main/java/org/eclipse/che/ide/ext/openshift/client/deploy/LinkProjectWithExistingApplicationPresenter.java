@@ -16,10 +16,10 @@ import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.git.gwt.client.GitServiceClient;
 import org.eclipse.che.api.git.shared.Remote;
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
-import org.eclipse.che.api.project.shared.dto.ProjectDescriptor;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -98,13 +98,13 @@ public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthent
     protected void onSuccessAuthentication() {
         if (appContext.getCurrentProject() != null) {
             //Check is Git repository:
-            ProjectDescriptor projectDescription = appContext.getCurrentProject().getRootProject();
-            List<String> listVcsProvider = projectDescription.getAttributes().get("vcs.provider.name");
+            ProjectConfigDto projectConfig = appContext.getCurrentProject().getRootProject();
+            List<String> listVcsProvider = projectConfig.getAttributes().get("vcs.provider.name");
             if (listVcsProvider != null && !listVcsProvider.isEmpty() && listVcsProvider.contains("git")) {
-                getGitRemoteRepositories(projectDescription);
+                getGitRemoteRepositories(projectConfig);
             } else {
                 dialogFactory.createMessageDialog(locale.notGitRepositoryWarningTitle(),
-                                                  locale.notGitRepositoryWarning(projectDescription.getName()),
+                                                  locale.notGitRepositoryWarning(projectConfig.getName()),
                                                   null).show();
             }
         }
@@ -113,7 +113,7 @@ public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthent
     /**
      * Retrieve Git remote repositories of the current project.
      */
-    private void getGitRemoteRepositories(final ProjectDescriptor project) {
+    private void getGitRemoteRepositories(final ProjectConfigDto project) {
         gitService.remoteList(project, null, true,
                               new AsyncRequestCallback<List<Remote>>(dtoUnmarshaller.newListUnmarshaller(Remote.class)) {
                                   @Override
@@ -193,28 +193,28 @@ public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthent
      *         OpenShift application info
      */
     private void markAsOpenshiftProject(final BuildConfig buildConfig) {
-        final ProjectDescriptor projectDescription = appContext.getCurrentProject().getRootProject();
-        List<String> mixins = projectDescription.getMixins();
+        final ProjectConfigDto projectConfig = appContext.getCurrentProject().getRootProject();
+        List<String> mixins = projectConfig.getMixins();
         if (!mixins.contains(OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID)) {
             mixins.add(OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID);
         }
 
-        Map<String, List<String>> attributes = projectDescription.getAttributes();
+        Map<String, List<String>> attributes = projectConfig.getAttributes();
         attributes.put(OpenshiftProjectTypeConstants.OPENSHIFT_APPLICATION_VARIABLE_NAME, Arrays.asList(
                 buildConfig.getMetadata().getName()));
 
         attributes.put(OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME, Arrays.asList(
                 buildConfig.getMetadata().getNamespace()));
 
-        projectDescription.withMixins(mixins)
-                          .withType(projectDescription.getType())
-                          .withAttributes(attributes);
+        projectConfig.withMixins(mixins)
+                     .withType(projectConfig.getType())
+                     .withAttributes(attributes);
 
-        projectServiceClient.updateProject(projectDescription.getPath(), projectDescription,
-                                           new AsyncRequestCallback<ProjectDescriptor>(
-                                                   dtoUnmarshaller.newUnmarshaller(ProjectDescriptor.class)) {
+        projectServiceClient.updateProject(projectConfig.getPath(), projectConfig,
+                                           new AsyncRequestCallback<ProjectConfigDto>(
+                                                   dtoUnmarshaller.newUnmarshaller(ProjectConfigDto.class)) {
                                                @Override
-                                               protected void onSuccess(ProjectDescriptor result) {
+                                               protected void onSuccess(ProjectConfigDto result) {
                                                    appContext.getCurrentProject().setRootProject(result);
                                                    notificationManager.showInfo(locale.linkProjectWithExistingSuccess(result.getName(),
                                                                                                                       buildConfig

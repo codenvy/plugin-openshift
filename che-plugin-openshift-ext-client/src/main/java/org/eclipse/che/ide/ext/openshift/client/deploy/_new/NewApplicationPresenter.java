@@ -23,7 +23,6 @@ import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.git.gwt.client.GitServiceClient;
 import org.eclipse.che.api.git.shared.Remote;
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
-import org.eclipse.che.api.project.shared.dto.ProjectDescriptor;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
@@ -32,6 +31,7 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.RequestCall;
 import org.eclipse.che.api.promises.client.js.Promises;
+import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.event.project.ProjectUpdatedEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -178,20 +178,20 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
 
         if (appContext.getCurrentProject() != null) {
             //Check is Git repository:
-            ProjectDescriptor projectDescriptor = appContext.getCurrentProject().getRootProject();
-            List<String> listVcsProvider = projectDescriptor.getAttributes().get("vcs.provider.name");
+            ProjectConfigDto projectConfig = appContext.getCurrentProject().getRootProject();
+            List<String> listVcsProvider = projectConfig.getAttributes().get("vcs.provider.name");
             if (listVcsProvider != null && listVcsProvider.contains("git")) {
-                getGitRemoteRepositories(projectDescriptor);
+                getGitRemoteRepositories(projectConfig);
             } else {
                 dialogFactory.createMessageDialog(locale.notGitRepositoryWarningTitle(),
-                                                  locale.notGitRepositoryWarning(projectDescriptor.getName()),
+                                                  locale.notGitRepositoryWarning(projectConfig.getName()),
                                                   null).show();
             }
         }
     }
 
-    private void getGitRemoteRepositories(final ProjectDescriptor projectDescriptor) {
-        gitService.remoteList(projectDescriptor, null, true,
+    private void getGitRemoteRepositories(final ProjectConfigDto projectConfig) {
+        gitService.remoteList(projectConfig, null, true,
                               new AsyncRequestCallback<List<Remote>>(dtoUnmarshaller.newListUnmarshaller(Remote.class)) {
                                   @Override
                                   protected void onSuccess(List<Remote> result) {
@@ -201,21 +201,21 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
                                       } else {
                                           dialogFactory.createMessageDialog(locale.noGitRemoteRepositoryWarningTitle(),
                                                                             locale.noGitRemoteRepositoryWarning(
-                                                                                    projectDescriptor.getName()),
+                                                                                    projectConfig.getName()),
                                                                             null).show();
                                       }
                                   }
 
                                   @Override
                                   protected void onFailure(Throwable exception) {
-                                      notificationManager.showError(locale.getGitRemoteRepositoryError(projectDescriptor.getName()));
+                                      notificationManager.showError(locale.getGitRemoteRepositoryError(projectConfig.getName()));
                                   }
                               });
     }
 
     private void loadOpenShiftData() {
-        final ProjectDescriptor descriptor = appContext.getCurrentProject().getRootProject();
-        view.setApplicationName(descriptor.getName());
+        final ProjectConfigDto projectConfig = appContext.getCurrentProject().getRootProject();
+        view.setApplicationName(projectConfig.getName());
         view.show();
 
         osService.getProjects().then(new Operation<List<Project>>() {
@@ -338,29 +338,29 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
     }
 
     private void setupMixin(Project project) {
-        final ProjectDescriptor projectDescriptor = appContext.getCurrentProject().getRootProject();
+        final ProjectConfigDto projectConfig = appContext.getCurrentProject().getRootProject();
 
-        List<String> mixins = projectDescriptor.getMixins();
+        List<String> mixins = projectConfig.getMixins();
         if (!mixins.contains(OPENSHIFT_PROJECT_TYPE_ID)) {
             mixins.add(OPENSHIFT_PROJECT_TYPE_ID);
         }
 
-        Map<String, List<String>> attributes = projectDescriptor.getAttributes();
+        Map<String, List<String>> attributes = projectConfig.getAttributes();
         attributes.put(OPENSHIFT_APPLICATION_VARIABLE_NAME, newArrayList(osAppName));
         attributes.put(OPENSHIFT_NAMESPACE_VARIABLE_NAME, newArrayList(project.getMetadata().getName()));
 
-        newPromise(new RequestCall<ProjectDescriptor>() {
+        newPromise(new RequestCall<ProjectConfigDto>() {
             @Override
-            public void makeCall(AsyncCallback<ProjectDescriptor> callback) {
-                projectService.updateProject(projectDescriptor.getPath(),
-                                             projectDescriptor,
-                                             newCallback(callback, dtoUnmarshaller.newUnmarshaller(ProjectDescriptor.class)));
+            public void makeCall(AsyncCallback<ProjectConfigDto> callback) {
+                projectService.updateProject(projectConfig.getPath(),
+                                             projectConfig,
+                                             newCallback(callback, dtoUnmarshaller.newUnmarshaller(ProjectConfigDto.class)));
             }
-        }).then(new Operation<ProjectDescriptor>() {
+        }).then(new Operation<ProjectConfigDto>() {
             @Override
-            public void apply(ProjectDescriptor project) throws OperationException {
-                eventBus.fireEvent(new ProjectUpdatedEvent(projectDescriptor.getPath(), project));
-                notificationManager.showInfo(locale.linkProjectWithExistingSuccess(projectDescriptor.getName(), osAppName));
+            public void apply(ProjectConfigDto project) throws OperationException {
+                eventBus.fireEvent(new ProjectUpdatedEvent(projectConfig.getPath(), project));
+                notificationManager.showInfo(locale.linkProjectWithExistingSuccess(projectConfig.getName(), osAppName));
             }
         }).catchError(new Operation<PromiseError>() {
             @Override

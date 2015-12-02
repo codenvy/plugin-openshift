@@ -12,16 +12,16 @@ package org.eclipse.che.ide.ext.openshift.client.delete;
 
 import com.google.common.base.Strings;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.inject.Singleton;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
-import org.eclipse.che.api.project.shared.dto.ProjectDescriptor;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
+import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
@@ -48,7 +48,7 @@ import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConst
  */
 @Singleton
 public class DeleteProjectPresenter extends ValidateAuthenticationPresenter {
-    
+
     private final AppContext                    appContext;
     private final DialogFactory                 dialogFactory;
     private final OpenshiftLocalizationConstant locale;
@@ -83,13 +83,13 @@ public class DeleteProjectPresenter extends ValidateAuthenticationPresenter {
 
     @Override
     protected void onSuccessAuthentication() {
-        ProjectDescriptor descriptor = appContext.getCurrentProject().getRootProject();
-        final String namespace = getAttributeValue(descriptor, OPENSHIFT_NAMESPACE_VARIABLE_NAME);
-        
+        ProjectConfigDto projectConfig = appContext.getCurrentProject().getRootProject();
+        final String namespace = getAttributeValue(projectConfig, OPENSHIFT_NAMESPACE_VARIABLE_NAME);
+
         if (!Strings.isNullOrEmpty(namespace)) {
             loader.show(locale.retrievingProjectsData());
             Promise<List<BuildConfig>> buildConfigs = service.getBuildConfigs(namespace);
-            buildConfigs.then(showConfirmDialog(descriptor, namespace))
+            buildConfigs.then(showConfirmDialog(projectConfig, namespace))
                         .catchError(new Operation<PromiseError>() {
                             @Override
                             public void apply(PromiseError arg) throws OperationException {
@@ -98,19 +98,19 @@ public class DeleteProjectPresenter extends ValidateAuthenticationPresenter {
                         })
                         .catchError(handleError(namespace));
         } else {
-            notificationManager.showError(locale.projectIsNotLinkedToOpenShiftError(descriptor.getName()));
+            notificationManager.showError(locale.projectIsNotLinkedToOpenShiftError(projectConfig.getName()));
         }
     }
 
-    private String getAttributeValue(ProjectDescriptor projectDescriptor, String value) {
-        List<String> attributes = projectDescriptor.getAttributes().get(value);
+    private String getAttributeValue(ProjectConfigDto projectConfig, String value) {
+        List<String> attributes = projectConfig.getAttributes().get(value);
         if (attributes == null || attributes.isEmpty()) {
             return null;
         }
-        return projectDescriptor.getAttributes().get(value).get(0);
+        return projectConfig.getAttributes().get(value).get(0);
     }
 
-    private Operation<List<BuildConfig>> showConfirmDialog(final ProjectDescriptor projectDescriptor, final String nameSpace) {
+    private Operation<List<BuildConfig>> showConfirmDialog(final ProjectConfigDto projectConfig, final String nameSpace) {
         return new Operation<List<BuildConfig>>() {
             @Override
             public void apply(List<BuildConfig> configs) throws OperationException {
@@ -133,7 +133,7 @@ public class DeleteProjectPresenter extends ValidateAuthenticationPresenter {
                                                               @Override
                                                               public void apply(Void arg) throws OperationException {
                                                                   notificationManager.showInfo(locale.deleteProjectSuccess(nameSpace));
-                                                                  removeOpenshiftMixin(projectDescriptor, nameSpace);
+                                                                  removeOpenshiftMixin(projectConfig, nameSpace);
                                                               }
                                                           }).catchError(new Operation<PromiseError>() {
                                                               @Override
@@ -157,23 +157,23 @@ public class DeleteProjectPresenter extends ValidateAuthenticationPresenter {
         };
     }
 
-    private void removeOpenshiftMixin(final ProjectDescriptor descriptor, final String nameSpace) {
-        descriptor.getMixins().remove(OPENSHIFT_PROJECT_TYPE_ID);
-        descriptor.getAttributes().remove(OPENSHIFT_NAMESPACE_VARIABLE_NAME);
-        descriptor.getAttributes().remove(OPENSHIFT_APPLICATION_VARIABLE_NAME);
+    private void removeOpenshiftMixin(final ProjectConfigDto projectConfig, final String nameSpace) {
+        projectConfig.getMixins().remove(OPENSHIFT_PROJECT_TYPE_ID);
+        projectConfig.getAttributes().remove(OPENSHIFT_NAMESPACE_VARIABLE_NAME);
+        projectConfig.getAttributes().remove(OPENSHIFT_APPLICATION_VARIABLE_NAME);
 
-        newPromise(new AsyncPromiseHelper.RequestCall<ProjectDescriptor>() {
+        newPromise(new AsyncPromiseHelper.RequestCall<ProjectConfigDto>() {
             @Override
-            public void makeCall(AsyncCallback<ProjectDescriptor> callback) {
-                projectService.updateProject(descriptor.getPath(),
-                                             descriptor,
-                                             newCallback(callback, dtoUnmarshaller.newUnmarshaller(ProjectDescriptor.class)));
+            public void makeCall(AsyncCallback<ProjectConfigDto> callback) {
+                projectService.updateProject(projectConfig.getPath(),
+                                             projectConfig,
+                                             newCallback(callback, dtoUnmarshaller.newUnmarshaller(ProjectConfigDto.class)));
             }
-        }).then(new Operation<ProjectDescriptor>() {
+        }).then(new Operation<ProjectConfigDto>() {
             @Override
-            public void apply(ProjectDescriptor projectDescriptor) throws OperationException {
-                appContext.getCurrentProject().setRootProject(projectDescriptor);
-                notificationManager.showInfo(locale.projectSuccessfullyReset(projectDescriptor.getName()));
+            public void apply(ProjectConfigDto configDto) throws OperationException {
+                appContext.getCurrentProject().setRootProject(configDto);
+                notificationManager.showInfo(locale.projectSuccessfullyReset(configDto.getName()));
             }
         }).catchError(handleError(nameSpace));
     }

@@ -10,13 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.openshift.client.project.wizard.page.configure;
 
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
-import org.eclipse.che.api.project.shared.dto.ProjectDescriptor;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
@@ -85,11 +83,11 @@ public class ConfigureProjectPresenter extends AbstractWizardPage<NewApplication
             }
         });
 
-        projectServiceClient.getProjects(false).then(new Operation<List<ProjectDescriptor>>() {
+        projectServiceClient.getProjects(false).then(new Operation<List<ProjectConfigDto>>() {
             @Override
-            public void apply(List<ProjectDescriptor> projects) throws OperationException {
+            public void apply(List<ProjectConfigDto> projects) throws OperationException {
                 cheProjects.clear();
-                for (ProjectDescriptor project : projects) {
+                for (ProjectConfigDto project : projects) {
                     cheProjects.add(project.getName());
                 }
             }
