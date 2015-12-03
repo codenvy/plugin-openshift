@@ -28,7 +28,7 @@ import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftResources;
 import org.eclipse.che.ide.ext.openshift.shared.dto.WebHook;
 import org.eclipse.che.ide.ui.window.Window;
-import org.eclipse.che.ide.ui.zeroclipboard.ClipboardButtonBuilder;
+import org.eclipse.che.ide.ui.zeroClipboard.ClipboardButtonBuilder;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
