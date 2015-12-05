@@ -12,12 +12,15 @@ package org.eclipse.che.ide.ext.openshift.client.deploy;
 
 import com.google.inject.Inject;
 
+import org.eclipse.che.api.core.model.workspace.ProjectConfig;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.git.gwt.client.GitServiceClient;
 import org.eclipse.che.api.git.shared.Remote;
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
+import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -28,22 +31,28 @@ import org.eclipse.che.ide.ext.openshift.client.OpenshiftServiceClient;
 import org.eclipse.che.ide.ext.openshift.client.ValidateAuthenticationPresenter;
 import org.eclipse.che.ide.ext.openshift.client.oauth.OpenshiftAuthenticator;
 import org.eclipse.che.ide.ext.openshift.client.oauth.OpenshiftAuthorizationHandler;
-import org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants;
 import org.eclipse.che.ide.ext.openshift.shared.dto.BuildConfig;
+import org.eclipse.che.ide.ext.openshift.shared.dto.BuildSource;
+import org.eclipse.che.ide.ext.openshift.shared.dto.GitBuildSource;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Project;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_APPLICATION_VARIABLE_NAME;
+import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
+import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID;
 
 /**
  * Presenter, which handles logic for linking current project with OpenShift application.
  *
  * @author Anna Shumilova
+ * @author Sergii Leschenko
  */
 public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthenticationPresenter
         implements LinkProjectWithExistingApplicationView.ActionDelegate {
@@ -59,8 +68,8 @@ public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthent
     private final DtoUnmarshallerFactory                 dtoUnmarshaller;
     private final DtoFactory                             dtoFactory;
     private final Map<String, List<BuildConfig>>         buildConfigMap;
+    private final ApplicationManager                     applicationManager;
     private       BuildConfig                            selectedBuildConfig;
-
 
     @Inject
     public LinkProjectWithExistingApplicationPresenter(OpenshiftLocalizationConstant locale,
@@ -74,9 +83,11 @@ public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthent
                                                        AppContext appContext,
                                                        DtoFactory dtoFactory,
                                                        OpenshiftAuthenticator openshiftAuthenticator,
-                                                       OpenshiftAuthorizationHandler openshiftAuthorizationHandler) {
+                                                       OpenshiftAuthorizationHandler openshiftAuthorizationHandler,
+                                                       ApplicationManager applicationManager) {
         super(openshiftAuthenticator, openshiftAuthorizationHandler, locale, notificationManager);
         this.view = view;
+        this.applicationManager = applicationManager;
         this.view.setDelegate(this);
 
         this.appContext = appContext;
@@ -149,62 +160,46 @@ public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthent
 
     @Override
     public void onLinkApplicationClicked() {
-        String remoteUrl = view.getGitRemoteUrl();
-        //Change location in existing
-        selectedBuildConfig.getSpec().getSource().getGit().setUri(remoteUrl);
-        selectedBuildConfig.getSpec().getSource().getGit().setRef(null);
-        selectedBuildConfig.getSpec().getSource().setContextDir(appContext.getCurrentProject().getRootProject().getContentRoot());
+        final ProjectConfig rootProject = appContext.getCurrentProject().getRootProject();
+        final String applicationName = rootProject.getName();
+        applicationManager.findApplication(selectedBuildConfig)
+                          .thenPromise(new Function<Application, Promise<Application>>() {
+                              @Override
+                              public Promise<Application> apply(Application application) {
+                                  BuildSource buildSource = dtoFactory.createDto(BuildSource.class)
+                                                                      .withType("Git")
+                                                                      .withGit(dtoFactory.createDto(GitBuildSource.class)
+                                                                                         .withUri(view.getGitRemoteUrl()))
+                                                                      .withContextDir(rootProject.getContentRoot());
 
-        updateBuildConfig(selectedBuildConfig);
-    }
-
-    /**
-     * Update OpenShift Build Config object.
-     *
-     * @param buildConfig
-     *         buildConfig data to be updated
-     */
-    private void updateBuildConfig(BuildConfig buildConfig) {
-        openShiftClient.updateBuildConfig(buildConfig).then(new Operation<BuildConfig>() {
-            @Override
-            public void apply(BuildConfig result) throws OperationException {
-                view.closeView();
-                markAsOpenshiftProject(result);
-                notificationManager.showInfo(locale.linkProjectWithExistingUpdateBuildConfigSuccess(
-                        result.getMetadata().getName()));
-            }
-        }).catchError(handleError());
-    }
-
-    private Operation<PromiseError> handleError() {
-        return new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError arg) throws OperationException {
-                final ServiceError serviceError = dtoFactory.createDtoFromJson(arg.getMessage(), ServiceError.class);
-                notificationManager.showError(serviceError.getMessage());
-            }
-        };
+                                  return applicationManager.updateOpenshiftApplication(application, applicationName, buildSource);
+                              }
+                          })
+                          .then(new Operation<Application>() {
+                              @Override
+                              public void apply(Application arg) throws OperationException {
+                                  view.closeView();
+                                  notificationManager.showInfo(locale.linkProjectWithExistingUpdateBuildConfigSuccess(applicationName));
+                                  markAsOpenshiftProject(selectedBuildConfig.getMetadata().getNamespace(), applicationName);
+                              }
+                          })
+                          .catchError(handleError());
     }
 
     /**
      * Mark current project as OpenShift one.
-     *
-     * @param buildConfig
-     *         OpenShift application info
      */
-    private void markAsOpenshiftProject(final BuildConfig buildConfig) {
+    private void markAsOpenshiftProject(String namespace, final String application) {
         final ProjectConfigDto projectConfig = appContext.getCurrentProject().getRootProject();
         List<String> mixins = projectConfig.getMixins();
-        if (!mixins.contains(OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID)) {
-            mixins.add(OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID);
+        if (!mixins.contains(OPENSHIFT_PROJECT_TYPE_ID)) {
+            mixins.add(OPENSHIFT_PROJECT_TYPE_ID);
         }
 
         Map<String, List<String>> attributes = projectConfig.getAttributes();
-        attributes.put(OpenshiftProjectTypeConstants.OPENSHIFT_APPLICATION_VARIABLE_NAME, Arrays.asList(
-                buildConfig.getMetadata().getName()));
+        attributes.put(OPENSHIFT_NAMESPACE_VARIABLE_NAME, Collections.singletonList(namespace));
+        attributes.put(OPENSHIFT_APPLICATION_VARIABLE_NAME, Collections.singletonList(application));
 
-        attributes.put(OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME, Arrays.asList(
-                buildConfig.getMetadata().getNamespace()));
 
         projectConfig.withMixins(mixins)
                      .withType(projectConfig.getType())
@@ -217,9 +212,7 @@ public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthent
                                                protected void onSuccess(ProjectConfigDto result) {
                                                    appContext.getCurrentProject().setRootProject(result);
                                                    notificationManager.showInfo(locale.linkProjectWithExistingSuccess(result.getName(),
-                                                                                                                      buildConfig
-                                                                                                                              .getMetadata()
-                                                                                                                              .getName()));
+                                                                                                                      application));
                                                }
 
                                                @Override
@@ -255,18 +248,19 @@ public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthent
             @Override
             public void apply(List<Project> result) throws OperationException {
                 for (Project project : result) {
-                    getBuildConfigs(project.getMetadata().getName());
+                    loadBuildConfigs(project.getMetadata().getName());
                 }
             }
         }).catchError(handleError());
     }
 
     /**
-     * Get OpenShift Build Configs by namespace.
+     * Load OpenShift Build Configs by specified namespace.
      *
      * @param namespace
+     *         namespace for loading build configs
      */
-    private void getBuildConfigs(final String namespace) {
+    private void loadBuildConfigs(final String namespace) {
         openShiftClient.getBuildConfigs(namespace).then(new Operation<List<BuildConfig>>() {
             @Override
             public void apply(List<BuildConfig> result) throws OperationException {
@@ -274,5 +268,15 @@ public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthent
                 view.setBuildConfigs(buildConfigMap);
             }
         }).catchError(handleError());
+    }
+
+    private Operation<PromiseError> handleError() {
+        return new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError arg) throws OperationException {
+                final ServiceError serviceError = dtoFactory.createDtoFromJson(arg.getMessage(), ServiceError.class);
+                notificationManager.showError(serviceError.getMessage());
+            }
+        };
     }
 }

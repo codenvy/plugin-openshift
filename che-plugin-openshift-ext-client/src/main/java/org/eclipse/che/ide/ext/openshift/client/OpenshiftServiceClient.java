@@ -33,15 +33,21 @@ import java.util.List;
 public interface OpenshiftServiceClient {
     Promise<OpenshiftServerInfo> getServerInfo();
 
+    /** Templates */
+
     Promise<List<Template>> getTemplates(String namespace);
 
     Promise<Template> processTemplate(String namespace, Template template);
+
+    /** Projects */
 
     Promise<List<Project>> getProjects();
 
     Promise<Project> createProject(ProjectRequest request);
 
     Promise<Void> deleteProject(String project);
+
+    /** BuildConfigs */
 
     Promise<BuildConfig> createBuildConfig(BuildConfig config);
 
@@ -53,25 +59,47 @@ public interface OpenshiftServiceClient {
 
     Promise<List<WebHook>> getWebhooks(String namespace, String buildConfig);
 
-    Promise<ImageStream> createImageStream(ImageStream stream);
-
-    Promise<List<ImageStream>> getImageStreams(String namespace, String application);
-
-    Promise<ImageStreamTag> getImageStreamTag(String namespace, String imageStream, String tag);
-
-    Promise<DeploymentConfig> createDeploymentConfig(DeploymentConfig config);
-
-    Promise<Route> createRoute(Route route);
-
-    Promise<Service> createService(Service service);
-
-    Promise<List<Route>> getRoutes(String namespace, String application);
-
     Promise<List<Build>> getBuilds(String namespace, String application);
 
     Promise<Build> startBuild(String namespace, String buildConfig);
 
+    /** ImageStreams */
+
+    Promise<ImageStream> createImageStream(ImageStream stream);
+
+    Promise<List<ImageStream>> getImageStreams(String namespace, String application);
+
+    Promise<ImageStream> getImageStream(String namespace, String imageStream);
+
+    Promise<ImageStream> updateImageStream(ImageStream imageStream);
+
+    Promise<ImageStreamTag> getImageStreamTag(String namespace, String imageStream, String tag);
+
+    /** DeploymentConfigs */
+
+    Promise<DeploymentConfig> createDeploymentConfig(DeploymentConfig config);
+
+    Promise<DeploymentConfig> updateDeploymentConfig(DeploymentConfig deploymentConfig);
+
+    Promise<List<DeploymentConfig>> getDeploymentConfigs(String namespace, String application);
+
+    /** Routes */
+
+    Promise<Route> createRoute(Route route);
+
+    Promise<Route> updateRoute(Route route);
+
+    Promise<List<Route>> getRoutes(String namespace, String application);
+
+    /** Services */
+
+    Promise<Service> createService(Service service);
+
+    Promise<Service> updateService(Service service);
+
     Promise<List<ReplicationController>> getReplicationControllers(String namespace, String application);
 
     Promise<ReplicationController> updateReplicationController(ReplicationController controller);
+
+    Promise<List<Service>> getServices(String namespace, String application);
 }

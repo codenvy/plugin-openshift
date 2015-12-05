@@ -161,7 +161,7 @@ public class OpenshiftServiceClientImpl implements OpenshiftServiceClient {
                                             config.getMetadata().getName(), config, false)
                         .header(CONTENT_TYPE, MimeType.APPLICATION_JSON)
                         .header(ACCEPT, MimeType.APPLICATION_JSON)
-                        .loader(loader, "Updating build configs...")
+                        .loader(loader, "Updating build config...")
                         .send(newCallback(callback, dtoUnmarshaller.newUnmarshaller(BuildConfig.class)));
             }
         });
@@ -234,6 +234,37 @@ public class OpenshiftServiceClientImpl implements OpenshiftServiceClient {
     }
 
     @Override
+    public Promise<ImageStream> getImageStream(final String namespace, final String imageStream) {
+        return newPromise(new AsyncPromiseHelper.RequestCall<ImageStream>() {
+            @Override
+            public void makeCall(AsyncCallback<ImageStream> callback) {
+                final String url = openshiftPath + "/namespace/" + namespace + "/imagestream/" + imageStream;
+                asyncRequestFactory.createGetRequest(url)
+                                   .header(CONTENT_TYPE, MimeType.APPLICATION_JSON)
+                                   .header(ACCEPT, MimeType.APPLICATION_JSON)
+                                   .loader(loader, "Getting image stream...")
+                                   .send(newCallback(callback, dtoUnmarshaller.newUnmarshaller(ImageStream.class)));
+            }
+        });
+    }
+
+    @Override
+    public Promise<ImageStream> updateImageStream(final ImageStream imageStream) {
+        return newPromise(new AsyncPromiseHelper.RequestCall<ImageStream>() {
+            @Override
+            public void makeCall(AsyncCallback<ImageStream> callback) {
+                asyncRequestFactory
+                        .createRequest(PUT, openshiftPath + "/namespace/" + imageStream.getMetadata().getNamespace() + "/imagestream/" +
+                                            imageStream.getMetadata().getName(), imageStream, false)
+                        .header(CONTENT_TYPE, MimeType.APPLICATION_JSON)
+                        .header(ACCEPT, MimeType.APPLICATION_JSON)
+                        .loader(loader, "Updating image stream...")
+                        .send(newCallback(callback, dtoUnmarshaller.newUnmarshaller(ImageStream.class)));
+            }
+        });
+    }
+
+    @Override
     public Promise<ImageStreamTag> getImageStreamTag(final String namespace, final String imageStream, final String tag) {
         return newPromise(new AsyncPromiseHelper.RequestCall<ImageStreamTag>() {
             @Override
@@ -264,6 +295,40 @@ public class OpenshiftServiceClientImpl implements OpenshiftServiceClient {
     }
 
     @Override
+    public Promise<DeploymentConfig> updateDeploymentConfig(final DeploymentConfig config) {
+        return newPromise(new AsyncPromiseHelper.RequestCall<DeploymentConfig>() {
+            @Override
+            public void makeCall(AsyncCallback<DeploymentConfig> callback) {
+                asyncRequestFactory
+                        .createRequest(PUT, openshiftPath + "/namespace/" + config.getMetadata().getNamespace() + "/deploymentconfig/" +
+                                            config.getMetadata().getName(), config, false)
+                        .header(CONTENT_TYPE, MimeType.APPLICATION_JSON)
+                        .header(ACCEPT, MimeType.APPLICATION_JSON)
+                        .loader(loader, "Updating deployment config...")
+                        .send(newCallback(callback, dtoUnmarshaller.newUnmarshaller(DeploymentConfig.class)));
+            }
+        });
+    }
+
+    @Override
+    public Promise<List<DeploymentConfig>> getDeploymentConfigs(final String namespace, final String application) {
+        return newPromise(new AsyncPromiseHelper.RequestCall<List<DeploymentConfig>>() {
+            @Override
+            public void makeCall(AsyncCallback<List<DeploymentConfig>> callback) {
+                String url = openshiftPath + "/namespace/" + namespace + "/deploymentconfig";
+                if (application != null) {
+                    url += "?application=" + application;
+                }
+                asyncRequestFactory.createGetRequest(url)
+                                   .header(CONTENT_TYPE, MimeType.APPLICATION_JSON)
+                                   .header(ACCEPT, MimeType.APPLICATION_JSON)
+                                   .loader(loader, "Getting deployment configs...")
+                                   .send(newCallback(callback, dtoUnmarshaller.newListUnmarshaller(DeploymentConfig.class)));
+            }
+        });
+    }
+
+    @Override
     public Promise<Route> createRoute(final Route route) {
         return newPromise(new AsyncPromiseHelper.RequestCall<Route>() {
             @Override
@@ -277,6 +342,22 @@ public class OpenshiftServiceClientImpl implements OpenshiftServiceClient {
     }
 
     @Override
+    public Promise<Route> updateRoute(final Route route) {
+        return newPromise(new AsyncPromiseHelper.RequestCall<Route>() {
+            @Override
+            public void makeCall(AsyncCallback<Route> callback) {
+                asyncRequestFactory
+                        .createRequest(PUT, openshiftPath + "/namespace/" + route.getMetadata().getNamespace() + "/route/" +
+                                            route.getMetadata().getName(), route, false)
+                        .header(CONTENT_TYPE, MimeType.APPLICATION_JSON)
+                        .header(ACCEPT, MimeType.APPLICATION_JSON)
+                        .loader(loader, "Updating route...")
+                        .send(newCallback(callback, dtoUnmarshaller.newUnmarshaller(Route.class)));
+            }
+        });
+    }
+
+    @Override
     public Promise<Service> createService(final Service service) {
         return newPromise(new AsyncPromiseHelper.RequestCall<Service>() {
             @Override
@@ -285,6 +366,22 @@ public class OpenshiftServiceClientImpl implements OpenshiftServiceClient {
                         .createPostRequest(openshiftPath + "/namespace/" + service.getMetadata().getNamespace() + "/service", service)
                         .header(CONTENT_TYPE, MimeType.APPLICATION_JSON)
                         .header(ACCEPT, MimeType.APPLICATION_JSON)
+                        .send(newCallback(callback, dtoUnmarshaller.newUnmarshaller(Service.class)));
+            }
+        });
+    }
+
+    @Override
+    public Promise<Service> updateService(final Service service) {
+        return newPromise(new AsyncPromiseHelper.RequestCall<Service>() {
+            @Override
+            public void makeCall(AsyncCallback<Service> callback) {
+                asyncRequestFactory
+                        .createRequest(PUT, openshiftPath + "/namespace/" + service.getMetadata().getNamespace() + "/service/" +
+                                            service.getMetadata().getName(), service, false)
+                        .header(CONTENT_TYPE, MimeType.APPLICATION_JSON)
+                        .header(ACCEPT, MimeType.APPLICATION_JSON)
+                        .loader(loader, "Updating service...")
                         .send(newCallback(callback, dtoUnmarshaller.newUnmarshaller(Service.class)));
             }
         });
@@ -366,6 +463,24 @@ public class OpenshiftServiceClientImpl implements OpenshiftServiceClient {
                                    .header(ACCEPT, MimeType.APPLICATION_JSON)
                                    .loader(loader, "Updating replication controller...")
                                    .send(newCallback(callback, dtoUnmarshaller.newUnmarshaller(ReplicationController.class)));
+            }
+        });
+    }
+
+    @Override
+    public Promise<List<Service>> getServices(final String namespace, final String application) {
+        return newPromise(new AsyncPromiseHelper.RequestCall<List<Service>>() {
+            @Override
+            public void makeCall(AsyncCallback<List<Service>> callback) {
+                String url = openshiftPath + "/namespace/" + namespace + "/service";
+                if (application != null) {
+                    url += "?application=" + application;
+                }
+                asyncRequestFactory.createGetRequest(url)
+                                   .header(CONTENT_TYPE, MimeType.APPLICATION_JSON)
+                                   .header(ACCEPT, MimeType.APPLICATION_JSON)
+                                   .loader(loader, "Getting services...")
+                                   .send(newCallback(callback, dtoUnmarshaller.newListUnmarshaller(Service.class)));
             }
         });
     }
