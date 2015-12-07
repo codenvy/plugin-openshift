@@ -78,7 +78,8 @@ public class OpenshiftExtension {
 
         actionManager.registerAction("deployToExistingApplication", deployToExistingApplicationAction);
         deployGroup.add(deployToExistingApplicationAction);
-
+        
+        deployGroup.getTemplatePresentation().setSVGIcon(openshiftResources.deployGroup());
         openshift.add(deployGroup);
 
         actionManager.registerAction("unlinkOpenshiftProject", unlinkProjectAction);

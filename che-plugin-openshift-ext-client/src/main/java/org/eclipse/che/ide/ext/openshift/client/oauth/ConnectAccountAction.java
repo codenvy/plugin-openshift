@@ -18,6 +18,7 @@ import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.notification.Notification;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
+import org.eclipse.che.ide.ext.openshift.client.OpenshiftResources;
 import org.eclipse.che.security.oauth.OAuthStatus;
 
 import javax.inject.Inject;
@@ -36,8 +37,9 @@ public class ConnectAccountAction extends Action {
     public ConnectAccountAction(OpenshiftAuthenticator openshiftAuthenticator,
                                 OpenshiftAuthorizationHandler openshiftAuthorizationHandler,
                                 OpenshiftLocalizationConstant locale,
-                                NotificationManager notificationManager) {
-        super(locale.connectAccountTitle());
+                                NotificationManager notificationManager,
+                                OpenshiftResources resources) {
+        super(locale.connectAccountTitle(), null, null, resources.connect());
         this.openshiftAuthenticator = openshiftAuthenticator;
         this.openshiftAuthorizationHandler = openshiftAuthorizationHandler;
         this.locale = locale;
