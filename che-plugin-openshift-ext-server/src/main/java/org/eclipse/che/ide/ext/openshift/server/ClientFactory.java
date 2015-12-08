@@ -45,7 +45,7 @@ public class ClientFactory {
     private final LoadingCache<String, IClient> token2clientCache;
     private final String                        openshiftApiEndpoint;
     private final RemoteOAuthTokenProvider      provider;
-    /** Client instance without specified token for providing information about openshift server*/
+    /** Client instance without specified token for providing information about openshift server */
     private final IClient                       infoClient;
 
     @Inject
@@ -69,7 +69,14 @@ public class ClientFactory {
         final String openShiftAPIVersion = infoClient.getOpenShiftAPIVersion();
         final String openshiftEndpoint = (OpenShiftAPIVersion.v1beta3.toString().equals(openShiftAPIVersion) ? "osapi" : "oapi") +
                                          "/" + openShiftAPIVersion;
-        return newDto(OpenshiftServerInfo.class).withOpenshiftEndpoint(infoClient.getBaseURL().toString() + openshiftEndpoint);
+        return newDto(OpenshiftServerInfo.class).withOpenshiftEndpoint(normalize(infoClient.getBaseURL().toString()) + openshiftEndpoint);
+    }
+
+    /**
+     * Returns normalized url with '/' at the end
+     */
+    private String normalize(String baseUrl) {
+        return baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
     }
 
     /**
