@@ -228,31 +228,24 @@ public class CreateProjectWizard extends AbstractWizard<NewApplicationRequest> {
 
         appNameParam.setValue(dataObject.getProjectConfigDto().getName());
 
+        //set up application name labels in objects of template
         for (Object object : template.getObjects()) {
-            setUpApplicationName(object);
+            JSONObject metadata = provideExistingJsonObject((JSONObject)object, "metadata");
+            JSONObject labels = provideExistingJsonObject(metadata, "labels");
+            labels.put(APPLICATION_LABEL_NAME, new JSONString("${" + APPLICATION_PARAMETER_NAME + "}"));
         }
     }
 
     /**
-     * Add application name parameter in object
-     *App
-     * @param object
-     *         object for setting of application name parameter
+     * Returns {@link JSONObject} instance that is field with specified name of specified source object.<br/>
+     * Note: creates new {@link JSONObject} in given source if it is absent or it is not instance of {@link JSONObject}.
      */
-    private void setUpApplicationName(Object object) {
-        final JSONObject metadata = getJsonObjectOrNull((JSONObject)object, "metadata");
-        if (metadata != null) {
-            final JSONObject labels = getJsonObjectOrNull(metadata, "labels");
-            if (labels != null) {
-                labels.put(APPLICATION_LABEL_NAME, new JSONString("${" + APPLICATION_PARAMETER_NAME + "}"));
-            }
-        }
-    }
-
-    private JSONObject getJsonObjectOrNull(JSONObject source, String objectName) {
+    private JSONObject provideExistingJsonObject(JSONObject source, String objectName) {
         final JSONValue jsonValue = source.get(objectName);
         if (jsonValue == null || !(jsonValue instanceof JSONObject)) {
-            return null;
+            JSONObject result = new JSONObject();
+            source.put(objectName, result);
+            return result;
         }
         return ((JSONObject)jsonValue);
     }
