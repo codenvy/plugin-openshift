@@ -17,6 +17,7 @@ import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
+import org.eclipse.che.ide.ext.openshift.client.OpenshiftResources;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
@@ -35,10 +36,15 @@ public class ImportApplicationAction extends AbstractPerspectiveAction {
     private final ImportApplicationPresenter presenter;
 
     @Inject
-    public ImportApplicationAction(final AnalyticsEventLogger eventLogger, OpenshiftLocalizationConstant locale,
+    public ImportApplicationAction(final AnalyticsEventLogger eventLogger,
+                                   OpenshiftLocalizationConstant locale,
+                                   OpenshiftResources resources,
                                    final ImportApplicationPresenter presenter) {
-        super(Collections.singletonList(PROJECT_PERSPECTIVE_ID), locale.importApplicationAction(),
-              locale.linkProjectWithExistingApplicationAction(), null, null);
+        super(Collections.singletonList(PROJECT_PERSPECTIVE_ID),
+              locale.importApplicationAction(),
+              locale.linkProjectWithExistingApplicationAction(),
+              null,
+              resources.importApplication());
         this.eventLogger = eventLogger;
         this.presenter = presenter;
     }

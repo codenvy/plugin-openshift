@@ -16,6 +16,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.ext.openshift.client.OpenshiftResources;
 import org.eclipse.che.ide.ext.openshift.client.oauth.OpenshiftAuthorizationHandler;
 import org.eclipse.che.ide.ext.openshift.client.project.wizard.CreateProjectPresenter;
 
@@ -38,8 +39,13 @@ public class CreateApplicationFromTemplateAction extends AbstractPerspectiveActi
     @Inject
     public CreateApplicationFromTemplateAction(AnalyticsEventLogger eventLogger,
                                                CreateProjectPresenter wizard,
-                                               OpenshiftAuthorizationHandler authorizationHandler) {
-        super(Collections.singletonList(PROJECT_PERSPECTIVE_ID), "Create Application From Template", null, null, null);
+                                               OpenshiftAuthorizationHandler authorizationHandler,
+                                               OpenshiftResources resources) {
+        super(Collections.singletonList(PROJECT_PERSPECTIVE_ID),
+              "Create Application From Template",
+              null,
+              null,
+              resources.createFromTemplate());
         this.eventLogger = eventLogger;
         this.wizard = wizard;
         this.authorizationHandler = authorizationHandler;

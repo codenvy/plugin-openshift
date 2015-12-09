@@ -17,6 +17,7 @@ import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
+import org.eclipse.che.ide.ext.openshift.client.OpenshiftResources;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 
 import javax.inject.Inject;
@@ -35,8 +36,9 @@ public class DisconnectAccountAction extends Action {
     public DisconnectAccountAction(OAuthServiceClient oAuthServiceClient,
                                    OpenshiftAuthorizationHandler openshiftAuthorizationHandler,
                                    OpenshiftLocalizationConstant locale,
-                                   NotificationManager notificationManager) {
-        super(locale.disconnectAccountTitle());
+                                   NotificationManager notificationManager,
+                                   OpenshiftResources resources) {
+        super(locale.disconnectAccountTitle(), null, null, resources.disconnect());
         this.oAuthServiceClient = oAuthServiceClient;
         this.openshiftAuthorizationHandler = openshiftAuthorizationHandler;
         this.locale = locale;

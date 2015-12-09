@@ -19,6 +19,7 @@ import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
+import org.eclipse.che.ide.ext.openshift.client.OpenshiftResources;
 import javax.validation.constraints.NotNull;
 
 import java.util.Collections;
@@ -42,8 +43,13 @@ public class NewApplicationAction extends AbstractPerspectiveAction {
     public NewApplicationAction(final AnalyticsEventLogger eventLogger,
                                 final NewApplicationPresenter presenter,
                                 final AppContext appContext,
-                                OpenshiftLocalizationConstant locale) {
-        super(Collections.singletonList(PROJECT_PERSPECTIVE_ID), locale.newApplicationAction(), null, null, null);
+                                OpenshiftLocalizationConstant locale,
+                                OpenshiftResources resources) {
+        super(Collections.singletonList(PROJECT_PERSPECTIVE_ID),
+              locale.newApplicationAction(),
+              null,
+              null,
+              resources.deployNewApplication());
         this.eventLogger = eventLogger;
         this.presenter = presenter;
         this.appContext = appContext;
