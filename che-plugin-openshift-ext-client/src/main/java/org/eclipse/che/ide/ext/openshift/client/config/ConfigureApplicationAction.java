@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ext.openshift.client;
+package org.eclipse.che.ide.ext.openshift.client.config;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -18,8 +18,7 @@ import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentProject;
-import org.eclipse.che.ide.ext.openshift.client.oauth.OpenshiftAuthorizationHandler;
-import org.eclipse.che.ide.ext.openshift.client.url.ShowApplicationUrlPresenter;
+import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
@@ -28,41 +27,38 @@ import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConst
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
- * @author Sergii Leschenko
+ * Action for showing OpenShift application configs with ability
+ * to edit them.
+ *
+ * @author Anna Shumilova
  */
 @Singleton
-public class ShowApplicationUrlAction extends AbstractPerspectiveAction {
-    private final ShowApplicationUrlPresenter   presenter;
+public class ConfigureApplicationAction extends AbstractPerspectiveAction {
     private final AnalyticsEventLogger          eventLogger;
     private final AppContext                    appContext;
-    private final OpenshiftAuthorizationHandler authorizationHandler;
+    private final ConfigureApplicationPresenter presenter;
 
     @Inject
-    public ShowApplicationUrlAction(ShowApplicationUrlPresenter presenter,
-                                    AnalyticsEventLogger eventLogger,
-                                    AppContext appContext,
-                                    OpenshiftLocalizationConstant locale,
-                                    OpenshiftAuthorizationHandler authorizationHandler) {
-        super(Collections.singletonList(PROJECT_PERSPECTIVE_ID), locale.showApplicationUrlTooltip(), null, null, null);
-        this.presenter = presenter;
+    public ConfigureApplicationAction(AnalyticsEventLogger eventLogger,
+                                      AppContext appContext,
+                                      ConfigureApplicationPresenter presenter,
+                                      OpenshiftLocalizationConstant locale) {
+        super(Collections.singletonList(PROJECT_PERSPECTIVE_ID), locale.applicationConfigAction(), null, null, null);
         this.eventLogger = eventLogger;
         this.appContext = appContext;
-        this.authorizationHandler = authorizationHandler;
+        this.presenter = presenter;
     }
 
-    /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
         eventLogger.log(this);
-        presenter.showDialog();
+        presenter.show();
     }
 
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
         final CurrentProject currentProject = appContext.getCurrentProject();
-        event.getPresentation().setVisible(currentProject != null);
-        event.getPresentation().setEnabled(authorizationHandler.isLoggedIn()
-                                           && currentProject != null
-                                           && currentProject.getRootProject().getMixins().contains(OPENSHIFT_PROJECT_TYPE_ID));
+        event.getPresentation().setVisible(true);
+        event.getPresentation().setEnabled(currentProject != null && currentProject.getRootProject().getMixins().contains(OPENSHIFT_PROJECT_TYPE_ID));
     }
 }

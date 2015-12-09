@@ -33,13 +33,21 @@ public interface OpenshiftResources extends ClientBundle {
 
         String sectionSeparator();
 
+        String configList();
+
+        String configDescription();
+
         String choiceTitle();
 
         String textInput();
 
+        String textInputTitle();
+
         String projectApplicationBox();
 
         String warningLabel();
+
+        String goButton();
 
         String smallButton();
 

@@ -1,0 +1,58 @@
+<!--
+
+    Copyright (c) 2012-2015 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:with field='resources' type='org.eclipse.che.ide.ext.openshift.client.OpenshiftResources'/>
+    <ui:with field='locale' type='org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant'/>
+    <ui:style>
+        .content {
+            box-sizing: border-box;
+            width: 100%;
+            height: 100%;
+        }
+
+        .space {
+            margin-right: 5px;
+            float: left;
+        }
+
+        .input {
+            width: 20px;
+            min-width: 20px;
+        }
+
+        .label {
+            line-height: 22px;
+        }
+
+        .button {
+            margin-right: 5px;
+            float: left;
+            margin-top: 2px;
+        }
+
+    </ui:style>
+    <g:FlowPanel addStyleNames="{style.content}">
+        <g:Label text="{locale.applicationConfigsReplicationInfoTitle}" styleName="{resources.css.sectionTitle}"/>
+        <g:Label text="{locale.applicationConfigsReplicationDescription}" addStyleNames="{resources.css.configDescription}"/>
+        <g:FlowPanel width="100%" ui:field="replicasPanel">
+            <g:Label text="{locale.applicationConfigsReplicationNumber}" addStyleNames="{style.label} {style.space}"></g:Label>
+            <g:TextBox ui:field="replicas" readOnly="true" addStyleNames="{style.space} {style.input}"></g:TextBox>
+            <g:Button text="+" ui:field="addButton" title="Scale up" addStyleNames="{style.button} {resources.css.smallButton}"></g:Button>
+            <g:Button text="-" ui:field="minusButton" title="Scale down" addStyleNames="{style.button} {resources.css.smallButton}"></g:Button>
+        </g:FlowPanel>
+        <g:Label ui:field="noReplicasMessage" text="{locale.applicationConfigsNoReplicationCtrl}"></g:Label>
+    </g:FlowPanel>
+
+</ui:UiBinder>

@@ -9,7 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
 .sectionTitle {
-    font-size: largeLabel;
+    font-size: fontSize;
     font-weight: bold;
     margin-bottom: 15px;
 }
@@ -20,6 +20,14 @@
     width: 1px;
 }
 
+.configList {
+    border: 1px solid separatorColor;
+}
+
+.configDescription {
+    margin-bottom: 20px;
+}
+
 .choiceTitle {
     font-size: fontSize;
     width: 100%;
@@ -28,8 +36,15 @@
 
 .textInput {
     width: 100%;
+    height: 22px;
     box-sizing: border-box;
 }
+
+.textInputTitle {
+    float :left;
+    line-height: 22px;
+}
+
 
 .projectApplicationBox {
     border: 1px solid separatorColor;
@@ -37,6 +52,10 @@
 
 .warningLabel {
     font-weight: bold;
+}
+
+.goButton {
+    min-width: 40px;
 }
 
 .smallButton, .deployApplicationTable button {

@@ -15,6 +15,7 @@ import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.ext.openshift.client.build.StartBuildAction;
+import org.eclipse.che.ide.ext.openshift.client.config.ConfigureApplicationAction;
 import org.eclipse.che.ide.ext.openshift.client.deploy.LinkProjectWithExistingApplicationAction;
 import org.eclipse.che.ide.ext.openshift.client.deploy._new.NewApplicationAction;
 import org.eclipse.che.ide.ext.openshift.client.oauth.ConnectAccountAction;
@@ -50,11 +51,10 @@ public class OpenshiftExtension {
                               LinkProjectWithExistingApplicationAction deployToExistingApplicationAction,
                               NewApplicationAction newApplicationAction,
                               DeleteProjectAction deleteProjectAction,
-                              ShowApplicationUrlAction showApplicationUrlAction,
-                              ShowWebhooksAction showWebhooksAction,
                               StartBuildAction startBuildAction,
                               ImportApplicationAction importApplicationAction,
-                              UnlinkProjectAction unlinkProjectAction) {
+                              UnlinkProjectAction unlinkProjectAction,
+                              ConfigureApplicationAction configureApplicationAction) {
         openshiftResources.css().ensureInjected();
         DefaultActionGroup mainMenu = (DefaultActionGroup)actionManager.getAction(GROUP_MAIN_MENU);
 
@@ -91,16 +91,13 @@ public class OpenshiftExtension {
         actionManager.registerAction("importApplication", importApplicationAction);
         openshift.add(importApplicationAction);
 
-        actionManager.registerAction("showOpenshiftApplicationUrl", showApplicationUrlAction);
-        openshift.add(showApplicationUrlAction);
-
-        actionManager.registerAction("showOpenshiftWebhooks", showWebhooksAction);
-        openshift.add(showWebhooksAction);
-
         actionManager.registerAction("startOpenshiftBuild", startBuildAction);
         openshift.add(startBuildAction);
 
         actionManager.registerAction("deleteOpenshiftProject", deleteProjectAction);
         openshift.add(deleteProjectAction);
+
+        actionManager.registerAction("applicationConfig", configureApplicationAction);
+        openshift.add(configureApplicationAction);
     }
 }
