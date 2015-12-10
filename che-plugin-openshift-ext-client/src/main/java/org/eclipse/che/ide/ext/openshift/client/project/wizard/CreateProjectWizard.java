@@ -230,7 +230,15 @@ public class CreateProjectWizard extends AbstractWizard<NewApplicationRequest> {
 
         //set up application name labels in objects of template
         for (Object object : template.getObjects()) {
+            final JSONString kind = getJsonStringOrNull((JSONObject)object, "kind");
+
             JSONObject metadata = provideExistingJsonObject((JSONObject)object, "metadata");
+
+            //TODO Add setting of names of another kind of configs in https://jira.codenvycorp.com/browse/IDEX-3816
+            if (kind != null && "BuildConfig".equals(kind.stringValue())) {
+                metadata.put("name", new JSONString("${" + APPLICATION_PARAMETER_NAME + "}"));
+            }
+
             JSONObject labels = provideExistingJsonObject(metadata, "labels");
             labels.put(APPLICATION_LABEL_NAME, new JSONString("${" + APPLICATION_PARAMETER_NAME + "}"));
         }
@@ -248,5 +256,17 @@ public class CreateProjectWizard extends AbstractWizard<NewApplicationRequest> {
             return result;
         }
         return ((JSONObject)jsonValue);
+    }
+
+    /**
+     * Returns {@link JSONString} instance that is field with specified name of specified source object <br/>
+     * or null if it is absent or it is not instance of {@link JSONString}.
+     */
+    private JSONString getJsonStringOrNull(JSONObject source, String name) {
+        final JSONValue jsonValue = source.get(name);
+        if (jsonValue == null || !(jsonValue instanceof JSONString)) {
+            return null;
+        }
+        return ((JSONString)jsonValue);
     }
 }
