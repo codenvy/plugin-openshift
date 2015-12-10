@@ -99,13 +99,6 @@ public interface NewApplicationView extends View<NewApplicationView.ActionDelega
     Project getOpenShiftSelectedProject();
 
     /**
-     * Get new OpenShift application name.
-     *
-     * @return application name
-     */
-    String getApplicationName();
-
-    /**
      * Set name for new OpenShift application.
      *
      * @param name
@@ -190,6 +183,59 @@ public interface NewApplicationView extends View<NewApplicationView.ActionDelega
      */
     void showError(String error);
 
+    /**
+     * Show invalid OpenShift project name error message. Attach tooltip
+     * with {@code tooltipMessage}, if it is not null or empty, otherwise remove it.
+     *
+     * @param labelMessage
+     *         message to display on label
+     * @param tooltipMessage
+     *         message to display in tooltip
+     */
+    void showProjectNameError(String labelMessage, String tooltipMessage);
+
+    /** Hide invalid OpenShift project name error message. */
+    void hideProjectNameError();
+
+    /**
+     * Show invalid OpenShift application name error message. Attach tooltip
+     * with {@code tooltipMessage}, if it is not null or empty, otherwise remove it.
+     *
+     * @param labelMessage
+     *         message to display on label
+     * @param tooltipMessage
+     *         message to display in tooltip
+     */
+    void showApplicationNameError(String labelMessage, String tooltipMessage);
+
+    /** Hide invalid application name error message. */
+    void hideApplicationNameError();
+
+    /**
+     * Show invalid OpenShift environment variable error message.
+     *
+     * @param message
+     *         message to display
+     */
+    void showVariablesError(String message);
+
+    /** Hide invalid OpenShift environment variable error message. */
+    void hideVariablesError();
+
+    /**
+     * Show invalid OpenShift label name error message. Attach tooltip
+     * with {@code tooltipMessage}, if it is not null or empty, otherwise remove it.
+     *
+     * @param labelMessage
+     *         message to display on label
+     * @param tooltipMessage
+     *         message to display in tooltip
+     */
+    void showLabelsError(String labelMessage, String tooltipMessage);
+
+    /** Hide invalid OpenShift label name error message. */
+    void hideLabelsError();
+
     interface ActionDelegate {
 
         /**
@@ -201,14 +247,6 @@ public interface NewApplicationView extends View<NewApplicationView.ActionDelega
          * Handler event, when deploy button is clicked.
          */
         void onDeployClicked();
-
-        /**
-         * Handle event, when project name is changed.
-         *
-         * @param name
-         *         new project name
-         */
-        void onProjectNameChanged(String name);
 
         /**
          * Handler event, when application name is changed.
@@ -226,20 +264,7 @@ public interface NewApplicationView extends View<NewApplicationView.ActionDelega
          */
         void onImageStreamChanged(String stream);
 
-        /**
-         * Handler event, when OpenShift project is selected.
-         *
-         * @param project
-         *         selected project
-         */
-        void onActiveProjectChanged(Project project);
-
-        /**
-         * Handler event, when project mode is changed.
-         *
-         * @param mode
-         *         project mode
-         */
-        void onModeChanged(Mode mode);
+        /** Validate names on the form and enable buttons, depending on result */
+        void updateControls();
     }
 }

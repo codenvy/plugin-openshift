@@ -298,14 +298,32 @@ public interface OpenshiftLocalizationConstant extends Messages {
     @Key("deploy.project.success")
     String deployProjectSuccess(String project);
 
-    @Key("invalid.openshift.project.name.error")
-    String invalidOpenShiftProjectNameError();
+    @Key("invalid.project.name.error")
+    String invalidProjectNameError();
 
+    @Key("invalid.project.name.detail.error")
+    String invalidProjectNameDetailError();
+
+    @Key("invalid.application.name.error")
+    String invalidApplicationNameError();
+
+    @Key("invalid.application.name.detail.error")
+    String invalidApplicationNameDetailError();
+
+    @Key("invalid.variables.error")
+    String invalidVariablesError();
+
+    @Key("invalid.labels.error")
+    String invalidLabelsError();
+
+    @Key("invalid.labels.detail.error")
+    String invalidLabelsDetailError();
+    
     @Key("existing.project.name.error")
     String existingProjectNameError();
 
-    @Key("invalid.che.project.name.error")
-    String invalidCheProjectNameError();
+    @Key("existing.application.name.error")
+    String existingApplicationNameError();
 
     @Key("retrieving.projects.data")
     String retrievingProjectsData();

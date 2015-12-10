@@ -37,14 +37,29 @@ public interface ConfigureProjectView extends View<ConfigureProjectView.ActionDe
     /** @return new OpenShift project name. */
     String getOpenShiftNewProjectName();
 
-    /** Show invalid OpenShift project name error message. */
-    void showOsProjectNameError(String message);
+    /**
+     *  Show invalid OpenShift project name error message.
+     *
+     * @param labelMessage
+     *         message to display
+     * @param tooltipMessage
+     *         message to display in tooltip
+     */
+    void showOsProjectNameError(String labelMessage, String tooltipMessage);
 
     /** Hide invalid OpenShift project name error message. */
     void hideOsProjectNameError();
 
-    /** Show invalid Che project name error message. */
-    void showCheProjectNameError(String message);
+    /**
+     *  Show invalid Che project name error message.
+     *
+     * @param labelMessage
+     *         message to display
+     * @param tooltipMessage
+     *         message to display in tooltip
+     *
+     */
+    void showCheProjectNameError(String labelMessage, String tooltipMessage);
 
     /** Hide invalid Che project name error message. */
     void hideCheProjectNameError();

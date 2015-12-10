@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.openshift.client.importapp;
 
+import com.google.common.base.Strings;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
@@ -34,9 +35,11 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftResources;
 import org.eclipse.che.ide.ext.openshift.shared.dto.BuildConfig;
+import org.eclipse.che.ide.ui.Tooltip;
 import org.eclipse.che.ide.ui.list.CategoriesList;
 import org.eclipse.che.ide.ui.list.Category;
 import org.eclipse.che.ide.ui.list.CategoryRenderer;
+import org.eclipse.che.ide.ui.menu.PositionController;
 import org.eclipse.che.ide.ui.window.Window;
 
 import javax.validation.constraints.NotNull;
@@ -102,6 +105,8 @@ public class ImportApplicationViewImpl extends Window implements ImportApplicati
     private Button cancelButton;
 
     private CategoriesList buildConfigList;
+
+    private Tooltip projectNameErrorTooltip;
 
     private final Category.CategoryEventDelegate<BuildConfig> buildConfigDelegate =
             new Category.CategoryEventDelegate<BuildConfig>() {
@@ -293,15 +298,31 @@ public class ImportApplicationViewImpl extends Window implements ImportApplicati
     }
 
     @Override
-    public void showCheProjectNameError(@NotNull String message) {
+    public void showCheProjectNameError(@NotNull String labelMessage, String tooltipMessage) {
         projectName.addStyleName(openshiftResources.css().inputError());
-        projectNameErrorLabel.setText(message);
+        projectNameErrorLabel.setText(labelMessage);
+
+        if (projectNameErrorTooltip != null) {
+            projectNameErrorTooltip.destroy();
+        }
+
+        if (!Strings.isNullOrEmpty(tooltipMessage)) {
+            projectNameErrorTooltip = Tooltip.create((elemental.dom.Element)projectNameErrorLabel.getElement(),
+                                                     PositionController.VerticalAlign.MIDDLE,
+                                                     PositionController.HorizontalAlign.LEFT,
+                                                     tooltipMessage);
+            projectNameErrorTooltip.setShowDelayDisabled(false);
+        }
     }
 
     @Override
     public void hideCheProjectNameError() {
         projectName.removeStyleName(openshiftResources.css().inputError());
         projectNameErrorLabel.setText("");
+
+        if (projectNameErrorTooltip != null) {
+            projectNameErrorTooltip.destroy();
+        }
     }
 
     @Override

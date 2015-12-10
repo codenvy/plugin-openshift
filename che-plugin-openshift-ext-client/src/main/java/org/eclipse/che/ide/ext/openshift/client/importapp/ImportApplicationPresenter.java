@@ -34,13 +34,13 @@ import org.eclipse.che.ide.ext.openshift.client.OpenshiftServiceClient;
 import org.eclipse.che.ide.ext.openshift.client.ValidateAuthenticationPresenter;
 import org.eclipse.che.ide.ext.openshift.client.oauth.OpenshiftAuthenticator;
 import org.eclipse.che.ide.ext.openshift.client.oauth.OpenshiftAuthorizationHandler;
+import org.eclipse.che.ide.ext.openshift.client.util.OpenshiftValidator;
 import org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants;
 import org.eclipse.che.ide.ext.openshift.shared.dto.BuildConfig;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Project;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.Unmarshallable;
-import org.eclipse.che.ide.util.NameUtils;
 import org.eclipse.che.ide.websocket.rest.RequestCallback;
 
 import java.util.ArrayList;
@@ -380,11 +380,11 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
 
     private boolean isCheProjectNameValid(String projectName) {
         if (cheProjects.contains(projectName)) {
-            view.showCheProjectNameError(locale.existingProjectNameError());
+            view.showCheProjectNameError(locale.existingProjectNameError(), null);
             return false;
         }
-        if (!NameUtils.checkProjectName(projectName)) {
-            view.showCheProjectNameError(locale.invalidCheProjectNameError());
+        if (!OpenshiftValidator.isProjectNameValid(projectName)) {
+            view.showCheProjectNameError(locale.invalidProjectNameError(), locale.invalidProjectNameDetailError());
             return false;
         }
         view.hideCheProjectNameError();

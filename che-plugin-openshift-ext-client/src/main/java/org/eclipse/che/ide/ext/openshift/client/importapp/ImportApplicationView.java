@@ -137,8 +137,15 @@ public interface ImportApplicationView extends View<ImportApplicationView.Action
      */
     void setErrorMessage(String message);
 
-    /** Show invalid Che project name error message. */
-    void showCheProjectNameError(String message);
+    /**
+     * Show invalid Che project name error message.
+     *
+     * @param labelMessage
+     *         message to display
+     * @param tooltipMessage
+     *         message to display in tooltip
+     */
+    void showCheProjectNameError(String labelMessage, String tooltipMessage);
 
     /** Hide invalid Che project name error message. */
     void hideCheProjectNameError();

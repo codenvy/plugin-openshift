@@ -24,10 +24,10 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftServiceClient;
 import org.eclipse.che.ide.ext.openshift.client.dto.NewApplicationRequest;
+import org.eclipse.che.ide.ext.openshift.client.util.OpenshiftValidator;
 import org.eclipse.che.ide.ext.openshift.shared.dto.ObjectMeta;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Project;
 import org.eclipse.che.ide.ext.openshift.shared.dto.ProjectRequest;
-import org.eclipse.che.ide.util.NameUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -128,14 +128,11 @@ public class ConfigureProjectPresenter extends AbstractWizardPage<NewApplication
      */
     private boolean isOpenShiftProjectNameValid(String projectName) {
         if (openShiftProjects.contains(projectName)) {
-            view.showOsProjectNameError(locale.existingProjectNameError());
+            view.showOsProjectNameError(locale.existingProjectNameError(), null);
             return false;
         }
-        if (projectName.length() > 63
-            || projectName.length() < 2
-            || projectName.isEmpty()
-            || !projectName.matches("[a-z]([-a-z0-9]*[a-z0-9])?")) {
-            view.showOsProjectNameError(locale.invalidOpenShiftProjectNameError());
+        if (!OpenshiftValidator.isProjectNameValid(projectName)) {
+            view.showOsProjectNameError(locale.invalidProjectNameError(), null);
             return false;
         }
 
@@ -154,18 +151,11 @@ public class ConfigureProjectPresenter extends AbstractWizardPage<NewApplication
      */
     private boolean isCheProjectNameValid(String projectName) {
         if (cheProjects.contains(projectName)) {
-            view.showCheProjectNameError(locale.existingProjectNameError());
+            view.showCheProjectNameError(locale.existingProjectNameError(), null);
             return false;
         }
-        if (!NameUtils.checkProjectName(projectName)) {
-            view.showCheProjectNameError(locale.invalidCheProjectNameError());
-            return false;
-        }
-        if (projectName.length() > 63
-            || projectName.length() < 2
-            || projectName.isEmpty()
-            || !projectName.matches("[a-z]([-a-z0-9]*[a-z0-9])?")) {
-            view.showCheProjectNameError(locale.invalidOpenShiftProjectNameError());
+        if (!OpenshiftValidator.isProjectNameValid(projectName)) {
+            view.showCheProjectNameError(locale.invalidProjectNameError(), locale.invalidProjectNameDetailError());
             return false;
         }
         view.hideCheProjectNameError();

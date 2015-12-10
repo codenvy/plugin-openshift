@@ -14,9 +14,9 @@ import elemental.dom.Element;
 import elemental.html.SpanElement;
 import elemental.html.TableElement;
 
+import com.google.common.base.Strings;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -34,7 +34,9 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftResources;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Project;
+import org.eclipse.che.ide.ui.Tooltip;
 import org.eclipse.che.ide.ui.list.SimpleList;
+import org.eclipse.che.ide.ui.menu.PositionController;
 import org.eclipse.che.ide.util.dom.Elements;
 
 import javax.validation.constraints.NotNull;
@@ -96,6 +98,8 @@ public class ConfigureProjectViewImpl implements ConfigureProjectView {
 
     private ActionDelegate delegate;
     private DockPanel      widget;
+    private Tooltip        osProjectNameErrorTooltip;
+    private Tooltip        cheProjectNameErrorTooltip;
     private boolean        rewriteCheProjectName;
     private boolean        rewriteCheProjectDescription;
 
@@ -163,7 +167,7 @@ public class ConfigureProjectViewImpl implements ConfigureProjectView {
         osExistProjectListPanel.setVisible(!enabled);
         if (enabled) {
             delegate.onExistProjectSelected();
-        } else  {
+        } else {
             hideOsProjectNameError();
         }
     }
@@ -173,16 +177,16 @@ public class ConfigureProjectViewImpl implements ConfigureProjectView {
         if (rewriteCheProjectName) {
             cheProjectNameInput.setValue(osProjectNameInput.getValue(), true);
         }
-        
+
         delegate.onOpenShiftNewProjectNameChanged();
     }
 
     @UiHandler({"cheProjectNameInput"})
     public void onCheProjectNameChanged(KeyUpEvent event) {
         if (cheProjectNameInput.getValue().isEmpty()) {
-            rewriteCheProjectName=true;
+            rewriteCheProjectName = true;
         } else {
-            rewriteCheProjectName=false;
+            rewriteCheProjectName = false;
         }
         delegate.onCheNewProjectNameChanged();
     }
@@ -199,9 +203,9 @@ public class ConfigureProjectViewImpl implements ConfigureProjectView {
     @UiHandler({"cheProjectDescriptionInput"})
     public void onCheProjectDescriptionChanged(KeyUpEvent event) {
         if (cheProjectDescriptionInput.getValue().isEmpty()) {
-            rewriteCheProjectDescription=true;
+            rewriteCheProjectDescription = true;
         } else {
-            rewriteCheProjectDescription=false;
+            rewriteCheProjectDescription = false;
         }
         delegate.onCheDescriptionChanged();
     }
@@ -264,27 +268,59 @@ public class ConfigureProjectViewImpl implements ConfigureProjectView {
     }
 
     @Override
-    public void showOsProjectNameError(@NotNull String message) {
+    public void showOsProjectNameError(@NotNull String labelMessage, String tooltipMessage) {
         osProjectNameInput.addStyleName(openshiftResources.css().inputError());
-        osProjectNameErrorLabel.setText(message);
+        osProjectNameErrorLabel.setText(labelMessage);
+
+        if (osProjectNameErrorTooltip != null) {
+            osProjectNameErrorTooltip.destroy();
+        }
+
+        if (!Strings.isNullOrEmpty(tooltipMessage)) {
+            osProjectNameErrorTooltip = Tooltip.create((elemental.dom.Element)osProjectNameErrorLabel.getElement(),
+                                                       PositionController.VerticalAlign.MIDDLE,
+                                                       PositionController.HorizontalAlign.LEFT,
+                                                       tooltipMessage);
+            osProjectNameErrorTooltip.setShowDelayDisabled(false);
+        }
     }
 
     @Override
     public void hideOsProjectNameError() {
         osProjectNameInput.removeStyleName(openshiftResources.css().inputError());
         osProjectNameErrorLabel.setText("");
+
+        if (osProjectNameErrorTooltip != null) {
+            osProjectNameErrorTooltip.destroy();
+        }
     }
 
     @Override
-    public void showCheProjectNameError(@NotNull String message) {
+    public void showCheProjectNameError(@NotNull String labelMessage, String tooltipMessage) {
         cheProjectNameInput.addStyleName(openshiftResources.css().inputError());
-        cheProjectNameErrorLabel.setText(message);
+        cheProjectNameErrorLabel.setText(labelMessage);
+
+        if (cheProjectNameErrorTooltip != null) {
+            cheProjectNameErrorTooltip.destroy();
+        }
+
+        if (!Strings.isNullOrEmpty(tooltipMessage)) {
+            cheProjectNameErrorTooltip = Tooltip.create((elemental.dom.Element)cheProjectNameErrorLabel.getElement(),
+                                                        PositionController.VerticalAlign.MIDDLE,
+                                                        PositionController.HorizontalAlign.LEFT,
+                                                        tooltipMessage);
+            cheProjectNameErrorTooltip.setShowDelayDisabled(false);
+        }
     }
 
     @Override
     public void hideCheProjectNameError() {
         cheProjectNameInput.removeStyleName(openshiftResources.css().inputError());
         cheProjectNameErrorLabel.setText("");
+
+        if (cheProjectNameErrorTooltip != null) {
+            cheProjectNameErrorTooltip.destroy();
+        }
     }
 
     @Override

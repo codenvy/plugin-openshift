@@ -81,6 +81,8 @@ public interface OpenshiftResources extends ClientBundle {
 
         String deployApplicationTable();
 
+        String deployApplicationTableError();
+
         String templateSection();
 
         String templateSectionTitle();
@@ -92,6 +94,8 @@ public interface OpenshiftResources extends ClientBundle {
         String templateSectionTags();
 
         String labelErrorPosition();
+
+        String labelErrorPositionTable();
 
         String loadingCategoriesLabel();
 

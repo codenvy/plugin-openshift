@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.openshift.client.deploy._new;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.gwt.core.client.JsArrayMixed;
 import com.google.gwt.json.client.JSONObject;
@@ -38,11 +37,13 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.collections.Jso;
 import org.eclipse.che.ide.collections.js.JsoArray;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.ext.openshift.client.deploy.ApplicationManager;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftServiceClient;
 import org.eclipse.che.ide.ext.openshift.client.ValidateAuthenticationPresenter;
 import org.eclipse.che.ide.ext.openshift.client.oauth.OpenshiftAuthenticator;
 import org.eclipse.che.ide.ext.openshift.client.oauth.OpenshiftAuthorizationHandler;
+import org.eclipse.che.ide.ext.openshift.client.util.OpenshiftValidator;
 import org.eclipse.che.ide.ext.openshift.shared.dto.BuildConfig;
 import org.eclipse.che.ide.ext.openshift.shared.dto.BuildConfigSpec;
 import org.eclipse.che.ide.ext.openshift.shared.dto.BuildOutput;
@@ -77,8 +78,10 @@ import org.eclipse.che.ide.ext.openshift.shared.dto.WebHookTrigger;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
+import org.eclipse.che.ide.util.Pair;
 
 import javax.validation.constraints.NotNull;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -116,7 +119,9 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
     private final ProjectServiceClient          projectService;
     private final EventBus                      eventBus;
     private final NotificationManager           notificationManager;
+    private final ApplicationManager            applicationManager;
     private       List<Project>                 osProjects;
+    private       List<Pair<String, String>>    osApplications;
     private       List<Remote>                  projectRemotes;
     private       List<ImageStream>             osImageStreams;
     private       ImageStreamTag                osActiveStreamTag;
@@ -136,6 +141,7 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
                                    ProjectServiceClient projectService,
                                    EventBus eventBus,
                                    NotificationManager notificationManager,
+                                   ApplicationManager applicationManager,
                                    OpenshiftAuthenticator openshiftAuthenticator,
                                    OpenshiftAuthorizationHandler openshiftAuthorizationHandler) {
         super(openshiftAuthenticator, openshiftAuthorizationHandler, locale, notificationManager);
@@ -150,20 +156,28 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
         this.projectService = projectService;
         this.eventBus = eventBus;
         this.notificationManager = notificationManager;
+        this.applicationManager = applicationManager;
         view.setDelegate(this);
+        osProjects = new ArrayList<>();
+        osApplications = new ArrayList<>();
     }
 
     private void reset() {
-        osProjects = null;
+        osProjects.clear();
+        osApplications.clear();
         osImageStreams = null;
-        osActiveStreamTag = null;
         osAppName = null;
+        osActiveStreamTag = null;
         projectRemotes = null;
 
         view.setDeployButtonEnabled(false);
         view.setLabels(Collections.<KeyValue>emptyList());
         view.setEnvironmentVariables(Collections.<KeyValue>emptyList());
         view.setApplicationName(null);
+        view.hideApplicationNameError();
+        view.hideProjectNameError();
+        view.hideLabelsError();
+        view.hideVariablesError();
         view.setOpenShiftProjectName(null);
         view.setOpenShiftProjectDisplayName(null);
         view.setOpenShiftProjectDescription(null);
@@ -224,8 +238,8 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
                 if (projects == null || projects.isEmpty()) {
                     return;
                 }
-
-                osProjects = unmodifiableList(projects);
+                osProjects.clear();
+                osProjects.addAll(unmodifiableList(projects));
                 view.setProjects(osProjects);
             }
         }).then(osService.getImageStreams("openshift", null).then(new Operation<List<ImageStream>>() {
@@ -248,6 +262,13 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
                 view.setLabels(Collections.<KeyValue>emptyList());
             }
         }));
+        applicationManager.getApplicationNamesByNamespaces().then(new Operation<List<Pair<String, String>>>() {
+            @Override
+            public void apply(List<Pair<String, String>> arg) throws OperationException {
+                osApplications.clear();
+                osApplications.addAll(arg);
+            }
+        });
     }
 
     @Override
@@ -371,22 +392,6 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
         });
     }
 
-    @Override
-    public void onProjectNameChanged(String name) {
-        validate();
-    }
-
-    @Override
-    public void onApplicationNameChanged(String name) {
-        osAppName = name;
-        validate();
-    }
-
-    @Override
-    public void onActiveProjectChanged(Project project) {
-        validate();
-    }
-
     private Promise<ImageStreamTag> setActiveImageTag(final ImageStream stream) {
         return osService.getImageStreamTag("openshift", stream.getMetadata().getName(), "latest").thenPromise(
                 new Function<ImageStreamTag, Promise<ImageStreamTag>>() {
@@ -411,6 +416,12 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
     }
 
     @Override
+    public void onApplicationNameChanged(String name) {
+        osAppName = name;
+        updateControls();
+    }
+
+    @Override
     public void onImageStreamChanged(String stream) {
         for (ImageStream osStream : osImageStreams) {
             if (stream.equals(osStream.getMetadata().getName())) {
@@ -418,31 +429,98 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
                 break;
             }
         }
-        validate();
+        updateControls();
     }
 
-    @Override
-    public void onModeChanged(NewApplicationView.Mode mode) {
-        validate();
-    }
-
-    private void validate() {
-        boolean valid = true;
-        String osProjectName = view.getOpenShiftProjectName();
-        //TODO add check for application name
-
+    private boolean isApplicationNameValid() {
+        if (!OpenshiftValidator.isApplicationNameValid(osAppName)) {
+            view.showApplicationNameError(locale.invalidApplicationNameError(), locale.invalidApplicationNameDetailError());
+            return false;
+        }
         if (view.getMode() == CREATE_NEW_PROJECT) {
-            //TODO check existing OpenShift projects
-            if (Strings.isNullOrEmpty(osProjectName) || !osProjectName.matches("[a-z0-9]([-a-z0-9]*[a-z0-9])?")) {
-                valid = false;
+            for (Pair<String, String> pair : osApplications) {
+                if (pair.getFirst().equals(view.getOpenShiftProjectName()) && pair.getSecond().equals(osAppName)) {
+                    view.showApplicationNameError(locale.existingApplicationNameError(), null);
+                    return false;
+                }
+            }
+        } else if (view.getMode() == SELECT_EXISTING_PROJECT
+                   && view.getOpenShiftSelectedProject() != null) {
+            for (Pair<String, String> pair : osApplications) {
+                if (pair.getFirst().equals(view.getOpenShiftSelectedProject().getMetadata().getName())
+                    && pair.getSecond().equals(osAppName)) {
+                    view.showApplicationNameError(locale.existingApplicationNameError(), null);
+                    return false;
+                }
+            }
+        }
+        view.hideApplicationNameError();
+        return true;
+    }
+
+    private boolean isProjectNameValid() {
+        String osProjectName = view.getOpenShiftProjectName();
+        if (view.getMode() == CREATE_NEW_PROJECT) {
+            if (!OpenshiftValidator.isProjectNameValid(osProjectName)) {
+                view.showProjectNameError(locale.invalidProjectNameError(), locale.invalidProjectNameDetailError());
+                return false;
+            }
+            for (Project project : osProjects) {
+                if (project.getMetadata().getName().equals(osProjectName)) {
+                    view.showProjectNameError(locale.existingProjectNameError(), null);
+                    return false;
+                }
             }
         } else if (view.getMode() == SELECT_EXISTING_PROJECT) {
             if (view.getOpenShiftSelectedProject() == null) {
-                valid = false;
+                return false;
             }
         }
+        view.hideProjectNameError();
+        return true;
+    }
 
-        view.setDeployButtonEnabled(valid && view.getActiveImage() != null && view.getApplicationName() != null);
+    private boolean isVariablesListValid() {
+        List<KeyValue> variables = view.getEnvironmentVariables();
+        if (variables.isEmpty()) {
+            view.hideVariablesError();
+            return true;
+        }
+        for (KeyValue keyValue : variables) {
+            if (!OpenshiftValidator.isEnvironmentVariableNameValid(keyValue.getKey())) {
+                view.showVariablesError(locale.invalidVariablesError());
+                return false;
+            }
+        }
+        view.hideVariablesError();
+        return true;
+    }
+
+    private boolean isLabelListValid() {
+        List<KeyValue> labels = view.getLabels();
+        if (labels.isEmpty()) {
+            view.hideLabelsError();
+            return true;
+        }
+        for (KeyValue keyValue : labels) {
+            if (!OpenshiftValidator.isLabelNameValid(keyValue.getKey())
+                || !OpenshiftValidator.isLabelValueValid(keyValue.getValue())) {
+                view.showLabelsError(locale.invalidLabelsError(), locale.invalidLabelsDetailError());
+                return false;
+            }
+        }
+        view.hideLabelsError();
+        return true;
+    }
+
+    @Override
+    public void updateControls() {
+        view.setDeployButtonEnabled(isApplicationNameValid()
+                                    & isProjectNameValid()
+                                    & isVariablesListValid()
+                                    & isLabelListValid()
+                                    & osImageStreams != null
+                                    & view.getActiveImage() != null);
     }
 
     private ImageStream generateImageStream(String namespace, Map<String, String> labels) {
