@@ -161,7 +161,7 @@ public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthent
     @Override
     public void onLinkApplicationClicked() {
         final ProjectConfig rootProject = appContext.getCurrentProject().getRootProject();
-        final String applicationName = rootProject.getName();
+        final String applicationName = selectedBuildConfig.getMetadata().getName();
         applicationManager.findApplication(selectedBuildConfig)
                           .thenPromise(new Function<Application, Promise<Application>>() {
                               @Override
