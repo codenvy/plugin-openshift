@@ -34,10 +34,13 @@ import org.eclipse.che.ide.ext.openshift.shared.dto.NamedTagEventList;
 import org.eclipse.che.ide.ext.openshift.shared.dto.ObjectReference;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Route;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Service;
+import org.eclipse.che.ide.ext.openshift.shared.dto.Project;
 import org.eclipse.che.ide.util.Pair;
 
 import javax.inject.Inject;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +48,7 @@ import java.util.Set;
 
 /**
  * @author Sergii Leschenko
+ * @author Michail Kuznyetsov
  */
 public class ApplicationManager {
     private static final String APPLICATION_LABEL_NAME = "application";
@@ -57,6 +61,60 @@ public class ApplicationManager {
                               OpenshiftLocalizationConstant locale) {
         this.openShiftClient = openShiftClient;
         this.locale = locale;
+    }
+
+    /**
+     * @return a list of pairs, where first is namespace,
+     * second - application name
+     */
+    public Promise<List<Pair<String, String>>> getApplicationNamesByNamespaces() {
+        final Executor.ExecutorBody<List<Pair<String, String>>> body = new Executor.ExecutorBody<List<Pair<String, String>>>() {
+            @Override
+            public void apply(final ResolveFunction<List<Pair<String, String>>> resolve, final RejectFunction reject) {
+                openShiftClient.getProjects().then(new Operation<List<Project>>() {
+                    @Override
+                    public void apply(List<Project> projects) throws OperationException {
+                        List<String> namespaces = new ArrayList<>();
+                        for (Project project : projects) {
+                            namespaces.add(project.getMetadata().getName());
+                        }
+
+                        if (namespaces.isEmpty()) {
+                            resolve.apply(Collections.<Pair<String, String>>emptyList());
+                            return;
+                        }
+
+                        final List<Pair<String, String>> result = new ArrayList<>();
+                        List<Promise> promises = new ArrayList<>();
+                        for (final String namespace : namespaces) {
+                            promises.add(openShiftClient.getBuildConfigs(namespace).then(new Operation<List<BuildConfig>>() {
+                                @Override
+                                public void apply(List<BuildConfig> buildConfigs) throws OperationException {
+                                    if (buildConfigs != null && !buildConfigs.isEmpty()) {
+                                        for (BuildConfig buildConfig : buildConfigs) {
+                                            result.add(new Pair<>(namespace, buildConfig.getMetadata().getName()));
+                                        }
+                                    }
+                                }
+                            }));
+                        }
+                        Promises.all(promises.toArray(new Promise[promises.size()])).then(new Operation() {
+                            @Override
+                            public void apply(Object arg) throws OperationException {
+                                resolve.apply(result);
+                            }
+                        }).catchError(new Operation<PromiseError>() {
+                            @Override
+                            public void apply(PromiseError arg) throws OperationException {
+                                reject.apply(arg);
+                            }
+                        });
+                    }
+                });
+            }
+        };
+        final Executor<List<Pair<String, String>>> executor = Executor.create(body);
+        return Promises.create(executor);
     }
 
     /**

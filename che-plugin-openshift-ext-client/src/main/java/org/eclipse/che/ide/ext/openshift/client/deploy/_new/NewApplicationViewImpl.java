@@ -14,11 +14,16 @@ import elemental.dom.Element;
 import elemental.html.SpanElement;
 import elemental.html.TableElement;
 
+import com.google.common.base.Predicate;
+import com.google.common.base.Strings;
 import com.google.gwt.cell.client.ButtonCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextInputCell;
+import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.BrowserEvents;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -36,7 +41,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextArea;
@@ -48,10 +52,13 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftResources;
+import org.eclipse.che.ide.ext.openshift.client.util.OpenshiftValidator;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Project;
+import org.eclipse.che.ide.ui.Tooltip;
 import org.eclipse.che.ide.ui.cellview.CellTableResources;
 import org.eclipse.che.ide.ui.list.SimpleList;
 import org.eclipse.che.ide.ui.listbox.CustomListBox;
+import org.eclipse.che.ide.ui.menu.PositionController;
 import org.eclipse.che.ide.ui.window.Window;
 import org.eclipse.che.ide.util.dom.Elements;
 
@@ -78,6 +85,9 @@ public class NewApplicationViewImpl extends Window implements NewApplicationView
     TextBox projectName;
 
     @UiField
+    Label projectNameErrorLabel;
+
+    @UiField
     TextBox displayName;
 
     @UiField
@@ -85,6 +95,9 @@ public class NewApplicationViewImpl extends Window implements NewApplicationView
 
     @UiField
     TextBox applicationName;
+
+    @UiField
+    Label applicationNameErrorLabel;
 
     @UiField
     RadioButton createNewProject;
@@ -112,10 +125,16 @@ public class NewApplicationViewImpl extends Window implements NewApplicationView
 
     private ListDataProvider<KeyValue> environmentVariablesProvider;
 
+    @UiField
+    Label variablesErrorLabel;
+
     @UiField(provided = true)
     CellTable<KeyValue> environmentLabels;
 
     private ListDataProvider<KeyValue> environmentLabelsProvider;
+
+    @UiField
+    Label labelsErrorLabel;
 
     private SimpleList<Project> projectsList;
 
@@ -131,6 +150,10 @@ public class NewApplicationViewImpl extends Window implements NewApplicationView
 
     private ActionDelegate delegate;
 
+    private Tooltip projectNameErrorTooltip;
+    private Tooltip applicationNameErrorTooltip;
+    private Tooltip labelsErrorTooltip;
+
     @Inject
     public NewApplicationViewImpl(org.eclipse.che.ide.Resources coreResources, OpenshiftResources resources,
                                   CellTableResources cellTableResources,
@@ -143,11 +166,37 @@ public class NewApplicationViewImpl extends Window implements NewApplicationView
         setTitle(locale.deployProjectWindowTitle());
         getWidget().getElement().getStyle().setPadding(0, Style.Unit.PX);
 
-        environmentVariablesProvider = new ListDataProvider<KeyValue>();
-        environmentVariables = createCellTable(cellTableResources, environmentVariablesProvider);
+        environmentVariablesProvider = new ListDataProvider<>();
+        environmentVariables = createCellTable(cellTableResources,
+                                               environmentVariablesProvider,
+                                               new Predicate<String>() {
+                                                   @Override
+                                                   public boolean apply(String input) {
+                                                       return OpenshiftValidator.isEnvironmentVariableNameValid(input);
+                                                   }
+                                               },
+                                               new Predicate<String>() {
+                                                   @Override
+                                                   public boolean apply(String input) {
+                                                       return true;
+                                                   }
+                                               });
 
-        environmentLabelsProvider = new ListDataProvider<KeyValue>();
-        environmentLabels = createCellTable(cellTableResources, environmentLabelsProvider);
+        environmentLabelsProvider = new ListDataProvider<>();
+        environmentLabels = createCellTable(cellTableResources,
+                                            environmentLabelsProvider,
+                                            new Predicate<String>() {
+                                                @Override
+                                                public boolean apply(String input) {
+                                                    return OpenshiftValidator.isLabelNameValid(input);
+                                                }
+                                            },
+                                            new Predicate<String>() {
+                                                @Override
+                                                public boolean apply(String input) {
+                                                    return OpenshiftValidator.isLabelValueValid(input);
+                                                }
+                                            });
 
         setWidget(uiBinder.createAndBindUi(this));
 
@@ -196,7 +245,7 @@ public class NewApplicationViewImpl extends Window implements NewApplicationView
                                      public void onListItemClicked(Element listItemBase, Project itemData) {
                                          if (choseExistProject.getValue()) {
                                              projectsList.getSelectionModel().setSelectedItem(itemData);
-                                             delegate.onActiveProjectChanged(itemData);
+                                             delegate.updateControls();
                                          }
                                      }
 
@@ -207,12 +256,41 @@ public class NewApplicationViewImpl extends Window implements NewApplicationView
                                  });
     }
 
-    private CellTable createCellTable(CellTableResources cellTableResources, final ListDataProvider<KeyValue> dataProvider) {
-        CellTable<KeyValue> table = new CellTable<KeyValue>(50, cellTableResources);
+    private CellTable<KeyValue> createCellTable(CellTableResources cellTableResources,
+                                                final ListDataProvider<KeyValue> dataProvider,
+                                                final Predicate<String> keyValidator,
+                                                final Predicate<String> valueValidator) {
+        final CellTable<KeyValue> table = new CellTable<>(50, cellTableResources);
         table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
         dataProvider.addDataDisplay(table);
 
-        final Column<KeyValue, String> nameColumn = new Column<KeyValue, String>(new TextInputCell()) {
+        TextInputCell keyCell = new TextInputCell() {
+            @Override
+            public void onBrowserEvent(Context context, com.google.gwt.dom.client.Element parent, String value,
+                                       NativeEvent event, ValueUpdater<String> valueUpdater) {
+                super.onBrowserEvent(context, parent, value, event, valueUpdater);
+                if (event.getType().equals(BrowserEvents.KEYUP)) {
+                    String newValue = getInputElement(parent).getValue();
+                    if (!keyValidator.apply(newValue)) {
+                        parent.getParentElement().addClassName(resources.css().deployApplicationTableError());
+                    } else {
+                        parent.getParentElement().removeClassName(resources.css().deployApplicationTableError());
+                    }
+                    valueUpdater.update(newValue);
+                    delegate.updateControls();
+                }
+            }
+        };
+
+        Column<KeyValue, String> nameColumn = new Column<KeyValue, String>(keyCell) {
+            @Override
+            public String getCellStyleNames(Cell.Context context, KeyValue object) {
+                if (!keyValidator.apply(object.getKey())) {
+                    return resources.css().deployApplicationTableError();
+                }
+                return null;
+            }
+
             @Override
             public String getValue(KeyValue object) {
                 return object.getKey();
@@ -226,8 +304,33 @@ public class NewApplicationViewImpl extends Window implements NewApplicationView
             }
         });
 
+        TextInputCell valueCell = new TextInputCell() {
+            @Override
+            public void onBrowserEvent(Cell.Context context, com.google.gwt.dom.client.Element parent, String value,
+                                       NativeEvent event, ValueUpdater<String> valueUpdater) {
+                super.onBrowserEvent(context, parent, value, event, valueUpdater);
+                if (event.getType().equals(BrowserEvents.KEYUP)) {
+                    String newValue = getInputElement(parent).getValue();
+                    if (!valueValidator.apply(newValue)) {
+                        parent.getParentElement().addClassName(resources.css().deployApplicationTableError());
+                    } else {
+                        parent.getParentElement().removeClassName(resources.css().deployApplicationTableError());
+                    }
+                    valueUpdater.update(newValue);
+                    delegate.updateControls();
+                }
+            }
+        };
 
-        Column<KeyValue, String> valueColumn = new Column<KeyValue, String>(new TextInputCell()) {
+        Column<KeyValue, String> valueColumn = new Column<KeyValue, String>(valueCell) {
+            @Override
+            public String getCellStyleNames(Cell.Context context, KeyValue object) {
+                if (!valueValidator.apply(object.getValue())) {
+                    return resources.css().deployApplicationTableError();
+                }
+                return null;
+            }
+
             @Override
             public String getValue(KeyValue object) {
                 return object.getValue();
@@ -258,6 +361,7 @@ public class NewApplicationViewImpl extends Window implements NewApplicationView
             @Override
             public void update(int index, KeyValue object, String value) {
                 dataProvider.getList().remove(object);
+                delegate.updateControls();
             }
         });
 
@@ -278,27 +382,24 @@ public class NewApplicationViewImpl extends Window implements NewApplicationView
         this.delegate = delegate;
     }
 
-    @Override
-    public String getApplicationName() {
-        return applicationName.getValue();
-    }
-
-    @Override
-    public void setApplicationName(String name) {
-        applicationName.setValue(name);
-        delegate.onApplicationNameChanged(name);
-    }
-
     @UiHandler("addVariableButton")
     public void onAddVariable(ClickEvent event) {
         environmentVariablesProvider.getList().add(0, new KeyValue("", ""));
         environmentVariablesProvider.refresh();
+        delegate.updateControls();
     }
 
     @UiHandler("addLabelButton")
     public void onAddLabel(ClickEvent event) {
         environmentLabelsProvider.getList().add(0, new KeyValue("", ""));
         environmentLabelsProvider.refresh();
+        delegate.updateControls();
+    }
+
+    @Override
+    public void setApplicationName(String name) {
+        applicationName.setValue(name);
+        delegate.onApplicationNameChanged(name);
     }
 
     @UiHandler("applicationName")
@@ -314,12 +415,12 @@ public class NewApplicationViewImpl extends Window implements NewApplicationView
     @Override
     public void setOpenShiftProjectName(String name) {
         projectName.setValue(name);
-        delegate.onProjectNameChanged(name);
+        delegate.updateControls();
     }
 
     @UiHandler("projectName")
     public void onProjectNameChanged(KeyUpEvent event) {
-        delegate.onProjectNameChanged(projectName.getValue());
+        delegate.updateControls();
     }
 
     @Override
@@ -358,7 +459,6 @@ public class NewApplicationViewImpl extends Window implements NewApplicationView
         }
     }
 
-
     @Override
     public void setImages(List<String> images) {
         if (images == null || images.isEmpty()) {
@@ -392,8 +492,7 @@ public class NewApplicationViewImpl extends Window implements NewApplicationView
             projectsList.getSelectionModel().setSelectedItem(0);
         }
 
-        delegate.onModeChanged(createNewProject.getValue() ? CREATE_NEW_PROJECT : SELECT_EXISTING_PROJECT);
-        delegate.onActiveProjectChanged(projectsList.getSelectionModel().getSelectedItem());
+        delegate.updateControls();
     }
 
     @UiHandler("images")
@@ -449,6 +548,96 @@ public class NewApplicationViewImpl extends Window implements NewApplicationView
     @Override
     public void showError(String error) {
         //TODO display error on window
+    }
+
+    @Override
+    public void showProjectNameError(String labelMessage, String tooltipMessage) {
+        projectName.addStyleName(resources.css().inputError());
+        projectNameErrorLabel.setText(labelMessage);
+
+        if (projectNameErrorTooltip != null) {
+            projectNameErrorTooltip.destroy();
+            return;
+        }
+
+        if (!Strings.isNullOrEmpty(tooltipMessage)) {
+            projectNameErrorTooltip = Tooltip.create((elemental.dom.Element)projectNameErrorLabel.getElement(),
+                                                     PositionController.VerticalAlign.MIDDLE,
+                                                     PositionController.HorizontalAlign.LEFT,
+                                                     tooltipMessage);
+            projectNameErrorTooltip.setShowDelayDisabled(false);
+        }
+    }
+
+    @Override
+    public void hideProjectNameError() {
+        projectName.removeStyleName(resources.css().inputError());
+        projectNameErrorLabel.setText("");
+
+        if (projectNameErrorTooltip != null) {
+            projectNameErrorTooltip.destroy();
+        }
+    }
+
+    @Override
+    public void showApplicationNameError(String labelMessage, String tooltipMessage) {
+        applicationName.addStyleName(resources.css().inputError());
+        applicationNameErrorLabel.setText(labelMessage);
+
+        if (projectNameErrorTooltip != null) {
+            applicationNameErrorTooltip.destroy();
+        }
+
+        if (!Strings.isNullOrEmpty(tooltipMessage)) {
+            applicationNameErrorTooltip = Tooltip.create((elemental.dom.Element)applicationNameErrorLabel.getElement(),
+                                                         PositionController.VerticalAlign.MIDDLE,
+                                                         PositionController.HorizontalAlign.LEFT,
+                                                         tooltipMessage);
+            applicationNameErrorTooltip.setShowDelayDisabled(false);
+        }
+
+    }
+
+    @Override
+    public void hideApplicationNameError() {
+        applicationName.removeStyleName(resources.css().inputError());
+        applicationNameErrorLabel.setText("");
+
+        if (applicationNameErrorTooltip != null) {
+            applicationNameErrorTooltip.destroy();
+        }
+    }
+
+    @Override
+    public void showVariablesError(String message) {
+        variablesErrorLabel.setText(message);
+    }
+
+    @Override
+    public void hideVariablesError() {
+        variablesErrorLabel.setText("");
+    }
+
+    @Override
+    public void showLabelsError(String labelMessage, String tooltipMessage) {
+        labelsErrorLabel.setText(labelMessage);
+
+        if (labelsErrorTooltip != null) {
+            labelsErrorTooltip.destroy();
+        }
+
+        if (!Strings.isNullOrEmpty(tooltipMessage)) {
+            labelsErrorTooltip = Tooltip.create((elemental.dom.Element)labelsErrorLabel.getElement(),
+                                                PositionController.VerticalAlign.TOP,
+                                                PositionController.HorizontalAlign.MIDDLE,
+                                                tooltipMessage);
+            labelsErrorTooltip.setShowDelayDisabled(false);
+        }
+    }
+
+    @Override
+    public void hideLabelsError() {
+        labelsErrorLabel.setText("");
     }
 
     @Override

@@ -51,15 +51,20 @@
                 <g:Label text="{locale.deployProjectWindowApplicationSection}" styleName="{resources.css.sectionTitle}"/>
                 <g:Label text="{locale.deployProjectWindowApplicationName}"/>
                 <g:TextBox ui:field="applicationName" addStyleNames="{resources.css.textInput}"/>
+                <g:Label ui:field="applicationNameErrorLabel" width="100%" wordWrap="true" addStyleNames="{resources.css.labelErrorPosition}"/>
                 <g:FlowPanel height="24px" addStyleNames="{style.spacing20}">
                     <g:RadioButton name="createMode" text="{locale.deployProjectWindowCreateOpenShiftProject}" ui:field="createNewProject"/>
                 </g:FlowPanel>
                 <g:Label text="{locale.deployProjectWindowProjectName}" addStyleNames="{style.spacing5}"/>
                 <g:TextBox ui:field="projectName" addStyleNames="{resources.css.textInput}"/>
+                <!--<g:FlowPanel ui:field="variablesErrorPanel">-->
+                    <g:Label ui:field="projectNameErrorLabel" width="100%" wordWrap="true" addStyleNames="{resources.css.labelErrorPosition}"/>
+                <!--</g:FlowPanel>-->
                 <g:Label text="{locale.deployProjectWindowDisplayName}" addStyleNames="{style.spacing5}"/>
                 <g:TextBox ui:field="displayName" addStyleNames="{resources.css.textInput}"/>
                 <g:Label text="{locale.deployProjectWindowDescription}" addStyleNames="{style.spacing5} {style.description}"/>
                 <g:TextArea ui:field="description" addStyleNames="{resources.css.textInput}"/>
+
                 <g:FlowPanel height="24px" addStyleNames="{style.spacing20}">
                     <g:RadioButton name="createMode" text="{locale.deployProjectWindowChooseExistingProject}" ui:field="choseExistProject"/>
                 </g:FlowPanel>
@@ -77,6 +82,10 @@
                     <g:north size="24">
                         <g:FlowPanel width="100%">
                             <g:Label text="{locale.deployProjectWindowVariablesSection}" addStyleNames="{style.floatLeft}"></g:Label>
+                            <g:FlowPanel ui:field="variablesErrorPanel">
+                                <g:Label ui:field="variablesErrorLabel" width="100%" wordWrap="true"
+                                         addStyleNames="{resources.css.labelErrorPosition} {resources.css.labelErrorPositionTable}"/>
+                            </g:FlowPanel>
                             <g:Button text="+" ui:field="addVariableButton" addStyleNames="{style.addButton} {resources.css.smallButton}"
                                       title="{locale.deployProjectWindowVariablesAddTooltip}"></g:Button>
                         </g:FlowPanel>
@@ -94,6 +103,8 @@
                     <g:north size="24">
                         <g:FlowPanel width="100%">
                             <g:Label text="{locale.deployProjectWindowLabelsSection}" addStyleNames="{style.floatLeft}"></g:Label>
+                            <g:Label ui:field="labelsErrorLabel" width="100%" wordWrap="true"
+                                     addStyleNames="{resources.css.labelErrorPosition} {resources.css.labelErrorPositionTable}"/>
                             <g:Button text="+" ui:field="addLabelButton" addStyleNames="{style.addButton} {resources.css.smallButton}"
                                       title="{locale.deployProjectWindowLabelsAddTooltip}"></g:Button>
                         </g:FlowPanel>

@@ -70,6 +70,10 @@
     border: 1px solid separatorColor;
 }
 
+.deployApplicationTableError input {
+    border-bottom: 1px solid errorColor;
+}
+
 .templateSection {
     border-bottom: 1px solid separatorColor;
     padding: 10px 8px;
@@ -99,6 +103,11 @@
     color: errorEventColor;
     font-weight: lighter;
     float: left;
+}
+
+.labelErrorPositionTable {
+    width: auto !important;
+    margin-left: 20px;
 }
 
 .loadingCategoriesLabel {
