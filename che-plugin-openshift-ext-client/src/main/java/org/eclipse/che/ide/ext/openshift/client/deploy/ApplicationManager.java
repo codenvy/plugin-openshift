@@ -90,10 +90,8 @@ public class ApplicationManager {
                             promises.add(openShiftClient.getBuildConfigs(namespace).then(new Operation<List<BuildConfig>>() {
                                 @Override
                                 public void apply(List<BuildConfig> buildConfigs) throws OperationException {
-                                    if (buildConfigs != null && !buildConfigs.isEmpty()) {
-                                        for (BuildConfig buildConfig : buildConfigs) {
-                                            result.add(new Pair<>(namespace, buildConfig.getMetadata().getName()));
-                                        }
+                                    for (BuildConfig buildConfig : buildConfigs) {
+                                        result.add(new Pair<>(namespace, buildConfig.getMetadata().getName()));
                                     }
                                 }
                             }));
@@ -109,6 +107,11 @@ public class ApplicationManager {
                                 reject.apply(arg);
                             }
                         });
+                    }
+                }).catchError(new Operation<PromiseError>() {
+                    @Override
+                    public void apply(PromiseError arg) throws OperationException {
+                        reject.apply(arg);
                     }
                 });
             }

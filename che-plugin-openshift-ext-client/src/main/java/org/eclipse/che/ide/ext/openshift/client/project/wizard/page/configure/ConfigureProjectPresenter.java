@@ -132,7 +132,7 @@ public class ConfigureProjectPresenter extends AbstractWizardPage<NewApplication
             return false;
         }
         if (!OpenshiftValidator.isProjectNameValid(projectName)) {
-            view.showOsProjectNameError(locale.invalidProjectNameError(), null);
+            view.showOsProjectNameError(locale.invalidProjectNameError(), locale.invalidProjectNameDetailError());
             return false;
         }
 

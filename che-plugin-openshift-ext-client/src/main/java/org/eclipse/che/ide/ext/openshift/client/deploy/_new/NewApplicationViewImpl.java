@@ -557,7 +557,6 @@ public class NewApplicationViewImpl extends Window implements NewApplicationView
 
         if (projectNameErrorTooltip != null) {
             projectNameErrorTooltip.destroy();
-            return;
         }
 
         if (!Strings.isNullOrEmpty(tooltipMessage)) {
@@ -584,7 +583,7 @@ public class NewApplicationViewImpl extends Window implements NewApplicationView
         applicationName.addStyleName(resources.css().inputError());
         applicationNameErrorLabel.setText(labelMessage);
 
-        if (projectNameErrorTooltip != null) {
+        if (applicationNameErrorTooltip != null) {
             applicationNameErrorTooltip.destroy();
         }
 
