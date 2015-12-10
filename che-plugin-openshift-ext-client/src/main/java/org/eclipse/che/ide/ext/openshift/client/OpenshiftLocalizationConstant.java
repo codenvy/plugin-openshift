@@ -325,6 +325,45 @@ public interface OpenshiftLocalizationConstant extends Messages {
     @Key("existing.application.name.error")
     String existingApplicationNameError();
 
+    @Key("add.service.description")
+    String addServiceActionDescription();
+
+    @Key("add.service.action")
+    String addServiceAction();
+
+    @Key("add.service.group.description")
+    String addServiceGroupDescription();
+
+    @Key("create.service.from.template")
+    String createServiceFromTemplate();
+
+    @Key("configure.service")
+    String configureService();
+
+    @Key("get.list.templates.failed")
+    String getListTemplatesFailed();
+
+    @Key("configure.service.environment.variables.table.title")
+    String configureServiceEnvironmentVariablesTableTitle();
+
+    @Key("configure.service.environment.labels.table.title")
+    String configureServiceEnvironmentLabelsTableTitle();
+
+    @Key("create.service.from.template.success")
+    String createServiceFromTemplateSuccess();
+
+    @Key("create.service.from.template.failed")
+    String createServiceFromTemplateFailed();
+
+    @Key("labels.name.placeholder")
+    String labelNamePlaceholder();
+
+    @Key("environment.labels.value.placeholder")
+    String labelValuePlaceholder();
+
+    @Key("environment.variables.value.placeholder")
+    String environmentVarialbesValuePlaceholder();
+
     @Key("retrieving.projects.data")
     String retrievingProjectsData();
 

@@ -58,7 +58,7 @@
         </g:Dock>
 
         <g:Dock direction="CENTER">
-            <g:FlowPanel addStyleNames="{resources.css.sectionSeparator}" height="470px"></g:FlowPanel>
+            <g:FlowPanel addStyleNames="{resources.css.sectionSeparator}" height="470px"/>
         </g:Dock>
 
         <!-- Codenvy configuration -->

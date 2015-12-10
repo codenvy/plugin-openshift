@@ -155,7 +155,8 @@ public class NewApplicationViewImpl extends Window implements NewApplicationView
     private Tooltip labelsErrorTooltip;
 
     @Inject
-    public NewApplicationViewImpl(org.eclipse.che.ide.Resources coreResources, OpenshiftResources resources,
+    public NewApplicationViewImpl(org.eclipse.che.ide.Resources coreResources,
+                                  OpenshiftResources resources,
                                   CellTableResources cellTableResources,
                                   OpenshiftLocalizationConstant locale,
                                   CoreLocalizationConstant constants) {

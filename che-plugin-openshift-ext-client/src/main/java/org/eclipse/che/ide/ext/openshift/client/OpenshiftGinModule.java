@@ -14,7 +14,6 @@ import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
-import org.eclipse.che.ide.ext.openshift.client.project.wizard.CreateProjectWizardFactory;
 
 /**
  * @author Sergii Leschenko
@@ -25,6 +24,6 @@ public class OpenshiftGinModule extends AbstractGinModule {
     protected void configure() {
         bind(OpenshiftServiceClient.class).to(OpenshiftServiceClientImpl.class);
 
-        install(new GinFactoryModuleBuilder().build(CreateProjectWizardFactory.class));
+        install(new GinFactoryModuleBuilder().build(WizardFactory.class));
     }
 }

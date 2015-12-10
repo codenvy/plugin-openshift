@@ -23,6 +23,7 @@ import org.eclipse.che.ide.ext.openshift.client.oauth.DisconnectAccountAction;
 import org.eclipse.che.ide.ext.openshift.client.importapp.ImportApplicationAction;
 import org.eclipse.che.ide.ext.openshift.client.project.CreateApplicationFromTemplateAction;
 import org.eclipse.che.ide.ext.openshift.client.project.UnlinkProjectAction;
+import org.eclipse.che.ide.ext.openshift.client.service.add.AddServiceAction;
 import org.eclipse.che.ide.ext.openshift.client.delete.DeleteProjectAction;
 
 import javax.inject.Inject;
@@ -45,11 +46,13 @@ public class OpenshiftExtension {
     @Inject
     public OpenshiftExtension(ActionManager actionManager,
                               OpenshiftResources openshiftResources,
+                              OpenshiftLocalizationConstant constant,
                               ConnectAccountAction connectAccountAction,
                               DisconnectAccountAction disconnectAccountAction,
                               CreateApplicationFromTemplateAction createApplicationFromTemplateAction,
                               LinkProjectWithExistingApplicationAction deployToExistingApplicationAction,
                               NewApplicationAction newApplicationAction,
+                              AddServiceAction addServiceAction,
                               DeleteProjectAction deleteProjectAction,
                               StartBuildAction startBuildAction,
                               ImportApplicationAction importApplicationAction,
@@ -84,6 +87,16 @@ public class OpenshiftExtension {
 
         actionManager.registerAction("unlinkOpenshiftProject", unlinkProjectAction);
         openshift.add(unlinkProjectAction);
+        
+        openshift.addSeparator();
+        DefaultActionGroup serviceGroup = new DefaultActionGroup("Service", true, actionManager);
+        serviceGroup.getTemplatePresentation().setDescription(constant.addServiceGroupDescription());
+        serviceGroup.getTemplatePresentation().setSVGIcon(null);//TODO replace with icon in nearest future
+        
+        actionManager.registerAction("addService", addServiceAction);
+        serviceGroup.add(addServiceAction);
+        
+        openshift.add(serviceGroup);
 
         openshift.addSeparator();
         actionManager.registerAction("createOpenshiftApplicationFromTemplate", createApplicationFromTemplateAction);

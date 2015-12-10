@@ -14,6 +14,22 @@
     margin-bottom: 15px;
 }
 
+.floatLeft {
+    float: left;
+}
+
+.floatRight {
+    float: right;
+}
+
+.marginV {
+    margin: 8px 0px;
+}
+
+.marginH {
+    margin: 0px 8px;
+}
+
 .sectionSeparator {
     background-color: separatorColor;
     margin: 0px 8px;
@@ -50,6 +66,10 @@
     border: 1px solid separatorColor;
 }
 
+.applicationTableError input {
+    border-bottom: 1px solid errorColor;
+ }
+
 .warningLabel {
     font-weight: bold;
 }
@@ -58,7 +78,7 @@
     min-width: 40px;
 }
 
-.smallButton, .deployApplicationTable button {
+.smallButton, .applicationTable button, .tableWithEmptyBorder button {
     padding: 0px 5px;
     height: 18px;
     line-height: 14px;
@@ -66,12 +86,16 @@
     font-weight: bold;
 }
 
-.deployApplicationTable {
+.applicationTable {
     border: 1px solid separatorColor;
 }
 
 .deployApplicationTableError input {
     border-bottom: 1px solid errorColor;
+}
+
+.tableWithEmptyBorder {
+    border: 0px solid
 }
 
 .templateSection {

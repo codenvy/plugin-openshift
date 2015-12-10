@@ -19,6 +19,7 @@ import org.eclipse.che.ide.api.wizard.Wizard;
 import org.eclipse.che.ide.api.wizard.WizardPage;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
+import org.eclipse.che.ide.ext.openshift.client.WizardFactory;
 import org.eclipse.che.ide.ext.openshift.client.dto.NewApplicationRequest;
 import org.eclipse.che.ide.ext.openshift.client.project.wizard.page.configure.ConfigureProjectPresenter;
 import org.eclipse.che.ide.ext.openshift.client.project.wizard.page.template.SelectTemplatePresenter;
@@ -34,7 +35,7 @@ public class CreateProjectPresenter implements Wizard.UpdateDelegate, CreateProj
 
     private       CreateProjectWizard           wizard;
     private final CreateProjectView             view;
-    private final CreateProjectWizardFactory    wizardFactory;
+    private final WizardFactory                 wizardFactory;
     private final ConfigureProjectPresenter     configProjectPage;
     private final SelectTemplatePresenter       selectTemplatePage;
     private final DtoFactory                    dtoFactory;
@@ -45,7 +46,7 @@ public class CreateProjectPresenter implements Wizard.UpdateDelegate, CreateProj
 
     @Inject
     public CreateProjectPresenter(CreateProjectView view,
-                                  CreateProjectWizardFactory wizardFactory,
+                                  WizardFactory wizardFactory,
                                   ConfigureProjectPresenter configProjectPage,
                                   SelectTemplatePresenter selectTemplatePage,
                                   NotificationManager notificationManager,
@@ -133,10 +134,8 @@ public class CreateProjectPresenter implements Wizard.UpdateDelegate, CreateProj
      * Displays the wizard.
      */
     public void createWizardAndShow() {
-        view.showWizard();
-
-        wizard = wizardFactory.newWizard(dtoFactory.createDto(NewApplicationRequest.class)
-                              .withProjectConfigDto(dtoFactory.createDto(ProjectConfigDto.class)));
+        wizard = wizardFactory.newProjectWizard(dtoFactory.createDto(NewApplicationRequest.class)
+                                                          .withProjectConfigDto(dtoFactory.createDto(ProjectConfigDto.class)));
 
         wizard.setUpdateDelegate(this);
         wizard.addPage(selectTemplatePage);
