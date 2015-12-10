@@ -98,6 +98,7 @@ public class ConfigureConfigureApplicationViewImpl extends Window implements Con
         this.locale = locale;
         this.resources = openshiftResources;
         this.coreResources = coreResources;
+        setTitle(locale.applicationConfigViewTitle());
 
         this.ensureDebugId("openshiftConfigureApplication-window");
 

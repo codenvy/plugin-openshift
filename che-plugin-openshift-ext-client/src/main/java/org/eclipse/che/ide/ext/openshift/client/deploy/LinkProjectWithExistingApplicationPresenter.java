@@ -155,7 +155,6 @@ public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthent
         selectedBuildConfig = null;
         view.enableLinkButton(false);
         view.setBuildConfigGitUrl("");
-        view.showView();
     }
 
     @Override
@@ -247,6 +246,13 @@ public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthent
         openShiftClient.getProjects().then(new Operation<List<Project>>() {
             @Override
             public void apply(List<Project> result) throws OperationException {
+                if (result.isEmpty()) {
+                    dialogFactory.createMessageDialog(locale.deployProjectWindowNoProjectsTitle(),
+                                                      locale.deployProjectWindowNoProjects(),
+                                                      null).show();
+                    return;
+                }
+                view.showView();
                 for (Project project : result) {
                     loadBuildConfigs(project.getMetadata().getName());
                 }

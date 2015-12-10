@@ -137,7 +137,7 @@ public interface OpenshiftLocalizationConstant extends Messages {
     String applicationConfigAction();
 
     @Key("application.config.title")
-    String applicationConfigViewTitle(String application);
+    String applicationConfigViewTitle();
 
     @Key("application.config.build.config.title")
     String applicationConfigsBuildConfigTitle();
@@ -273,6 +273,9 @@ public interface OpenshiftLocalizationConstant extends Messages {
 
     @Key("deploy.project.window.no.projects")
     String deployProjectWindowNoProjects();
+
+    @Key("deploy.project.window.no.projects.title")
+    String deployProjectWindowNoProjectsTitle();
 
     @Key("deploy.project.window.deploy.section")
     String deployProjectWindowDeploySection();
