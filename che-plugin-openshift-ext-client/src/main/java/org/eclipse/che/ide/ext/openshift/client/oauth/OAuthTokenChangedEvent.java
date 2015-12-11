@@ -15,9 +15,13 @@ import com.google.gwt.event.shared.GwtEvent;
 /**
  * @author Sergii Leschenko
  */
-public class OAuthTokenChangedEvent extends GwtEvent<OAuthTokenChangedEventHandler> {
-    public static Type<OAuthTokenChangedEventHandler> TYPE = new Type<>();
+public class OAuthTokenChangedEvent extends GwtEvent<OAuthTokenChangedHandler> {
 
+    public static Type<OAuthTokenChangedHandler> TYPE = new Type<>();
+
+    /**
+     * Oauth token
+     */
     private String token;
 
     public OAuthTokenChangedEvent(String token) {
@@ -25,12 +29,21 @@ public class OAuthTokenChangedEvent extends GwtEvent<OAuthTokenChangedEventHandl
     }
 
     @Override
-    public Type<OAuthTokenChangedEventHandler> getAssociatedType() {
+    public Type<OAuthTokenChangedHandler> getAssociatedType() {
         return TYPE;
     }
 
     @Override
-    protected void dispatch(OAuthTokenChangedEventHandler handler) {
-        handler.onTokenChange(token);
+    protected void dispatch(OAuthTokenChangedHandler handler) {
+        handler.onOAuthTokenChanged(this);
+    }
+
+    /**
+     * Returns oauth token
+     * @return
+     *       token
+     */
+    public String getToken() {
+        return token;
     }
 }

@@ -15,6 +15,8 @@ import com.google.gwt.event.shared.EventHandler;
 /**
  * @author Sergii Leschenko
  */
-public interface OAuthTokenChangedEventHandler extends EventHandler {
-    void onTokenChange(String token);
+public interface OAuthTokenChangedHandler extends EventHandler {
+
+    void onOAuthTokenChanged(OAuthTokenChangedEvent event);
+
 }
