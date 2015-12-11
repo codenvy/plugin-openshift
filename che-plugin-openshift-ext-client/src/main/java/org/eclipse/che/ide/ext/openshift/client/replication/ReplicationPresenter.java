@@ -96,7 +96,7 @@ public class ReplicationPresenter implements ConfigPresenter, ReplicationView.Ac
                 if (noReplicationCtrl) {
                     return;
                 }
-                replicationController = result.get(0);
+                replicationController = result.get(result.size() - 1);//take the last replication controller
                 replicasNumber = replicationController.getSpec().getReplicas();
                 view.setReplicas(replicasNumber);
                 view.enableAddButton(true);
