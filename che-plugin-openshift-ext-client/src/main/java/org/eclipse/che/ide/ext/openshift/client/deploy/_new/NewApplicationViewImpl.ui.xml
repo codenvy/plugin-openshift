@@ -29,25 +29,11 @@
             width: 270px;
         }
 
-        .marginV {
-            margin: 8px 0px;
-        }
 
-        .marginH {
-            margin: 0px 8px;
-        }
-
-        .floatLeft {
-            float: left;
-        }
-
-        .addButton {
-            float: right;
-        }
     </ui:style>
-    <g:DockLayoutPanel width="700px" height="450px" addStyleNames="{style.marginH}">
+    <g:DockLayoutPanel width="700px" height="450px" addStyleNames="{resources.css.marginH}">
         <g:center>
-            <g:FlowPanel addStyleNames="{style.marginV}">
+            <g:FlowPanel addStyleNames="{resources.css.marginV}">
                 <g:Label text="{locale.deployProjectWindowApplicationSection}" styleName="{resources.css.sectionTitle}"/>
                 <g:Label text="{locale.deployProjectWindowApplicationName}"/>
                 <g:TextBox ui:field="applicationName" addStyleNames="{resources.css.textInput}"/>
@@ -73,7 +59,7 @@
             </g:FlowPanel>
         </g:center>
         <g:east size="400">
-            <g:FlowPanel addStyleNames="{style.marginV}">
+            <g:FlowPanel addStyleNames="{resources.css.marginV}">
                 <g:Label text="{locale.deployProjectWindowDeploySection}" styleName="{resources.css.sectionTitle}"/>
                 <g:Label text="{locale.deployProjectWindowBuildImage}"/>
                 <che:CustomListBox ui:field="images" addStyleNames="{resources.css.textInput}"/>
@@ -81,17 +67,18 @@
                 <g:DockLayoutPanel height="160px" addStyleNames="{style.spacing20}">
                     <g:north size="24">
                         <g:FlowPanel width="100%">
-                            <g:Label text="{locale.deployProjectWindowVariablesSection}" addStyleNames="{style.floatLeft}"></g:Label>
+                            <g:Label text="{locale.deployProjectWindowVariablesSection}" addStyleNames="{resources.css.floatLeft}"/>
                             <g:FlowPanel ui:field="variablesErrorPanel">
                                 <g:Label ui:field="variablesErrorLabel" width="100%" wordWrap="true"
                                          addStyleNames="{resources.css.labelErrorPosition} {resources.css.labelErrorPositionTable}"/>
                             </g:FlowPanel>
-                            <g:Button text="+" ui:field="addVariableButton" addStyleNames="{style.addButton} {resources.css.smallButton}"
-                                      title="{locale.deployProjectWindowVariablesAddTooltip}"></g:Button>
+                            <g:Button text="+" ui:field="addVariableButton"
+                                      addStyleNames="{resources.css.floatRight} {resources.css.smallButton}"
+                                      title="{locale.deployProjectWindowVariablesAddTooltip}"/>
                         </g:FlowPanel>
                     </g:north>
                     <g:center>
-                        <g:ScrollPanel addStyleNames="{resources.css.deployApplicationTable}">
+                        <g:ScrollPanel addStyleNames="{resources.css.applicationTable}">
                             <g:SimplePanel>
                                 <c:CellTable ui:field='environmentVariables' width="100%" tableLayoutFixed="true"/>
                             </g:SimplePanel>
@@ -102,15 +89,16 @@
                 <g:DockLayoutPanel height="158px" addStyleNames="{style.spacing20}">
                     <g:north size="24">
                         <g:FlowPanel width="100%">
-                            <g:Label text="{locale.deployProjectWindowLabelsSection}" addStyleNames="{style.floatLeft}"></g:Label>
+                            <g:Label text="{locale.deployProjectWindowLabelsSection}" addStyleNames="{resources.css.floatLeft}"/>
                             <g:Label ui:field="labelsErrorLabel" width="100%" wordWrap="true"
                                      addStyleNames="{resources.css.labelErrorPosition} {resources.css.labelErrorPositionTable}"/>
-                            <g:Button text="+" ui:field="addLabelButton" addStyleNames="{style.addButton} {resources.css.smallButton}"
-                                      title="{locale.deployProjectWindowLabelsAddTooltip}"></g:Button>
+                            <g:Button text="+" ui:field="addLabelButton"
+                                      addStyleNames="{resources.css.floatRight} {resources.css.smallButton}"
+                                      title="{locale.deployProjectWindowLabelsAddTooltip}"/>
                         </g:FlowPanel>
                     </g:north>
                     <g:center>
-                        <g:ScrollPanel addStyleNames="{resources.css.deployApplicationTable}">
+                        <g:ScrollPanel addStyleNames="{resources.css.applicationTable}">
                             <g:SimplePanel>
                                 <c:CellTable ui:field='environmentLabels' width="100%" tableLayoutFixed="true"/>
                             </g:SimplePanel>
@@ -120,7 +108,7 @@
             </g:FlowPanel>
         </g:east>
         <g:east size="18">
-            <g:FlowPanel addStyleNames="{resources.css.sectionSeparator}"></g:FlowPanel>
+            <g:FlowPanel addStyleNames="{resources.css.sectionSeparator}"/>
         </g:east>
     </g:DockLayoutPanel>
 </ui:UiBinder>

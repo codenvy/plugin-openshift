@@ -57,6 +57,14 @@ public interface OpenshiftResources extends ClientBundle {
     /** The CssResource interface for the Machine extension. */
     interface Css extends CssResource, Styles {
 
+        String floatRight();
+
+        String floatLeft();
+
+        String marginV();
+
+        String marginH();
+
         String sectionTitle();
 
         String sectionSeparator();
@@ -79,7 +87,9 @@ public interface OpenshiftResources extends ClientBundle {
 
         String smallButton();
 
-        String deployApplicationTable();
+        String applicationTable();
+        
+        String tableWithEmptyBorder();
 
         String deployApplicationTableError();
 
@@ -100,5 +110,7 @@ public interface OpenshiftResources extends ClientBundle {
         String loadingCategoriesLabel();
 
         String flashingLabel();
+
+        String applicationTableError();
     }
 }

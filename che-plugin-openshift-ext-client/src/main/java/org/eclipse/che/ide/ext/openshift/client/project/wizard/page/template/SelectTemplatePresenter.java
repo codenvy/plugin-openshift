@@ -68,12 +68,12 @@ public class SelectTemplatePresenter extends AbstractWizardPage<NewApplicationRe
         view.showLoadingTemplates();
 
         openshiftClient.getTemplates(DEF_NAMESPACE)
-                .then(new Operation<List<Template>>() {
-                    @Override
-                    public void apply(final List<Template> templates) throws OperationException {
-                        view.setTemplates(templates, false);
-                    }
-                });
+                       .then(new Operation<List<Template>>() {
+                           @Override
+                           public void apply(final List<Template> templates) throws OperationException {
+                               view.setTemplates(templates, false);
+                           }
+                       });
     }
 
     /** {@inheritDoc} */
