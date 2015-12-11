@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.ext.openshift.client.project.wizard;
 
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
@@ -19,10 +20,12 @@ import org.eclipse.che.ide.api.wizard.Wizard;
 import org.eclipse.che.ide.api.wizard.WizardPage;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
+import org.eclipse.che.ide.ext.openshift.client.build.BuildsPresenter;
 import org.eclipse.che.ide.ext.openshift.client.WizardFactory;
 import org.eclipse.che.ide.ext.openshift.client.dto.NewApplicationRequest;
 import org.eclipse.che.ide.ext.openshift.client.project.wizard.page.configure.ConfigureProjectPresenter;
 import org.eclipse.che.ide.ext.openshift.client.project.wizard.page.template.SelectTemplatePresenter;
+import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
 
 import javax.validation.constraints.NotNull;
 
@@ -41,6 +44,7 @@ public class CreateProjectPresenter implements Wizard.UpdateDelegate, CreateProj
     private final DtoFactory                    dtoFactory;
     private final NotificationManager           notificationManager;
     private final OpenshiftLocalizationConstant locale;
+    private final BuildsPresenter               buildsPresenter;
 
     private WizardPage currentPage;
 
@@ -51,7 +55,8 @@ public class CreateProjectPresenter implements Wizard.UpdateDelegate, CreateProj
                                   SelectTemplatePresenter selectTemplatePage,
                                   NotificationManager notificationManager,
                                   OpenshiftLocalizationConstant locale,
-                                  DtoFactory dtoFactory) {
+                                  DtoFactory dtoFactory,
+                                  BuildsPresenter buildsPresenter) {
         this.view = view;
         this.wizardFactory = wizardFactory;
         this.configProjectPage = configProjectPage;
@@ -59,6 +64,7 @@ public class CreateProjectPresenter implements Wizard.UpdateDelegate, CreateProj
         this.dtoFactory = dtoFactory;
         this.notificationManager = notificationManager;
         this.locale = locale;
+        this.buildsPresenter = buildsPresenter;
 
         view.setDelegate(this);
     }
@@ -94,6 +100,8 @@ public class CreateProjectPresenter implements Wizard.UpdateDelegate, CreateProj
         wizard.complete(new Wizard.CompleteCallback() {
             @Override
             public void onCompleted() {
+                final String namespace = wizard.getDataObject().getProjectConfigDto().getAttributes().get(OPENSHIFT_NAMESPACE_VARIABLE_NAME).get(0);
+
                 configProjectPage.setEnabled(true);
                 updateControls();
                 view.animateCreateButton(false);
@@ -101,6 +109,13 @@ public class CreateProjectPresenter implements Wizard.UpdateDelegate, CreateProj
 
                 notificationManager.showInfo(locale.createFromTemplateSuccess());
                 view.closeWizard();
+
+                Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+                    @Override
+                    public void execute() {
+                        buildsPresenter.newApplicationCreated(namespace);
+                    }
+                });
             }
 
             @Override

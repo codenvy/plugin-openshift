@@ -48,22 +48,22 @@ public class StartBuildAction extends AbstractPerspectiveAction {
     private final OpenshiftServiceClient        openshiftService;
     private final NotificationManager           notificationManager;
     private final OpenshiftLocalizationConstant locale;
-    private final BuildStatusWatcher            buildStatusWatcher;
+    private final BuildsPresenter               buildsPresenter;
 
     @Inject
     public StartBuildAction(OpenshiftAuthorizationHandler authorizationHandler,
                             AppContext appContext,
                             OpenshiftServiceClient openshiftService,
                             NotificationManager notificationManager,
-                            BuildStatusWatcher buildStatusWatcher,
-                            OpenshiftLocalizationConstant locale) {
+                            OpenshiftLocalizationConstant locale,
+                            BuildsPresenter buildsPresenter) {
         super(Collections.singletonList(PROJECT_PERSPECTIVE_ID), locale.startBuildTitle(), null, null, null);
         this.authorizationHandler = authorizationHandler;
         this.appContext = appContext;
         this.openshiftService = openshiftService;
         this.notificationManager = notificationManager;
         this.locale = locale;
-        this.buildStatusWatcher = buildStatusWatcher;
+        this.buildsPresenter = buildsPresenter;
     }
 
     @Override
@@ -92,7 +92,7 @@ public class StartBuildAction extends AbstractPerspectiveAction {
                         .then(new Operation<Build>() {
                             @Override
                             public void apply(Build startedBuild) throws OperationException {
-                                buildStatusWatcher.watch(startedBuild);
+                                buildsPresenter.newBuildStarted(startedBuild);
                             }
                         })
                         .catchError(new Operation<PromiseError>() {

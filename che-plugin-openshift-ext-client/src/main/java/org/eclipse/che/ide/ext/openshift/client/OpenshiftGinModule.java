@@ -23,7 +23,6 @@ public class OpenshiftGinModule extends AbstractGinModule {
     @Override
     protected void configure() {
         bind(OpenshiftServiceClient.class).to(OpenshiftServiceClientImpl.class);
-
         install(new GinFactoryModuleBuilder().build(WizardFactory.class));
     }
 }

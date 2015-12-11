@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.openshift.client.importapp;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -32,15 +33,18 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftServiceClient;
 import org.eclipse.che.ide.ext.openshift.client.ValidateAuthenticationPresenter;
+import org.eclipse.che.ide.ext.openshift.client.build.BuildsPresenter;
 import org.eclipse.che.ide.ext.openshift.client.oauth.OpenshiftAuthenticator;
 import org.eclipse.che.ide.ext.openshift.client.oauth.OpenshiftAuthorizationHandler;
 import org.eclipse.che.ide.ext.openshift.client.util.OpenshiftValidator;
 import org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants;
+import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
 import org.eclipse.che.ide.ext.openshift.shared.dto.BuildConfig;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Project;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.Unmarshallable;
+import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.websocket.rest.RequestCallback;
 
 import java.util.ArrayList;
@@ -69,6 +73,7 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
     private final List<Project>                       projectList;
     private final Map<String, List<BuildConfig>>      buildConfigMap;
     private final NotificationManager                 notificationManager;
+    private final BuildsPresenter                     buildsPresenter;
     private       BuildConfig                         selectedBuildConfig;
     private       ProjectTypeServiceClient            projectTypeServiceClient;
 
@@ -84,7 +89,8 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
                                       OpenshiftAuthorizationHandler openshiftAuthorizationHandler,
                                       ImportProjectNotificationSubscriber importProjectNotificationSubscriber,
                                       EventBus eventBus,
-                                      DtoFactory dtoFactory) {
+                                      DtoFactory dtoFactory,
+                                      BuildsPresenter buildsPresenter) {
         super(openshiftAuthenticator, openshiftAuthorizationHandler, locale, notificationManager);
         this.view = view;
         this.view.setDelegate(this);
@@ -97,6 +103,7 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
         this.importProjectNotificationSubscriber = importProjectNotificationSubscriber;
         this.eventBus = eventBus;
         this.locale = locale;
+        this.buildsPresenter = buildsPresenter;
         projectList = new ArrayList<>();
         buildConfigMap = new HashMap<>();
         cheProjects = new ArrayList<>();
@@ -314,6 +321,14 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
                     view.animateImportButton(false);
                     view.setBlocked(false);
                     view.closeView();
+
+                    final String namespace = result.getAttributes().get(OPENSHIFT_NAMESPACE_VARIABLE_NAME).get(0);
+                    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+                        @Override
+                        public void execute() {
+                            buildsPresenter.newApplicationCreated(namespace);
+                        }
+                    });
 
                     eventBus.fireEvent(new CreateProjectEvent(result));
 
