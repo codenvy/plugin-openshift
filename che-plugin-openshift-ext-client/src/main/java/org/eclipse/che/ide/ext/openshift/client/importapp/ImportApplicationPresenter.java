@@ -19,6 +19,7 @@ import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
 import org.eclipse.che.api.project.gwt.client.ProjectTypeServiceClient;
 import org.eclipse.che.api.project.shared.dto.ProjectTypeDefinition;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
+import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -34,6 +35,8 @@ import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftServiceClient;
 import org.eclipse.che.ide.ext.openshift.client.ValidateAuthenticationPresenter;
 import org.eclipse.che.ide.ext.openshift.client.build.BuildsPresenter;
+import org.eclipse.che.ide.ext.openshift.client.deploy.Application;
+import org.eclipse.che.ide.ext.openshift.client.deploy.ApplicationManager;
 import org.eclipse.che.ide.ext.openshift.client.oauth.OpenshiftAuthenticator;
 import org.eclipse.che.ide.ext.openshift.client.oauth.OpenshiftAuthorizationHandler;
 import org.eclipse.che.ide.ext.openshift.client.util.OpenshiftValidator;
@@ -44,7 +47,6 @@ import org.eclipse.che.ide.ext.openshift.shared.dto.Project;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.Unmarshallable;
-import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.websocket.rest.RequestCallback;
 
 import java.util.ArrayList;
@@ -74,6 +76,7 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
     private final Map<String, List<BuildConfig>>      buildConfigMap;
     private final NotificationManager                 notificationManager;
     private final BuildsPresenter                     buildsPresenter;
+    private final ApplicationManager                  applicationManager;
     private       BuildConfig                         selectedBuildConfig;
     private       ProjectTypeServiceClient            projectTypeServiceClient;
 
@@ -90,9 +93,11 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
                                       ImportProjectNotificationSubscriber importProjectNotificationSubscriber,
                                       EventBus eventBus,
                                       DtoFactory dtoFactory,
-                                      BuildsPresenter buildsPresenter) {
+                                      BuildsPresenter buildsPresenter,
+                                      ApplicationManager applicationManager) {
         super(openshiftAuthenticator, openshiftAuthorizationHandler, locale, notificationManager);
         this.view = view;
+        this.applicationManager = applicationManager;
         this.view.setDelegate(this);
         this.openShiftClient = openShiftClient;
         this.projectServiceClient = projectServiceClient;
@@ -337,6 +342,8 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
                     }
 
                     importProjectNotificationSubscriber.onSuccess();
+
+                    updateApplicationLabel(selectedBuildConfig);
                 }
 
                 @Override
@@ -406,4 +413,14 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
         return true;
     }
 
+    private void updateApplicationLabel(final BuildConfig buildConfig) {
+        applicationManager.findApplication(buildConfig)
+                          .thenPromise(new Function<Application, Promise<Application>>() {
+                              @Override
+                              public Promise<Application> apply(Application application) {
+                                  return applicationManager.updateOpenshiftApplication(application,
+                                                                                       buildConfig.getMetadata().getName());
+                              }
+                          });
+    }
 }

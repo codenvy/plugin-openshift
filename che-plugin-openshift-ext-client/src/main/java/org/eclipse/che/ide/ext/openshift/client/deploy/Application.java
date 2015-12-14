@@ -69,6 +69,7 @@ public class Application {
      * {@link DeploymentConfig} is linked with {@link BuildConfig} by {@link #imageStreamTagReference}.
      *
      * <p/>{@link Container#getImage()} of {@link DeploymentConfig} should equal to {@link #imageStreamTagReference}.<br/>
+     * {@link Container#getImage()} can have no imageStreamTag. By default it equals to 'latest'.<br/>
      * Needed instance of {@link Container} can be retrieved by next calling {@link DeploymentConfig#getSpec()} <br/>
      * then {@link DeploymentConfigSpec#getTemplate()} and then {@link PodTemplateSpec#getSpec()}<br/>
      * and you should get first item from {@link PodSpec#getContainers()}
