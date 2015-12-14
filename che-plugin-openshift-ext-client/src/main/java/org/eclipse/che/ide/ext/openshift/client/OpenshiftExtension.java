@@ -34,12 +34,12 @@ import static org.eclipse.che.ide.api.action.IdeActions.GROUP_WINDOW;
 import static org.eclipse.che.ide.api.constraints.Anchor.BEFORE;
 
 /**
- * Extension add Git support to the IDE Application.
+ * Extension add OpenShift support to the IDE Application.
  *
  * @author Sergii Leschenko
  */
 @Singleton
-@Extension(title = "Git", version = "3.0.0")
+@Extension(title = "Openshift", version = "3.0.0")
 public class OpenshiftExtension {
     public static final String OPENSHIFT_GROUP_MAIN_MENU = "OpenShift";
 
