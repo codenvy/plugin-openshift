@@ -263,7 +263,11 @@ public class ApplicationManager {
         List<DeploymentConfig> filtered = new ArrayList<>();
         for (DeploymentConfig deploymentConfig : deploymentConfigs) {
             for (Container container : deploymentConfig.getSpec().getTemplate().getSpec().getContainers()) {
-                if (imageStreamTagReference.equals(container.getImage())) {
+                String image = container.getImage();
+                if (!image.contains(":")) {
+                    image += ":latest";
+                }
+                if (imageStreamTagReference.equals(image)) {
                     filtered.add(deploymentConfig);
                     break;
                 }
@@ -295,6 +299,18 @@ public class ApplicationManager {
         }
     }
 
+    /**
+     * Updates objects from given {@link Application} if there are changes after adding label 'application' <br/>
+     * with given value to all objects from {@link Application}.
+     *
+     * @param application
+     *         instance of {@link Application} for updating of its configs
+     * @param applicationName
+     *         value of label application that will be adding to all objects from {@link Application}
+     */
+    public Promise<Application> updateOpenshiftApplication(final Application application, final String applicationName) {
+        return updateOpenshiftApplication(application, applicationName, application.getBuildConfig().getSpec().getSource());
+    }
     /**
      * Updates objects from given {@link Application} if there are changes after setting new given {@link BuildSource} <br/>
      * for {@link Application#buildConfig} and adding label 'application' with given value to all objects from {@link Application}.
