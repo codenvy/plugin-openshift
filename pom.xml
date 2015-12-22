@@ -30,6 +30,8 @@
         <module>che-plugin-openshift-ext-client</module>
     </modules>
     <properties>
+        <!-- TODO Remove property when plugin-openshift will be part of che-plugins project -->
+        <com.openshift.restclient.version>3.0.0.Final</com.openshift.restclient.version>
         <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>
     </properties>
     <!-- We need dependencyManagement section here for building with che-depmgt project from master branch.
