@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-openshift-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.0.0-M5</version>
+        <version>4.0.0-M5-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-openshift-ext-server</artifactId>
     <packaging>jar</packaging>
@@ -95,7 +95,6 @@
             <plugin>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-dto-maven-plugin</artifactId>
-                <version>${project.version}</version>
                 <executions>
                     <execution>
                         <phase>process-sources</phase>
