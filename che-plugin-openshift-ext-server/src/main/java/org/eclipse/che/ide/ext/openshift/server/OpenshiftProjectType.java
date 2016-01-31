@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.openshift.server;
 
-import org.eclipse.che.api.project.server.type.AbstractProjectType;
+import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -27,7 +27,7 @@ import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConst
  * @author Sergii Leschenko
  */
 @Singleton
-public class OpenshiftProjectType extends AbstractProjectType {
+public class OpenshiftProjectType extends ProjectTypeDef {
     @Inject
     public OpenshiftProjectType() {
         super(OPENSHIFT_PROJECT_TYPE_ID, OPENSHIFT_PROJECT_TYPE_DISPLAY_NAME, false, true);

@@ -85,6 +85,12 @@ public class BuildsViewImpl extends BaseView<BuildsView.ActionDelegate> implemen
 
         String loggerLines();
 
+        /** Progress loading icons */
+        String progress();
+
+        String success();
+
+        String error();
     }
 
     private Resources ideResources;
@@ -416,11 +422,11 @@ public class BuildsViewImpl extends BaseView<BuildsView.ActionDelegate> implemen
             if (New.equals(build.getStatus().getPhase()) ||
                     Pending.equals(build.getStatus().getPhase()) ||
                     Running.equals(build.getStatus().getPhase())) {
-                setIcon(ideResources.progress(), ideResources.notificationCss().progress());
+                setIcon(ideResources.progress(), style.progress());//todo need check style
             } else if (Complete.equals(build.getStatus().getPhase())) {
-                setIcon(ideResources.success(), ideResources.notificationCss().success());
+                setIcon(ideResources.success(), style.success());
             } else if (Failed.equals(build.getStatus().getPhase())) {
-                setIcon(ideResources.error(), ideResources.notificationCss().error());
+                setIcon(ideResources.fail(), style.error());
             }
         }
 

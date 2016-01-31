@@ -32,6 +32,8 @@ import java.util.List;
 
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_APPLICATION_VARIABLE_NAME;
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 
 /**
  * Presenter for scaling application.
@@ -110,7 +112,7 @@ public class ReplicationPresenter implements ConfigPresenter, ReplicationView.Ac
             @Override
             public void apply(PromiseError arg) throws OperationException {
                 final ServiceError serviceError = dtoFactory.createDtoFromJson(arg.getMessage(), ServiceError.class);
-                notificationManager.showError(serviceError.getMessage());
+                notificationManager.notify(serviceError.getMessage(), FAIL, true);
             }
         };
     }
@@ -157,7 +159,7 @@ public class ReplicationPresenter implements ConfigPresenter, ReplicationView.Ac
                 replicasNumber = arg.getSpec().getReplicas();
                 view.setReplicas(replicasNumber);
                 view.enableMinusButton(replicasNumber > 1);
-                notificationManager.showInfo(locale.applicationConfigsScaledSuccess(replicasNumber));
+                notificationManager.notify(locale.applicationConfigsScaledSuccess(replicasNumber), SUCCESS, true);
             }
         }).catchError(onFail());
     }

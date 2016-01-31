@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.ext.openshift.client.delete;
 
 import com.google.common.base.Strings;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -20,7 +19,6 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -30,18 +28,18 @@ import org.eclipse.che.ide.ext.openshift.client.ValidateAuthenticationPresenter;
 import org.eclipse.che.ide.ext.openshift.client.oauth.OpenshiftAuthenticator;
 import org.eclipse.che.ide.ext.openshift.client.oauth.OpenshiftAuthorizationHandler;
 import org.eclipse.che.ide.ext.openshift.shared.dto.BuildConfig;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
-import org.eclipse.che.ide.ui.loaders.requestLoader.IdeLoader;
+import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
+import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
 
 import java.util.List;
 
-import static org.eclipse.che.api.promises.client.callback.PromiseHelper.newCallback;
-import static org.eclipse.che.api.promises.client.callback.PromiseHelper.newPromise;
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_APPLICATION_VARIABLE_NAME;
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 
 /**
  * @author Alexander Andrienko
@@ -55,8 +53,7 @@ public class DeleteProjectPresenter extends ValidateAuthenticationPresenter {
     private final OpenshiftServiceClient        service;
     private final NotificationManager           notificationManager;
     private final ProjectServiceClient          projectService;
-    private final DtoUnmarshallerFactory        dtoUnmarshaller;
-    private final IdeLoader                     loader;
+    private final MessageLoader                 loader;
 
     @Inject
     protected DeleteProjectPresenter(OpenshiftAuthenticator openshiftAuthenticator,
@@ -67,8 +64,7 @@ public class DeleteProjectPresenter extends ValidateAuthenticationPresenter {
                                      OpenshiftServiceClient service,
                                      ProjectServiceClient projectService,
                                      NotificationManager notificationManager,
-                                     DtoUnmarshallerFactory dtoUnmarshaller,
-                                     IdeLoader loader) {
+                                     LoaderFactory loaderFactory) {
         super(openshiftAuthenticator, openshiftAuthorizationHandler, locale, notificationManager);
 
         this.appContext = appContext;
@@ -77,8 +73,7 @@ public class DeleteProjectPresenter extends ValidateAuthenticationPresenter {
         this.service = service;
         this.notificationManager = notificationManager;
         this.projectService = projectService;
-        this.dtoUnmarshaller = dtoUnmarshaller;
-        this.loader = loader;
+        this.loader = loaderFactory.newLoader();
     }
 
     @Override
@@ -98,7 +93,7 @@ public class DeleteProjectPresenter extends ValidateAuthenticationPresenter {
                         })
                         .catchError(handleError(namespace));
         } else {
-            notificationManager.showError(locale.projectIsNotLinkedToOpenShiftError(projectConfig.getName()));
+            notificationManager.notify(locale.projectIsNotLinkedToOpenShiftError(projectConfig.getName()), FAIL, true);
         }
     }
 
@@ -124,26 +119,25 @@ public class DeleteProjectPresenter extends ValidateAuthenticationPresenter {
                     dialogLabel = locale.deleteMultipleAppProjectLabel(nameSpace, applications);
                 }
                 loader.hide();
-                dialogFactory.createConfirmDialog(locale.deleteProjectDialogTitle(),
-                                                  dialogLabel,
-                                                  new ConfirmCallback() {
-                                                      @Override
-                                                      public void accepted() {
-                                                          service.deleteProject(nameSpace).then(new Operation<Void>() {
-                                                              @Override
-                                                              public void apply(Void arg) throws OperationException {
-                                                                  notificationManager.showInfo(locale.deleteProjectSuccess(nameSpace));
-                                                                  removeOpenshiftMixin(projectConfig, nameSpace);
-                                                              }
-                                                          }).catchError(new Operation<PromiseError>() {
-                                                              @Override
-                                                              public void apply(PromiseError arg) throws OperationException {
-                                                                  handleError(nameSpace);
-                                                              }
-                                                          });
-                                                      }
-                                                  },
-                                                  null).show();
+                ConfirmCallback confirmCallback = new ConfirmCallback() {
+                    @Override
+                    public void accepted() {
+                        service.deleteProject(nameSpace).then(new Operation<Void>() {
+                            @Override
+                            public void apply(Void arg) throws OperationException {
+                                notificationManager.notify(locale.deleteProjectSuccess(nameSpace), SUCCESS, true);
+                                removeOpenshiftMixin(projectConfig, nameSpace);
+                            }
+                        })
+                        .catchError(new Operation<PromiseError>() {
+                            @Override
+                            public void apply(PromiseError arg) throws OperationException {
+                                handleError(nameSpace);
+                            }
+                        });
+                    }
+                };
+                dialogFactory.createConfirmDialog(locale.deleteProjectDialogTitle(), dialogLabel, confirmCallback, null).show();
             }
         };
     }
@@ -152,7 +146,7 @@ public class DeleteProjectPresenter extends ValidateAuthenticationPresenter {
         return new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError promiseError) throws OperationException {
-                notificationManager.showError(locale.deleteProjectFailed(nameSpace) + " " + promiseError.getMessage());
+                notificationManager.notify(locale.deleteProjectFailed(nameSpace) + " " + promiseError.getMessage(), FAIL, true);
             }
         };
     }
@@ -162,20 +156,14 @@ public class DeleteProjectPresenter extends ValidateAuthenticationPresenter {
         projectConfig.getAttributes().remove(OPENSHIFT_NAMESPACE_VARIABLE_NAME);
         projectConfig.getAttributes().remove(OPENSHIFT_APPLICATION_VARIABLE_NAME);
 
-        newPromise(new AsyncPromiseHelper.RequestCall<ProjectConfigDto>() {
-            @Override
-            public void makeCall(AsyncCallback<ProjectConfigDto> callback) {
-                projectService.updateProject(projectConfig.getPath(),
-                                             projectConfig,
-                                             newCallback(callback, dtoUnmarshaller.newUnmarshaller(ProjectConfigDto.class)));
-            }
-        }).then(new Operation<ProjectConfigDto>() {
-            @Override
-            public void apply(ProjectConfigDto configDto) throws OperationException {
-                appContext.getCurrentProject().setRootProject(configDto);
-                notificationManager.showInfo(locale.projectSuccessfullyReset(configDto.getName()));
-            }
-        }).catchError(handleError(nameSpace));
+        projectService.updateProject(appContext.getWorkspaceId(), projectConfig.getPath(), projectConfig)
+                      .then(new Operation<ProjectConfigDto>() {
+                          @Override
+                          public void apply(ProjectConfigDto configDto) throws OperationException {
+                              appContext.getCurrentProject().setRootProject(configDto);
+                              notificationManager.notify(locale.projectSuccessfullyReset(configDto.getName()), SUCCESS, true);
+                          }
+                      }).catchError(handleError(nameSpace));
     }
 
     private String getBuildConfigNames(List<BuildConfig> buildConfigs) {

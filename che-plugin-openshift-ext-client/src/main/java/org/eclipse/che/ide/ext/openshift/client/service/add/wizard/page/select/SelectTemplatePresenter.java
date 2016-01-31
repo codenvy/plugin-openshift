@@ -35,6 +35,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
  * Presenter which handles logic for selection templates
@@ -131,7 +132,7 @@ public class SelectTemplatePresenter extends AbstractWizardPage<NewServiceReques
         return new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError promiseError) throws OperationException {
-                notificationManager.showError(locale.getListTemplatesFailed() + " " + promiseError.getMessage());
+                notificationManager.notify(locale.getListTemplatesFailed() + " " + promiseError.getMessage(), FAIL, true);
                 view.hideLoadingTemplates();
             }
         };

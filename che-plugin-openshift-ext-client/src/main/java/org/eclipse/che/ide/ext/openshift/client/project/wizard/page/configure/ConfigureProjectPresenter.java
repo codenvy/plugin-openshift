@@ -19,6 +19,7 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
@@ -46,6 +47,7 @@ public class ConfigureProjectPresenter extends AbstractWizardPage<NewApplication
     private final ProjectServiceClient          projectServiceClient;
     private final DtoFactory                    dtoFactory;
     private final OpenshiftLocalizationConstant locale;
+    private final AppContext                    appContext;
     private       List<String>                  openShiftProjects;
     private       List<String>                  cheProjects;
 
@@ -54,12 +56,14 @@ public class ConfigureProjectPresenter extends AbstractWizardPage<NewApplication
                                      OpenshiftServiceClient openShiftClient,
                                      ProjectServiceClient projectServiceClient,
                                      DtoFactory dtoFactory,
-                                     OpenshiftLocalizationConstant locale) {
+                                     OpenshiftLocalizationConstant locale,
+                                     AppContext appContext) {
         this.view = view;
         this.openShiftClient = openShiftClient;
         this.projectServiceClient = projectServiceClient;
         this.dtoFactory = dtoFactory;
         this.locale = locale;
+        this.appContext = appContext;
         openShiftProjects = new ArrayList<>();
         cheProjects = new ArrayList<>();
         view.setDelegate(this);
@@ -83,7 +87,7 @@ public class ConfigureProjectPresenter extends AbstractWizardPage<NewApplication
             }
         });
 
-        projectServiceClient.getProjects(false).then(new Operation<List<ProjectConfigDto>>() {
+        projectServiceClient.getProjects(appContext.getWorkspaceId(), false).then(new Operation<List<ProjectConfigDto>>() {
             @Override
             public void apply(List<ProjectConfigDto> projects) throws OperationException {
                 cheProjects.clear();

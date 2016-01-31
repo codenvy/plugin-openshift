@@ -29,6 +29,9 @@ import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConst
 
 import javax.validation.constraints.NotNull;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
+
 /**
  * Presenter for new application request.
  *
@@ -107,7 +110,7 @@ public class CreateProjectPresenter implements Wizard.UpdateDelegate, CreateProj
                 view.animateCreateButton(false);
                 view.setBlocked(false);
 
-                notificationManager.showInfo(locale.createFromTemplateSuccess());
+                notificationManager.notify(locale.createFromTemplateSuccess(), SUCCESS, true);
                 view.closeWizard();
 
                 Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -126,7 +129,7 @@ public class CreateProjectPresenter implements Wizard.UpdateDelegate, CreateProj
                 view.setBlocked(false);
 
                 String message = e.getMessage() != null ? e.getMessage() : locale.createFromTemplateFailed();
-                notificationManager.showError(message);
+                notificationManager.notify(message, FAIL, true);
             }
         });
     }

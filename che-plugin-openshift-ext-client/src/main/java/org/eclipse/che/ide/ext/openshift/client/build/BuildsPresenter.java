@@ -16,14 +16,14 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
+
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.ide.api.notification.Notification;
-import static org.eclipse.che.ide.api.notification.Notification.Status.FINISHED;
-import static org.eclipse.che.ide.api.notification.Notification.Status.PROGRESS;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
@@ -33,13 +33,7 @@ import org.eclipse.che.ide.ext.openshift.client.OpenshiftWebSocketPathProvider;
 import org.eclipse.che.ide.ext.openshift.client.dto.BuildChangeEvent;
 import org.eclipse.che.ide.ext.openshift.client.oauth.OAuthTokenChangedEvent;
 import org.eclipse.che.ide.ext.openshift.client.oauth.OAuthTokenChangedHandler;
-import org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Build;
-import static org.eclipse.che.ide.ext.openshift.shared.dto.BuildStatus.Phase.Complete;
-import static org.eclipse.che.ide.ext.openshift.shared.dto.BuildStatus.Phase.Failed;
-import static org.eclipse.che.ide.ext.openshift.shared.dto.BuildStatus.Phase.New;
-import static org.eclipse.che.ide.ext.openshift.shared.dto.BuildStatus.Phase.Pending;
-import static org.eclipse.che.ide.ext.openshift.shared.dto.BuildStatus.Phase.Running;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.websocket.WebSocket;
 import org.eclipse.che.ide.websocket.events.ConnectionErrorHandler;
@@ -49,6 +43,16 @@ import org.eclipse.che.ide.websocket.events.MessageReceivedHandler;
 
 import java.util.HashMap;
 import java.util.List;
+
+import static org.eclipse.che.ide.ext.openshift.shared.dto.BuildStatus.Phase.Complete;
+import static org.eclipse.che.ide.ext.openshift.shared.dto.BuildStatus.Phase.Failed;
+import static org.eclipse.che.ide.ext.openshift.shared.dto.BuildStatus.Phase.New;
+import static org.eclipse.che.ide.ext.openshift.shared.dto.BuildStatus.Phase.Pending;
+import static org.eclipse.che.ide.ext.openshift.shared.dto.BuildStatus.Phase.Running;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
 
 /**
  * Manages OpenShift builds.
@@ -61,13 +65,14 @@ import java.util.List;
 @Singleton
 public class BuildsPresenter extends BasePresenter implements BuildsView.ActionDelegate, OAuthTokenChangedHandler {
 
-    private final BuildsView view;
-    private final WorkspaceAgent workspaceAgent;
-    private final DtoFactory dtoFactory;
-    private final NotificationManager notificationManager;
-    private final OpenshiftLocalizationConstant locale;
-    private final ProjectServiceClient projectServiceClient;
+    private final BuildsView                     view;
+    private final WorkspaceAgent                 workspaceAgent;
+    private final DtoFactory                     dtoFactory;
+    private final NotificationManager            notificationManager;
+    private final OpenshiftLocalizationConstant  locale;
+    private final ProjectServiceClient           projectServiceClient;
     private final OpenshiftWebSocketPathProvider wsPathProvider;
+    private final AppContext                     appContext;
 
     private String webSocketBasePath = null;
 
@@ -80,7 +85,7 @@ public class BuildsPresenter extends BasePresenter implements BuildsView.ActionD
     private HashMap<String, LogsWatcher> logsWatchers = new HashMap<>();
 
     /** A set of notifications */
-    private HashMap<String, Notification> notifications = new HashMap<>();
+    private HashMap<String, StatusNotification> notifications = new HashMap<>();
 
     @Inject
     public BuildsPresenter(final BuildsView view,
@@ -90,7 +95,8 @@ public class BuildsPresenter extends BasePresenter implements BuildsView.ActionD
                            final DtoFactory dtoFactory,
                            final NotificationManager notificationManager,
                            final OpenshiftLocalizationConstant locale,
-                           final ProjectServiceClient projectServiceClient) {
+                           final ProjectServiceClient projectServiceClient,
+                           final AppContext appContext) {
         this.view = view;
         this.workspaceAgent = workspaceAgent;
         this.dtoFactory = dtoFactory;
@@ -98,6 +104,7 @@ public class BuildsPresenter extends BasePresenter implements BuildsView.ActionD
         this.locale = locale;
         this.projectServiceClient = projectServiceClient;
         this.wsPathProvider = wsPathProvider;
+        this.appContext = appContext;
 
         view.setDelegate(this);
 
@@ -139,7 +146,7 @@ public class BuildsPresenter extends BasePresenter implements BuildsView.ActionD
      * Checks workspace projects for being deployed on OpenShift and starts observation for builds for that projects.
      */
     private void checkWorkspaceProjects() {
-        projectServiceClient.getProjects(false).then(new Operation<List<ProjectConfigDto>>() {
+        projectServiceClient.getProjects(appContext.getWorkspaceId(), false).then(new Operation<List<ProjectConfigDto>>() {
             @Override
             public void apply(List<ProjectConfigDto> projects) throws OperationException {
                 for (ProjectConfigDto project : projects) {
@@ -147,7 +154,7 @@ public class BuildsPresenter extends BasePresenter implements BuildsView.ActionD
                         continue;
                     }
 
-                    List<String> namespaces = project.getAttributes().get(OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME);
+                    List<String> namespaces = project.getAttributes().get(OPENSHIFT_NAMESPACE_VARIABLE_NAME);
                     if (namespaces == null || namespaces.isEmpty()) {
                         continue;
                     }
@@ -232,8 +239,8 @@ public class BuildsPresenter extends BasePresenter implements BuildsView.ActionD
         String buildId = build.getMetadata().getNamespace() + "/" + build.getMetadata().getName();
 
         if (!notifications.containsKey(buildId)) {
-            Notification notification = new Notification(locale.buildStatusRunning(buildId), PROGRESS);
-            notificationManager.showNotification(notification);
+            StatusNotification notification = new StatusNotification(locale.buildStatusRunning(buildId), PROGRESS, true);
+            notificationManager.notify(notification);
             notifications.put(buildId, notification);
         }
     }
@@ -255,12 +262,12 @@ public class BuildsPresenter extends BasePresenter implements BuildsView.ActionD
         }
 
         if (notifications.containsKey(buildId)) {
-            Notification notification = notifications.get(buildId);
-            notification.setMessage(locale.buildStatusRunning(buildId));
+            StatusNotification notification = notifications.get(buildId);
+            notification.setTitle(locale.buildStatusRunning(buildId));
             notification.setStatus(PROGRESS);
         } else {
-            Notification notification = new Notification(locale.buildStatusRunning(buildId), PROGRESS);
-            notificationManager.showNotification(notification);
+            StatusNotification notification = new StatusNotification(locale.buildStatusRunning(buildId), PROGRESS, true);
+            notificationManager.notify(notification);
             notifications.put(buildId, notification);
         }
     }
@@ -275,10 +282,10 @@ public class BuildsPresenter extends BasePresenter implements BuildsView.ActionD
         String buildId = build.getMetadata().getNamespace() + "/" + build.getMetadata().getName();
 
         if (notifications.containsKey(buildId)) {
-            Notification notification = notifications.get(buildId);
-            notification.setMessage(locale.buildStatusCompleted(buildId.toString()));
-            notification.setStatus(FINISHED);
-            notificationManager.showNotification(notification);
+            StatusNotification notification = notifications.get(buildId);
+            notification.setTitle(locale.buildStatusCompleted(buildId));
+            notification.setStatus(SUCCESS);
+            notificationManager.notify(notification);
             notifications.remove(buildId);
         }
     }
@@ -293,11 +300,11 @@ public class BuildsPresenter extends BasePresenter implements BuildsView.ActionD
         String buildId = build.getMetadata().getNamespace() + "/" + build.getMetadata().getName();
 
         if (notifications.containsKey(buildId)) {
-            Notification notification = notifications.get(buildId);
-            notification.setMessage(locale.buildStatusFailed(buildId.toString()));
-            notification.setType(Notification.Type.ERROR);
+            StatusNotification notification = notifications.get(buildId);
+            notification.setTitle(locale.buildStatusFailed(buildId));
+            notification.setStatus(FAIL);
 
-            notificationManager.showNotification(notification);
+            notificationManager.notify(notification);
             notifications.remove(buildId);
         }
     }
@@ -448,7 +455,8 @@ public class BuildsPresenter extends BasePresenter implements BuildsView.ActionD
 
             String namespace = build.getMetadata().getNamespace();
             String buildName = build.getMetadata().getName();
-            webSocket = WebSocket.create(webSocketBasePath + "/namespaces/" + namespace + "/builds/" + buildName + "/log?follow=true&tailLines=1000&limitBytes=10485760&access_token=" + oauthToken);
+            webSocket = WebSocket.create(webSocketBasePath + "/namespaces/" + namespace + "/builds/" + buildName +
+                                         "/log?follow=true&tailLines=1000&limitBytes=10485760&access_token=" + oauthToken);
             webSocket.setOnMessageHandler(LogsWatcher.this);
         }
 

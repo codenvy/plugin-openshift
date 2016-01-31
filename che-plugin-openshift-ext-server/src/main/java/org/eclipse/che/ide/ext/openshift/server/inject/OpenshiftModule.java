@@ -13,7 +13,7 @@ package org.eclipse.che.ide.ext.openshift.server.inject;
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 
-import org.eclipse.che.api.core.model.project.type.ProjectType;
+import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.ide.ext.openshift.server.OpenshiftProjectType;
 import org.eclipse.che.ide.ext.openshift.server.rest.BuildConfigService;
 import org.eclipse.che.ide.ext.openshift.server.rest.BuildService;
@@ -45,7 +45,7 @@ public class OpenshiftModule extends AbstractModule {
         bind(ReplicationControllerService.class);
         bind(OpenshiftExceptionMapper.class);
 
-        final Multibinder<ProjectType> projectTypeMultibinder = Multibinder.newSetBinder(binder(), ProjectType.class);
+        final Multibinder<ProjectTypeDef> projectTypeMultibinder = Multibinder.newSetBinder(binder(), ProjectTypeDef.class);
         projectTypeMultibinder.addBinding().to(OpenshiftProjectType.class);
     }
 }

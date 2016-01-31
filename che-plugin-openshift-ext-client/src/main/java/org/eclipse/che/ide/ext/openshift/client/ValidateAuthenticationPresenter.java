@@ -11,12 +11,14 @@
 package org.eclipse.che.ide.ext.openshift.client;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.inject.Inject;
 
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.ext.openshift.client.oauth.OpenshiftAuthenticator;
 import org.eclipse.che.ide.ext.openshift.client.oauth.OpenshiftAuthorizationHandler;
 import org.eclipse.che.security.oauth.OAuthStatus;
+
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
  * @author Ann Shumilova
@@ -50,13 +52,13 @@ public abstract class ValidateAuthenticationPresenter {
                     }
 
                     openshiftAuthorizationHandler.registerLogin();
-                    notificationManager.showInfo(locale.loginSuccessful());
+                    notificationManager.notify(locale.loginSuccessful(), SUCCESS, true);
                     onSuccessAuthentication();
                 }
 
                 @Override
                 public void onFailure(Throwable caught) {
-                    notificationManager.showError(locale.loginFailed());
+                    notificationManager.notify(locale.loginFailed(), FAIL, true);
                 }
             });
         }

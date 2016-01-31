@@ -34,6 +34,7 @@ import java.util.List;
 
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_APPLICATION_VARIABLE_NAME;
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
  * Presenter for viewing and editing build config (webhooks, source).
@@ -147,7 +148,7 @@ public class BuildConfigPresenter implements ConfigPresenter, BuildConfigView.Ac
             @Override
             public void apply(PromiseError arg) throws OperationException {
                 final ServiceError serviceError = dtoFactory.createDtoFromJson(arg.getMessage(), ServiceError.class);
-                notificationManager.showError(serviceError.getMessage());
+                notificationManager.notify(serviceError.getMessage(), FAIL, true);
             }
         };
     }
@@ -200,8 +201,8 @@ public class BuildConfigPresenter implements ConfigPresenter, BuildConfigView.Ac
     public void onSourceDataChanged() {
         BuildSource buildSource = buildConfig.getSpec().getSource();
         boolean changed = !(buildSource.getContextDir().equals(view.getSourceContextDir()) &&
-                           buildSource.getGit().getRef().equals(view.getSourceReference()) &&
-                           buildSource.getGit().getUri().equals(view.getSourceUrl()));
+                            buildSource.getGit().getRef().equals(view.getSourceReference()) &&
+                            buildSource.getGit().getUri().equals(view.getSourceUrl()));
         view.enableSaveButton(changed);
         view.enableRestoreButton(changed);
     }
