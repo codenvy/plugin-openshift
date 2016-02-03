@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2015 Codenvy, S.A.
+ * Copyright (c) 2012-2016 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,13 +15,15 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
-import org.eclipse.che.ide.api.notification.Notification;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftResources;
 import org.eclipse.che.security.oauth.OAuthStatus;
 
 import javax.inject.Inject;
+
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 
 /**
  * @author Sergii Leschenko
@@ -55,12 +57,12 @@ public class ConnectAccountAction extends Action {
                     return;
                 }
                 openshiftAuthorizationHandler.registerLogin();
-                notificationManager.showInfo(locale.loginSuccessful());
+                notificationManager.notify(locale.loginSuccessful(), SUCCESS, true);
             }
 
             @Override
             public void onFailure(Throwable caught) {
-                notificationManager.showError(locale.loginFailed());
+                notificationManager.notify(locale.loginFailed(), FAIL, true);
             }
         });
     }

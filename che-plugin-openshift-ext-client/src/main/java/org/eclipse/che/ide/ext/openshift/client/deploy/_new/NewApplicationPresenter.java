@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2015 Codenvy, S.A.
+ * Copyright (c) 2012-2016 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,6 @@ package org.eclipse.che.ide.ext.openshift.client.deploy._new;
 import com.google.common.collect.Lists;
 import com.google.gwt.core.client.JsArrayMixed;
 import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
@@ -28,7 +27,6 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.RequestCall;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -75,8 +73,6 @@ import org.eclipse.che.ide.ext.openshift.shared.dto.ServicePort;
 import org.eclipse.che.ide.ext.openshift.shared.dto.ServiceSpec;
 import org.eclipse.che.ide.ext.openshift.shared.dto.SourceBuildStrategy;
 import org.eclipse.che.ide.ext.openshift.shared.dto.WebHookTrigger;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.util.Pair;
 
@@ -93,13 +89,13 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonMap;
 import static java.util.Collections.unmodifiableList;
-import static org.eclipse.che.api.promises.client.callback.PromiseHelper.newCallback;
-import static org.eclipse.che.api.promises.client.callback.PromiseHelper.newPromise;
 import static org.eclipse.che.ide.ext.openshift.client.deploy._new.NewApplicationView.Mode.CREATE_NEW_PROJECT;
 import static org.eclipse.che.ide.ext.openshift.client.deploy._new.NewApplicationView.Mode.SELECT_EXISTING_PROJECT;
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_APPLICATION_VARIABLE_NAME;
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 
 /**
  * Presenter for deploying Che project to new OpenShift application.
@@ -113,7 +109,6 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
     private final DialogFactory                 dialogFactory;
     private final OpenshiftLocalizationConstant locale;
     private final GitServiceClient              gitService;
-    private final DtoUnmarshallerFactory        dtoUnmarshaller;
     private final OpenshiftServiceClient        osService;
     private final DtoFactory                    dtoFactory;
     private final ProjectServiceClient          projectService;
@@ -135,7 +130,6 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
                                    DialogFactory dialogFactory,
                                    OpenshiftLocalizationConstant locale,
                                    GitServiceClient gitService,
-                                   DtoUnmarshallerFactory dtoUnmarshaller,
                                    OpenshiftServiceClient osService,
                                    DtoFactory dtoFactory,
                                    ProjectServiceClient projectService,
@@ -150,7 +144,6 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
         this.dialogFactory = dialogFactory;
         this.locale = locale;
         this.gitService = gitService;
-        this.dtoUnmarshaller = dtoUnmarshaller;
         this.osService = osService;
         this.dtoFactory = dtoFactory;
         this.projectService = projectService;
@@ -205,26 +198,26 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
     }
 
     private void getGitRemoteRepositories(final ProjectConfigDto projectConfig) {
-        gitService.remoteList(projectConfig, null, true,
-                              new AsyncRequestCallback<List<Remote>>(dtoUnmarshaller.newListUnmarshaller(Remote.class)) {
-                                  @Override
-                                  protected void onSuccess(List<Remote> result) {
-                                      if (!result.isEmpty()) {
-                                          projectRemotes = unmodifiableList(result);
-                                          loadOpenShiftData();
-                                      } else {
-                                          dialogFactory.createMessageDialog(locale.noGitRemoteRepositoryWarningTitle(),
-                                                                            locale.noGitRemoteRepositoryWarning(
-                                                                                    projectConfig.getName()),
-                                                                            null).show();
-                                      }
-                                  }
-
-                                  @Override
-                                  protected void onFailure(Throwable exception) {
-                                      notificationManager.showError(locale.getGitRemoteRepositoryError(projectConfig.getName()));
-                                  }
-                              });
+        gitService.remoteList(appContext.getWorkspaceId(), projectConfig, null, true)
+                  .then(new Operation<List<Remote>>() {
+                      @Override
+                      public void apply(List<Remote> result) throws OperationException {
+                          if (!result.isEmpty()) {
+                              projectRemotes = unmodifiableList(result);
+                              loadOpenShiftData();
+                          } else {
+                              dialogFactory.createMessageDialog(locale.noGitRemoteRepositoryWarningTitle(),
+                                                                locale.noGitRemoteRepositoryWarning(projectConfig.getName()),
+                                                                null).show();
+                          }
+                      }
+                  })
+                  .catchError(new Operation<PromiseError>() {
+                      @Override
+                      public void apply(PromiseError arg) throws OperationException {
+                          notificationManager.notify(locale.getGitRemoteRepositoryError(projectConfig.getName()), FAIL, true);
+                      }
+                  });
     }
 
     private void loadOpenShiftData() {
@@ -332,7 +325,9 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
                                 view.showLoader(false);
                                 view.hide();
                                 notificationManager
-                                        .showInfo(locale.deployProjectSuccess(appContext.getCurrentProject().getRootProject().getName()));
+                                        .notify(locale.deployProjectSuccess(appContext.getCurrentProject().getRootProject().getName()),
+                                                SUCCESS,
+                                                true);
                                 setupMixin(project);
                             }
                         })
@@ -354,7 +349,7 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
     private void handleError(PromiseError error) {
         view.showLoader(false);
         final ServiceError serviceError = dtoFactory.createDtoFromJson(error.getMessage(), ServiceError.class);
-        notificationManager.showError(serviceError.getMessage());
+        notificationManager.notify(serviceError.getMessage(), FAIL, true);
         view.showError(serviceError.getMessage());
     }
 
@@ -370,26 +365,23 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
         attributes.put(OPENSHIFT_APPLICATION_VARIABLE_NAME, newArrayList(osAppName));
         attributes.put(OPENSHIFT_NAMESPACE_VARIABLE_NAME, newArrayList(project.getMetadata().getName()));
 
-        newPromise(new RequestCall<ProjectConfigDto>() {
-            @Override
-            public void makeCall(AsyncCallback<ProjectConfigDto> callback) {
-                projectService.updateProject(projectConfig.getPath(),
-                                             projectConfig,
-                                             newCallback(callback, dtoUnmarshaller.newUnmarshaller(ProjectConfigDto.class)));
-            }
-        }).then(new Operation<ProjectConfigDto>() {
-            @Override
-            public void apply(ProjectConfigDto project) throws OperationException {
-                eventBus.fireEvent(new ProjectUpdatedEvent(projectConfig.getPath(), project));
-                notificationManager.showInfo(locale.linkProjectWithExistingSuccess(projectConfig.getName(), osAppName));
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError arg) throws OperationException {
-                final ServiceError serviceError = dtoFactory.createDtoFromJson(arg.getMessage(), ServiceError.class);
-                notificationManager.showError(serviceError.getMessage());
-            }
-        });
+        projectService.updateProject(appContext.getWorkspaceId(), projectConfig.getPath(), projectConfig)
+                      .then(new Operation<ProjectConfigDto>() {
+                          @Override
+                          public void apply(ProjectConfigDto project) throws OperationException {
+                              eventBus.fireEvent(new ProjectUpdatedEvent(projectConfig.getPath(), project));
+                              notificationManager.notify(locale.linkProjectWithExistingSuccess(projectConfig.getName(), osAppName),
+                                                         SUCCESS,
+                                                         true);
+                          }
+                      })
+                      .catchError(new Operation<PromiseError>() {
+                          @Override
+                          public void apply(PromiseError arg) throws OperationException {
+                              final ServiceError serviceError = dtoFactory.createDtoFromJson(arg.getMessage(), ServiceError.class);
+                              notificationManager.notify(serviceError.getMessage(), FAIL, true);
+                          }
+                      });
     }
 
     private Promise<ImageStreamTag> setActiveImageTag(final ImageStream stream) {

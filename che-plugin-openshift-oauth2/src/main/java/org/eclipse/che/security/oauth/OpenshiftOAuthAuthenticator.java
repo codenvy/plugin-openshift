@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2015 Codenvy, S.A.
+ * Copyright (c) 2012-2016 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.eclipse.che.security.oauth;
 import com.google.api.client.util.store.MemoryDataStoreFactory;
 
 import org.eclipse.che.api.auth.shared.dto.OAuthToken;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.json.JsonHelper;
 import org.eclipse.che.commons.json.JsonParseException;
 import org.eclipse.che.ide.ext.openshift.shared.dto.User;
@@ -44,13 +45,19 @@ public class OpenshiftOAuthAuthenticator extends OAuthAuthenticator {
     private final String openshiftApiEndpoint;
 
     @Inject
-    public OpenshiftOAuthAuthenticator(@Named("oauth.openshift.clientid") String clientId,
-                                       @Named("oauth.openshift.clientsecret") String clientSecret,
-                                       @Named("oauth.openshift.redirecturis") String[] redirectUris,
-                                       @Named("oauth.openshift.authuri") String authUri,
-                                       @Named("oauth.openshift.tokenuri") String tokenUri,
-                                       @Named("openshift.api.endpoint") String openshiftApiEndpoint) throws IOException {
-        super(clientId, clientSecret, redirectUris, authUri, tokenUri, new MemoryDataStoreFactory());
+    public OpenshiftOAuthAuthenticator(@Nullable @Named("oauth.openshift.clientid") String clientId,
+                                       @Nullable @Named("oauth.openshift.clientsecret") String clientSecret,
+                                       @Nullable @Named("oauth.openshift.redirecturis") String[] redirectUris,
+                                       @Nullable @Named("oauth.openshift.authuri") String authUri,
+                                       @Nullable @Named("oauth.openshift.tokenuri") String tokenUri,
+                                       @Nullable @Named("openshift.api.endpoint") String openshiftApiEndpoint) throws IOException {
+        if (!isNullOrEmpty(clientId)
+            && !isNullOrEmpty(clientSecret)
+            && !isNullOrEmpty(authUri)
+            && !isNullOrEmpty(tokenUri)
+            && redirectUris != null && redirectUris.length != 0) {
+            configure(clientId, clientSecret, redirectUris, authUri, tokenUri, new MemoryDataStoreFactory());
+        }
         this.openshiftApiEndpoint = openshiftApiEndpoint;
     }
 

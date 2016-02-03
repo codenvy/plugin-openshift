@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2015 Codenvy, S.A.
+ * Copyright (c) 2012-2016 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -85,6 +85,12 @@ public class BuildsViewImpl extends BaseView<BuildsView.ActionDelegate> implemen
 
         String loggerLines();
 
+        /** Progress loading icons */
+        String progress();
+
+        String success();
+
+        String error();
     }
 
     private Resources ideResources;
@@ -416,11 +422,11 @@ public class BuildsViewImpl extends BaseView<BuildsView.ActionDelegate> implemen
             if (New.equals(build.getStatus().getPhase()) ||
                     Pending.equals(build.getStatus().getPhase()) ||
                     Running.equals(build.getStatus().getPhase())) {
-                setIcon(ideResources.progress(), ideResources.notificationCss().progress());
+                setIcon(ideResources.progress(), style.progress());//todo need check style
             } else if (Complete.equals(build.getStatus().getPhase())) {
-                setIcon(ideResources.success(), ideResources.notificationCss().success());
+                setIcon(ideResources.success(), style.success());
             } else if (Failed.equals(build.getStatus().getPhase())) {
-                setIcon(ideResources.error(), ideResources.notificationCss().error());
+                setIcon(ideResources.fail(), style.error());
             }
         }
 

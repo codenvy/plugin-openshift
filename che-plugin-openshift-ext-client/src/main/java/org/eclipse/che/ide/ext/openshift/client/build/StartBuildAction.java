@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2015 Codenvy, S.A.
+ * Copyright (c) 2012-2016 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,6 +38,7 @@ import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConst
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
  * @author Sergii Leschenko
@@ -98,7 +99,7 @@ public class StartBuildAction extends AbstractPerspectiveAction {
                         .catchError(new Operation<PromiseError>() {
                             @Override
                             public void apply(PromiseError arg) throws OperationException {
-                                notificationManager.showError(locale.startBuildError() + " " + arg.getMessage());
+                                notificationManager.notify(locale.startBuildError() + " " + arg.getMessage(), FAIL, true);
                             }
                         });
     }

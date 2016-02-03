@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2015 Codenvy, S.A.
+ * Copyright (c) 2012-2016 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,7 +17,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
 import org.eclipse.che.api.project.gwt.client.ProjectTypeServiceClient;
-import org.eclipse.che.api.project.shared.dto.ProjectTypeDefinition;
+import org.eclipse.che.api.project.shared.dto.ProjectTypeDto;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Operation;
@@ -26,10 +26,12 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.event.ConfigureProjectEvent;
 import org.eclipse.che.ide.api.event.project.CreateProjectEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.project.wizard.ImportProjectNotificationSubscriber;
+import org.eclipse.che.ide.api.project.wizard.ImportProjectNotificationSubscriberFactory;
+import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftServiceClient;
@@ -41,19 +43,18 @@ import org.eclipse.che.ide.ext.openshift.client.oauth.OpenshiftAuthenticator;
 import org.eclipse.che.ide.ext.openshift.client.oauth.OpenshiftAuthorizationHandler;
 import org.eclipse.che.ide.ext.openshift.client.util.OpenshiftValidator;
 import org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants;
-import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
 import org.eclipse.che.ide.ext.openshift.shared.dto.BuildConfig;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Project;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.rest.Unmarshallable;
-import org.eclipse.che.ide.websocket.rest.RequestCallback;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
+import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_APPLICATION_VARIABLE_NAME;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
  * Presenter, which handles logic for importing OpenShift application to Che.
@@ -63,22 +64,22 @@ import java.util.Map;
  */
 public class ImportApplicationPresenter extends ValidateAuthenticationPresenter implements ImportApplicationView.ActionDelegate {
 
-    private final ImportApplicationView               view;
-    private final OpenshiftLocalizationConstant       locale;
-    private final OpenshiftServiceClient              openShiftClient;
-    private final ProjectServiceClient                projectServiceClient;
-    private final DtoFactory                          dtoFactory;
-    private final ImportProjectNotificationSubscriber importProjectNotificationSubscriber;
-    private final DtoUnmarshallerFactory              dtoUnmarshallerFactory;
-    private final EventBus                            eventBus;
-    private final List<String>                        cheProjects;
-    private final List<Project>                       projectList;
-    private final Map<String, List<BuildConfig>>      buildConfigMap;
-    private final NotificationManager                 notificationManager;
-    private final BuildsPresenter                     buildsPresenter;
-    private final ApplicationManager                  applicationManager;
-    private       BuildConfig                         selectedBuildConfig;
-    private       ProjectTypeServiceClient            projectTypeServiceClient;
+    private final ImportApplicationView          view;
+    private final OpenshiftLocalizationConstant  locale;
+    private final OpenshiftServiceClient         openShiftClient;
+    private final ProjectServiceClient           projectServiceClient;
+    private final DtoFactory                     dtoFactory;
+    private final ProjectNotificationSubscriber  importProjectNotificationSubscriber;
+    private final EventBus                       eventBus;
+    private final List<String>                   cheProjects;
+    private final List<Project>                  projectList;
+    private final Map<String, List<BuildConfig>> buildConfigMap;
+    private final NotificationManager            notificationManager;
+    private final BuildsPresenter                buildsPresenter;
+    private final ApplicationManager             applicationManager;
+    private final AppContext                     appContext;
+    private       BuildConfig                    selectedBuildConfig;
+    private       ProjectTypeServiceClient       projectTypeServiceClient;
 
 
     @Inject
@@ -86,15 +87,15 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
                                       OpenshiftServiceClient openShiftClient,
                                       ProjectServiceClient projectServiceClient,
                                       ProjectTypeServiceClient projectTypeServiceClient,
-                                      DtoUnmarshallerFactory dtoUnmarshallerFactory,
                                       NotificationManager notificationManager,
                                       OpenshiftAuthenticator openshiftAuthenticator,
                                       OpenshiftAuthorizationHandler openshiftAuthorizationHandler,
-                                      ImportProjectNotificationSubscriber importProjectNotificationSubscriber,
+                                      ImportProjectNotificationSubscriberFactory importProjectNotificationSubscriberFactory,
                                       EventBus eventBus,
                                       DtoFactory dtoFactory,
                                       BuildsPresenter buildsPresenter,
-                                      ApplicationManager applicationManager) {
+                                      ApplicationManager applicationManager,
+                                      AppContext appContext) {
         super(openshiftAuthenticator, openshiftAuthorizationHandler, locale, notificationManager);
         this.view = view;
         this.applicationManager = applicationManager;
@@ -102,13 +103,13 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
         this.openShiftClient = openShiftClient;
         this.projectServiceClient = projectServiceClient;
         this.projectTypeServiceClient = projectTypeServiceClient;
-        this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.dtoFactory = dtoFactory;
         this.notificationManager = notificationManager;
-        this.importProjectNotificationSubscriber = importProjectNotificationSubscriber;
+        this.importProjectNotificationSubscriber = importProjectNotificationSubscriberFactory.createSubscriber();
         this.eventBus = eventBus;
         this.locale = locale;
         this.buildsPresenter = buildsPresenter;
+        this.appContext = appContext;
         projectList = new ArrayList<>();
         buildConfigMap = new HashMap<>();
         cheProjects = new ArrayList<>();
@@ -146,7 +147,7 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
      * Load che projects for following verifications.
      */
     private void loadCheProjects() {
-        projectServiceClient.getProjects(false).then(new Operation<List<ProjectConfigDto>>() {
+        projectServiceClient.getProjects(appContext.getWorkspaceId(), false).then(new Operation<List<ProjectConfigDto>>() {
             @Override
             public void apply(List<ProjectConfigDto> result) throws OperationException {
                 cheProjects.clear();
@@ -164,7 +165,7 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
             @Override
             public void apply(PromiseError arg) throws OperationException {
                 final ServiceError serviceError = dtoFactory.createDtoFromJson(arg.getMessage(), ServiceError.class);
-                notificationManager.showError(serviceError.getMessage());
+                notificationManager.notify(serviceError.getMessage(), FAIL, true);
             }
         };
     }
@@ -244,11 +245,9 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
         }
 
         Map<String, List<String>> attributes = new HashMap<String, List<String>>();
-        attributes.put(OpenshiftProjectTypeConstants.OPENSHIFT_APPLICATION_VARIABLE_NAME, Arrays.asList(
-                selectedBuildConfig.getMetadata().getName()));
+        attributes.put(OPENSHIFT_APPLICATION_VARIABLE_NAME, Arrays.asList(selectedBuildConfig.getMetadata().getName()));
 
-        attributes.put(OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME, Arrays.asList(
-                selectedBuildConfig.getMetadata().getNamespace()));
+        attributes.put(OPENSHIFT_NAMESPACE_VARIABLE_NAME, Arrays.asList(selectedBuildConfig.getMetadata().getNamespace()));
 
         projectConfig.withMixins(Arrays.asList(OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID))
                      .withAttributes(attributes);
@@ -261,18 +260,19 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
         importProjectNotificationSubscriber.subscribe(view.getProjectName());
 
         try {
-            projectServiceClient.importProject(view.getProjectName(), false, projectConfig.getSource(), new RequestCallback<Void>(
-                    dtoUnmarshallerFactory.newWSUnmarshaller(Void.class)) {
-                @Override
-                protected void onSuccess(final Void result) {
-                    resolveProject(projectConfig);
-                }
-
-                @Override
-                protected void onFailure(Throwable exception) {
-                    createProjectFailure(exception);
-                }
-            });
+            projectServiceClient.importProject(appContext.getWorkspaceId(), view.getProjectName(), false, projectConfig.getSource())
+                                .then(new Operation<Void>() {
+                                    @Override
+                                    public void apply(Void arg) throws OperationException {
+                                        resolveProject(projectConfig);
+                                    }
+                                })
+                                .catchError(new Operation<PromiseError>() {
+                                    @Override
+                                    public void apply(PromiseError promiseError) throws OperationException {
+                                        createProjectFailure(promiseError.getCause());
+                                    }
+                                });
         } catch (Exception e) {
             createProjectFailure(e);
         }
@@ -286,29 +286,32 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
      */
     private void resolveProject(final ProjectConfigDto projectConfig) {
         final String projectName = projectConfig.getName();
-        Unmarshallable<List<SourceEstimation>> unmarshaller = dtoUnmarshallerFactory.newListUnmarshaller(SourceEstimation.class);
-        projectServiceClient.resolveSources(projectName, new AsyncRequestCallback<List<SourceEstimation>>(unmarshaller) {
-            @Override
-            protected void onSuccess(List<SourceEstimation> result) {
-                for (SourceEstimation estimation : result) {
-                    final Promise<ProjectTypeDefinition> projectTypePromise = projectTypeServiceClient.getProjectType(estimation.getType());
-                    projectTypePromise.then(new Operation<ProjectTypeDefinition>() {
-                        @Override
-                        public void apply(ProjectTypeDefinition arg) throws OperationException {
-                            if (arg.getPrimaryable()) {
-                                updateProject(projectConfig.withType(arg.getId()));
-                            }
-                        }
-                    });
-                }
-            }
-
-            @Override
-            protected void onFailure(Throwable exception) {
-                importProjectNotificationSubscriber.onFailure(exception.getMessage());
-                createProjectFailure(exception);
-            }
-        });
+        final String workspaceId = appContext.getWorkspaceId();
+        projectServiceClient.resolveSources(workspaceId, projectName)
+                            .then(new Operation<List<SourceEstimation>>() {
+                                @Override
+                                public void apply(List<SourceEstimation> result) throws OperationException {
+                                    for (SourceEstimation estimation : result) {
+                                        final Promise<ProjectTypeDto> projectTypePromise =
+                                                projectTypeServiceClient.getProjectType(workspaceId, estimation.getType());
+                                        projectTypePromise.then(new Operation<ProjectTypeDto>() {
+                                            @Override
+                                            public void apply(ProjectTypeDto arg) throws OperationException {
+                                                if (arg.isPrimaryable()) {
+                                                    updateProject(projectConfig.withType(arg.getId()));
+                                                }
+                                            }
+                                        });
+                                    }
+                                }
+                            })
+                            .catchError(new Operation<PromiseError>() {
+                                @Override
+                                public void apply(PromiseError promiseError) throws OperationException {
+                                    importProjectNotificationSubscriber.onFailure(promiseError.getMessage());
+                                    createProjectFailure(promiseError.getCause());
+                                }
+                            });
     }
 
     /**
@@ -317,40 +320,41 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
      * @param projectConfig
      *         project config
      */
-    private void updateProject(ProjectConfigDto projectConfig) {
+    private void updateProject(final ProjectConfigDto projectConfig) {
         try {
-            projectServiceClient.updateProject(projectConfig.getName(), projectConfig, new AsyncRequestCallback<ProjectConfigDto>(
-                    dtoUnmarshallerFactory.newUnmarshaller(ProjectConfigDto.class)) {
-                @Override
-                protected void onSuccess(ProjectConfigDto result) {
-                    view.animateImportButton(false);
-                    view.setBlocked(false);
-                    view.closeView();
+            projectServiceClient.updateProject(appContext.getWorkspaceId(), projectConfig.getName(), projectConfig)
+                                .then(new Operation<ProjectConfigDto>() {
+                                    @Override
+                                    public void apply(ProjectConfigDto result) throws OperationException {
+                                        view.animateImportButton(false);
+                                        view.setBlocked(false);
+                                        view.closeView();
 
-                    final String namespace = result.getAttributes().get(OPENSHIFT_NAMESPACE_VARIABLE_NAME).get(0);
-                    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-                        @Override
-                        public void execute() {
-                            buildsPresenter.newApplicationCreated(namespace);
-                        }
-                    });
+                                        final String namespace = result.getAttributes().get(OPENSHIFT_NAMESPACE_VARIABLE_NAME).get(0);
+                                        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+                                            @Override
+                                            public void execute() {
+                                                buildsPresenter.newApplicationCreated(namespace);
+                                            }
+                                        });
 
-                    eventBus.fireEvent(new CreateProjectEvent(result));
+                                        eventBus.fireEvent(new CreateProjectEvent(result));
 
-                    if (!result.getProblems().isEmpty()) {
-                        eventBus.fireEvent(new ConfigureProjectEvent(result));
-                    }
+                                        if (!result.getProblems().isEmpty()) {
+                                            eventBus.fireEvent(new ConfigureProjectEvent(result));
+                                        }
 
-                    importProjectNotificationSubscriber.onSuccess();
+                                        importProjectNotificationSubscriber.onSuccess();
 
-                    updateApplicationLabel(selectedBuildConfig);
-                }
-
-                @Override
-                protected void onFailure(Throwable exception) {
-                    createProjectFailure(exception);
-                }
-            });
+                                        updateApplicationLabel(selectedBuildConfig);
+                                    }
+                                })
+                                .catchError(new Operation<PromiseError>() {
+                                    @Override
+                                    public void apply(PromiseError promiseError) throws OperationException {
+                                        createProjectFailure(promiseError.getCause());
+                                    }
+                                });
         } catch (Exception e) {
             createProjectFailure(e);
         }
@@ -418,8 +422,7 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
                           .thenPromise(new Function<Application, Promise<Application>>() {
                               @Override
                               public Promise<Application> apply(Application application) {
-                                  return applicationManager.updateOpenshiftApplication(application,
-                                                                                       buildConfig.getMetadata().getName());
+                                  return applicationManager.updateOpenshiftApplication(application, buildConfig.getMetadata().getName());
                               }
                           });
     }

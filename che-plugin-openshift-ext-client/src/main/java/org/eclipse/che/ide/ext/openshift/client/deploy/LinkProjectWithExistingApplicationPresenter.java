@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2015 Codenvy, S.A.
+ * Copyright (c) 2012-2016 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,8 +35,6 @@ import org.eclipse.che.ide.ext.openshift.shared.dto.BuildConfig;
 import org.eclipse.che.ide.ext.openshift.shared.dto.BuildSource;
 import org.eclipse.che.ide.ext.openshift.shared.dto.GitBuildSource;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Project;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 
 import java.util.Collections;
@@ -47,6 +45,8 @@ import java.util.Map;
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_APPLICATION_VARIABLE_NAME;
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 
 /**
  * Presenter, which handles logic for linking current project with OpenShift application.
@@ -65,7 +65,6 @@ public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthent
     private final OpenshiftServiceClient                 openShiftClient;
     private final ProjectServiceClient                   projectServiceClient;
     private final GitServiceClient                       gitService;
-    private final DtoUnmarshallerFactory                 dtoUnmarshaller;
     private final DtoFactory                             dtoFactory;
     private final Map<String, List<BuildConfig>>         buildConfigMap;
     private final ApplicationManager                     applicationManager;
@@ -76,7 +75,6 @@ public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthent
                                                        LinkProjectWithExistingApplicationView view,
                                                        OpenshiftServiceClient openShiftClient,
                                                        ProjectServiceClient projectServiceClient,
-                                                       DtoUnmarshallerFactory dtoUnmarshaller,
                                                        GitServiceClient gitService,
                                                        NotificationManager notificationManager,
                                                        DialogFactory dialogFactory,
@@ -98,7 +96,6 @@ public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthent
         this.openShiftClient = openShiftClient;
         this.projectServiceClient = projectServiceClient;
         this.gitService = gitService;
-        this.dtoUnmarshaller = dtoUnmarshaller;
         buildConfigMap = new HashMap<>();
     }
 
@@ -125,26 +122,27 @@ public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthent
      * Retrieve Git remote repositories of the current project.
      */
     private void getGitRemoteRepositories(final ProjectConfigDto project) {
-        gitService.remoteList(project, null, true,
-                              new AsyncRequestCallback<List<Remote>>(dtoUnmarshaller.newListUnmarshaller(Remote.class)) {
-                                  @Override
-                                  protected void onSuccess(List<Remote> result) {
-                                      if (!result.isEmpty()) {
-                                          view.setGitRemotes(result);
-                                          prepareView();
-                                          loadOpenShiftData();
-                                      } else {
-                                          dialogFactory.createMessageDialog(locale.noGitRemoteRepositoryWarningTitle(),
-                                                                            locale.noGitRemoteRepositoryWarning(project.getName()),
-                                                                            null).show();
-                                      }
-                                  }
-
-                                  @Override
-                                  protected void onFailure(Throwable exception) {
-                                      notificationManager.showError(locale.getGitRemoteRepositoryError(project.getName()));
-                                  }
-                              });
+        gitService.remoteList(appContext.getWorkspaceId(), project, null, true)
+                  .then(new Operation<List<Remote>>() {
+                      @Override
+                      public void apply(List<Remote> result) throws OperationException {
+                          if (!result.isEmpty()) {
+                              view.setGitRemotes(result);
+                              prepareView();
+                              loadOpenShiftData();
+                          } else {
+                              dialogFactory.createMessageDialog(locale.noGitRemoteRepositoryWarningTitle(),
+                                                                locale.noGitRemoteRepositoryWarning(project.getName()),
+                                                                null).show();
+                          }
+                      }
+                  })
+                  .catchError(new Operation<PromiseError>() {
+                      @Override
+                      public void apply(PromiseError arg) throws OperationException {
+                          notificationManager.notify(locale.getGitRemoteRepositoryError(project.getName()), FAIL, true);
+                      }
+                  });
     }
 
     /**
@@ -178,7 +176,9 @@ public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthent
                               @Override
                               public void apply(Application arg) throws OperationException {
                                   view.closeView();
-                                  notificationManager.showInfo(locale.linkProjectWithExistingUpdateBuildConfigSuccess(applicationName));
+                                  notificationManager.notify(locale.linkProjectWithExistingUpdateBuildConfigSuccess(applicationName),
+                                                             SUCCESS,
+                                                             true);
                                   markAsOpenshiftProject(selectedBuildConfig.getMetadata().getNamespace(), applicationName);
                               }
                           })
@@ -204,21 +204,22 @@ public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthent
                      .withType(projectConfig.getType())
                      .withAttributes(attributes);
 
-        projectServiceClient.updateProject(projectConfig.getPath(), projectConfig,
-                                           new AsyncRequestCallback<ProjectConfigDto>(
-                                                   dtoUnmarshaller.newUnmarshaller(ProjectConfigDto.class)) {
-                                               @Override
-                                               protected void onSuccess(ProjectConfigDto result) {
-                                                   appContext.getCurrentProject().setRootProject(result);
-                                                   notificationManager.showInfo(locale.linkProjectWithExistingSuccess(result.getName(),
-                                                                                                                      application));
-                                               }
-
-                                               @Override
-                                               protected void onFailure(Throwable exception) {
-                                                   notificationManager.showError(exception.getMessage());
-                                               }
-                                           });
+        projectServiceClient.updateProject(appContext.getWorkspaceId(), projectConfig.getPath(), projectConfig)
+                            .then(new Operation<ProjectConfigDto>() {
+                                @Override
+                                public void apply(ProjectConfigDto result) throws OperationException {
+                                    appContext.getCurrentProject().setRootProject(result);
+                                    notificationManager.notify(locale.linkProjectWithExistingSuccess(result.getName(), application),
+                                                               SUCCESS,
+                                                               true);
+                                }
+                            })
+                            .catchError(new Operation<PromiseError>() {
+                                @Override
+                                public void apply(PromiseError promiseError) throws OperationException {
+                                    notificationManager.notify(promiseError.getMessage(), FAIL, true);
+                                }
+                            });
     }
 
     @Override
@@ -281,7 +282,7 @@ public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthent
             @Override
             public void apply(PromiseError arg) throws OperationException {
                 final ServiceError serviceError = dtoFactory.createDtoFromJson(arg.getMessage(), ServiceError.class);
-                notificationManager.showError(serviceError.getMessage());
+                notificationManager.notify(serviceError.getMessage(), FAIL, true);
             }
         };
     }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2015 Codenvy, S.A.
+ * Copyright (c) 2012-2016 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,9 @@ import org.eclipse.che.ide.ext.openshift.client.OpenshiftResources;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 
 import javax.inject.Inject;
+
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 
 /**
  * @author Sergii Leschenko
@@ -51,12 +54,12 @@ public class DisconnectAccountAction extends Action {
             @Override
             protected void onSuccess(Void result) {
                 openshiftAuthorizationHandler.registerLogout();
-                notificationManager.showInfo(locale.logoutSuccessful());
+                notificationManager.notify(locale.logoutSuccessful(), SUCCESS, true);
             }
 
             @Override
             protected void onFailure(Throwable exception) {
-                notificationManager.showError(locale.logoutFailed());
+                notificationManager.notify(locale.logoutFailed(), FAIL, true);
             }
         });
     }
