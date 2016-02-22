@@ -14,13 +14,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>maven-depmgt-pom</artifactId>
-        <groupId>org.eclipse.che.depmgt</groupId>
-        <version>4.0.0-RC1-SNAPSHOT</version>
+        <artifactId>che-parent</artifactId>
+        <groupId>org.eclipse.che</groupId>
+        <version>4.0.0-RC6-SNAPSHOT</version>
     </parent>
     <groupId>org.eclipse.che.plugin</groupId>
     <artifactId>che-plugin-openshift-parent</artifactId>
-    <version>4.0.0-RC1-SNAPSHOT</version>
+    <version>4.0.0-RC6-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Che Plugin :: Openshift :: Parent</name>
     <modules>

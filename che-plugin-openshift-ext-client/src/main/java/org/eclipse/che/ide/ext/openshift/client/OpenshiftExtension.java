@@ -74,7 +74,7 @@ public class OpenshiftExtension {
         openshift.addSeparator();
         DefaultActionGroup deployGroup = new DefaultActionGroup("Deploy", true, actionManager);
         deployGroup.getTemplatePresentation().setDescription("Deploy application...");
-        deployGroup.getTemplatePresentation().setSVGIcon(null); //TODO replace with icon in nearest future
+        deployGroup.getTemplatePresentation().setSVGResource(null); //TODO replace with icon in nearest future
 
         actionManager.registerAction("newOpenshiftApplication", newApplicationAction);
         deployGroup.add(newApplicationAction);
@@ -82,7 +82,7 @@ public class OpenshiftExtension {
         actionManager.registerAction("deployToExistingApplication", deployToExistingApplicationAction);
         deployGroup.add(deployToExistingApplicationAction);
         
-        deployGroup.getTemplatePresentation().setSVGIcon(openshiftResources.deployGroup());
+        deployGroup.getTemplatePresentation().setSVGResource(openshiftResources.deployGroup());
         openshift.add(deployGroup);
 
         actionManager.registerAction("unlinkOpenshiftProject", unlinkProjectAction);
@@ -91,7 +91,7 @@ public class OpenshiftExtension {
         openshift.addSeparator();
         DefaultActionGroup serviceGroup = new DefaultActionGroup("Service", true, actionManager);
         serviceGroup.getTemplatePresentation().setDescription(constant.addServiceGroupDescription());
-        serviceGroup.getTemplatePresentation().setSVGIcon(null);//TODO replace with icon in nearest future
+        serviceGroup.getTemplatePresentation().setSVGResource(null);//TODO replace with icon in nearest future
         
         actionManager.registerAction("addService", addServiceAction);
         serviceGroup.add(addServiceAction);
