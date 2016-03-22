@@ -146,7 +146,7 @@ public class BuildsPresenter extends BasePresenter implements BuildsView.ActionD
      * Checks workspace projects for being deployed on OpenShift and starts observation for builds for that projects.
      */
     private void checkWorkspaceProjects() {
-        projectServiceClient.getProjects(appContext.getWorkspaceId(), false).then(new Operation<List<ProjectConfigDto>>() {
+        projectServiceClient.getProjects(appContext.getWorkspaceId()).then(new Operation<List<ProjectConfigDto>>() {
             @Override
             public void apply(List<ProjectConfigDto> projects) throws OperationException {
                 for (ProjectConfigDto project : projects) {

@@ -12,7 +12,7 @@ package org.eclipse.che.ide.ext.openshift.client.deploy;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.core.model.workspace.ProjectConfig;
+import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.git.gwt.client.GitServiceClient;
 import org.eclipse.che.api.git.shared.Remote;
@@ -167,7 +167,7 @@ public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthent
                                                                       .withType("Git")
                                                                       .withGit(dtoFactory.createDto(GitBuildSource.class)
                                                                                          .withUri(view.getGitRemoteUrl()))
-                                                                      .withContextDir(rootProject.getContentRoot());
+                                                                      .withContextDir(rootProject.getPath());
 
                                   return applicationManager.updateOpenshiftApplication(application, applicationName, buildSource);
                               }
