@@ -87,7 +87,7 @@ public class ConfigureProjectPresenter extends AbstractWizardPage<NewApplication
             }
         });
 
-        projectServiceClient.getProjects(appContext.getWorkspaceId()).then(new Operation<List<ProjectConfigDto>>() {
+        projectServiceClient.getProjects(appContext.getWorkspaceId(), false).then(new Operation<List<ProjectConfigDto>>() {
             @Override
             public void apply(List<ProjectConfigDto> projects) throws OperationException {
                 cheProjects.clear();
