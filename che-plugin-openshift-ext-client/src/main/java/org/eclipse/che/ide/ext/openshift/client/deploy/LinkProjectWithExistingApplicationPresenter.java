@@ -167,7 +167,7 @@ public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthent
                                                                       .withType("Git")
                                                                       .withGit(dtoFactory.createDto(GitBuildSource.class)
                                                                                          .withUri(view.getGitRemoteUrl()))
-                                                                      .withContextDir(rootProject.getContentRoot());
+                                                                      .withContextDir(rootProject.getPath());
 
                                   return applicationManager.updateOpenshiftApplication(application, applicationName, buildSource);
                               }
