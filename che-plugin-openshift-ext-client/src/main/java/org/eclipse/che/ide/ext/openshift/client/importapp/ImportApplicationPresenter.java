@@ -147,7 +147,7 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
      * Load che projects for following verifications.
      */
     private void loadCheProjects() {
-        projectServiceClient.getProjects(appContext.getWorkspaceId()).then(new Operation<List<ProjectConfigDto>>() {
+        projectServiceClient.getProjects(appContext.getWorkspaceId(), false).then(new Operation<List<ProjectConfigDto>>() {
             @Override
             public void apply(List<ProjectConfigDto> result) throws OperationException {
                 cheProjects.clear();
