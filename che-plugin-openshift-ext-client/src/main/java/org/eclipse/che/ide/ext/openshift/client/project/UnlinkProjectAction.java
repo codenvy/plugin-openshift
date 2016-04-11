@@ -13,7 +13,6 @@ package org.eclipse.che.ide.ext.openshift.client.project;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -45,20 +44,17 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUC
 @Singleton
 public class UnlinkProjectAction extends AbstractPerspectiveAction {
 
-    private final AnalyticsEventLogger          eventLogger;
     private final AppContext                    appContext;
     private final ProjectServiceClient          projectServiceClient;
     private final NotificationManager           notificationManager;
     private final OpenshiftLocalizationConstant locale;
 
     @Inject
-    public UnlinkProjectAction(AnalyticsEventLogger eventLogger,
-                               AppContext appContext,
+    public UnlinkProjectAction(AppContext appContext,
                                ProjectServiceClient projectServiceClient,
                                NotificationManager notificationManager,
                                OpenshiftLocalizationConstant locale) {
         super(Collections.singletonList(PROJECT_PERSPECTIVE_ID), locale.unlinkProjectActionTitle(), null, null, null);
-        this.eventLogger = eventLogger;
         this.appContext = appContext;
         this.projectServiceClient = projectServiceClient;
         this.notificationManager = notificationManager;
@@ -75,7 +71,6 @@ public class UnlinkProjectAction extends AbstractPerspectiveAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
         final ProjectConfigDto projectConfig = appContext.getCurrentProject().getRootProject();
         List<String> mixins = projectConfig.getMixins();
         if (mixins.contains(OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID)) {

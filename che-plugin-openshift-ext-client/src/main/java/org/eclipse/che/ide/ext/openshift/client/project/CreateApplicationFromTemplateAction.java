@@ -13,7 +13,6 @@ package org.eclipse.che.ide.ext.openshift.client.project;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftResources;
@@ -32,13 +31,11 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
  */
 @Singleton
 public class CreateApplicationFromTemplateAction extends AbstractPerspectiveAction {
-    private final AnalyticsEventLogger          eventLogger;
     private final CreateProjectPresenter        wizard;
     private final OpenshiftAuthorizationHandler authorizationHandler;
 
     @Inject
-    public CreateApplicationFromTemplateAction(AnalyticsEventLogger eventLogger,
-                                               CreateProjectPresenter wizard,
+    public CreateApplicationFromTemplateAction(CreateProjectPresenter wizard,
                                                OpenshiftAuthorizationHandler authorizationHandler,
                                                OpenshiftResources resources) {
         super(Collections.singletonList(PROJECT_PERSPECTIVE_ID),
@@ -46,7 +43,6 @@ public class CreateApplicationFromTemplateAction extends AbstractPerspectiveActi
               null,
               null,
               resources.createFromTemplate());
-        this.eventLogger = eventLogger;
         this.wizard = wizard;
         this.authorizationHandler = authorizationHandler;
     }
@@ -60,7 +56,6 @@ public class CreateApplicationFromTemplateAction extends AbstractPerspectiveActi
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
         wizard.createWizardAndShow();
     }
 }

@@ -13,7 +13,6 @@ package org.eclipse.che.ide.ext.openshift.client.importapp;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
@@ -32,12 +31,10 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
 @Singleton
 public class ImportApplicationAction extends AbstractPerspectiveAction {
 
-    private final AnalyticsEventLogger       eventLogger;
     private final ImportApplicationPresenter presenter;
 
     @Inject
-    public ImportApplicationAction(final AnalyticsEventLogger eventLogger,
-                                   OpenshiftLocalizationConstant locale,
+    public ImportApplicationAction(OpenshiftLocalizationConstant locale,
                                    OpenshiftResources resources,
                                    final ImportApplicationPresenter presenter) {
         super(Collections.singletonList(PROJECT_PERSPECTIVE_ID),
@@ -45,7 +42,6 @@ public class ImportApplicationAction extends AbstractPerspectiveAction {
               locale.linkProjectWithExistingApplicationAction(),
               null,
               resources.importApplication());
-        this.eventLogger = eventLogger;
         this.presenter = presenter;
     }
 
@@ -56,7 +52,6 @@ public class ImportApplicationAction extends AbstractPerspectiveAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
         this.presenter.show();
     }
 }

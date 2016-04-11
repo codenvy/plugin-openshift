@@ -16,11 +16,10 @@
     <parent>
         <artifactId>che-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>4.0.0-RC14-SNAPSHOT</version>
+        <version>4.2.0-RC1-SNAPSHOT</version>
     </parent>
     <groupId>org.eclipse.che.plugin</groupId>
     <artifactId>che-plugin-openshift-parent</artifactId>
-    <version>4.0.0-RC14-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Che Plugin :: Openshift :: Parent</name>
     <modules>
@@ -31,7 +30,7 @@
     </modules>
     <properties>
         <!-- TODO Remove property when plugin-openshift will be part of che-plugins project -->
-        <com.openshift.restclient.version>3.0.0.Final</com.openshift.restclient.version>
+        <com.openshift.restclient.version>4.0.0.Final</com.openshift.restclient.version>
         <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>
     </properties>
     <!-- We need dependencyManagement section here for building with che-depmgt project from master branch.
