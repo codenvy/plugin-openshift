@@ -13,7 +13,6 @@ package org.eclipse.che.ide.ext.openshift.client.deploy._new;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -35,13 +34,11 @@ import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConst
 @Singleton
 public class NewApplicationAction extends AbstractPerspectiveAction {
 
-    private final AnalyticsEventLogger          eventLogger;
     private final NewApplicationPresenter       presenter;
     private final AppContext                    appContext;
 
     @Inject
-    public NewApplicationAction(final AnalyticsEventLogger eventLogger,
-                                final NewApplicationPresenter presenter,
+    public NewApplicationAction(final NewApplicationPresenter presenter,
                                 final AppContext appContext,
                                 OpenshiftLocalizationConstant locale,
                                 OpenshiftResources resources) {
@@ -50,7 +47,6 @@ public class NewApplicationAction extends AbstractPerspectiveAction {
               null,
               null,
               resources.deployNewApplication());
-        this.eventLogger = eventLogger;
         this.presenter = presenter;
         this.appContext = appContext;
     }
@@ -65,7 +61,6 @@ public class NewApplicationAction extends AbstractPerspectiveAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
         presenter.show();
     }
 }

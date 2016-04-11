@@ -13,7 +13,6 @@ package org.eclipse.che.ide.ext.openshift.client.deploy;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -35,13 +34,11 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
 @Singleton
 public class LinkProjectWithExistingApplicationAction extends AbstractPerspectiveAction {
 
-    private final AnalyticsEventLogger                        eventLogger;
     private final LinkProjectWithExistingApplicationPresenter presenter;
     private final AppContext                                  appContext;
 
     @Inject
-    public LinkProjectWithExistingApplicationAction(final AnalyticsEventLogger eventLogger,
-                                                    OpenshiftLocalizationConstant locale,
+    public LinkProjectWithExistingApplicationAction(OpenshiftLocalizationConstant locale,
                                                     final LinkProjectWithExistingApplicationPresenter presenter,
                                                     AppContext appContext,
                                                     OpenshiftResources resources) {
@@ -50,7 +47,6 @@ public class LinkProjectWithExistingApplicationAction extends AbstractPerspectiv
               locale.linkProjectWithExistingApplicationAction(),
               null,
               resources.linkToExistingApplication());
-        this.eventLogger = eventLogger;
         this.presenter = presenter;
         this.appContext = appContext;
     }
@@ -65,7 +61,6 @@ public class LinkProjectWithExistingApplicationAction extends AbstractPerspectiv
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
         this.presenter.show();
     }
 }
