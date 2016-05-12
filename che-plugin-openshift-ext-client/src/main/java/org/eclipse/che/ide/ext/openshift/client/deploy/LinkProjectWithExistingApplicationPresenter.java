@@ -45,6 +45,7 @@ import java.util.Map;
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_APPLICATION_VARIABLE_NAME;
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 
@@ -122,7 +123,7 @@ public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthent
      * Retrieve Git remote repositories of the current project.
      */
     private void getGitRemoteRepositories(final ProjectConfigDto project) {
-        gitService.remoteList(appContext.getWorkspaceId(), project, null, true)
+        gitService.remoteList(appContext.getDevMachine(), project, null, true)
                   .then(new Operation<List<Remote>>() {
                       @Override
                       public void apply(List<Remote> result) throws OperationException {
@@ -140,7 +141,7 @@ public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthent
                   .catchError(new Operation<PromiseError>() {
                       @Override
                       public void apply(PromiseError arg) throws OperationException {
-                          notificationManager.notify(locale.getGitRemoteRepositoryError(project.getName()), FAIL, true);
+                          notificationManager.notify(locale.getGitRemoteRepositoryError(project.getName()), FAIL, EMERGE_MODE);
                       }
                   });
     }
@@ -178,7 +179,7 @@ public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthent
                                   view.closeView();
                                   notificationManager.notify(locale.linkProjectWithExistingUpdateBuildConfigSuccess(applicationName),
                                                              SUCCESS,
-                                                             true);
+                                                             EMERGE_MODE);
                                   markAsOpenshiftProject(selectedBuildConfig.getMetadata().getNamespace(), applicationName);
                               }
                           })
@@ -204,20 +205,20 @@ public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthent
                      .withType(projectConfig.getType())
                      .withAttributes(attributes);
 
-        projectServiceClient.updateProject(appContext.getWorkspaceId(), projectConfig.getPath(), projectConfig)
+        projectServiceClient.updateProject(appContext.getDevMachine(), projectConfig)
                             .then(new Operation<ProjectConfigDto>() {
                                 @Override
                                 public void apply(ProjectConfigDto result) throws OperationException {
                                     appContext.getCurrentProject().setRootProject(result);
                                     notificationManager.notify(locale.linkProjectWithExistingSuccess(result.getName(), application),
                                                                SUCCESS,
-                                                               true);
+                                                               EMERGE_MODE);
                                 }
                             })
                             .catchError(new Operation<PromiseError>() {
                                 @Override
                                 public void apply(PromiseError promiseError) throws OperationException {
-                                    notificationManager.notify(promiseError.getMessage(), FAIL, true);
+                                    notificationManager.notify(promiseError.getMessage(), FAIL, EMERGE_MODE);
                                 }
                             });
     }
@@ -282,7 +283,7 @@ public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthent
             @Override
             public void apply(PromiseError arg) throws OperationException {
                 final ServiceError serviceError = dtoFactory.createDtoFromJson(arg.getMessage(), ServiceError.class);
-                notificationManager.notify(serviceError.getMessage(), FAIL, true);
+                notificationManager.notify(serviceError.getMessage(), FAIL, EMERGE_MODE);
             }
         };
     }

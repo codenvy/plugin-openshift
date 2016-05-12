@@ -54,7 +54,9 @@ import java.util.Map;
 
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_APPLICATION_VARIABLE_NAME;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import org.eclipse.che.ide.resource.Path;
 
 /**
  * Presenter, which handles logic for importing OpenShift application to Che.
@@ -147,7 +149,7 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
      * Load che projects for following verifications.
      */
     private void loadCheProjects() {
-        projectServiceClient.getProjects(appContext.getWorkspaceId()).then(new Operation<List<ProjectConfigDto>>() {
+        projectServiceClient.getProjects(appContext.getDevMachine()).then(new Operation<List<ProjectConfigDto>>() {
             @Override
             public void apply(List<ProjectConfigDto> result) throws OperationException {
                 cheProjects.clear();
@@ -165,7 +167,7 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
             @Override
             public void apply(PromiseError arg) throws OperationException {
                 final ServiceError serviceError = dtoFactory.createDtoFromJson(arg.getMessage(), ServiceError.class);
-                notificationManager.notify(serviceError.getMessage(), FAIL, true);
+                notificationManager.notify(serviceError.getMessage(), FAIL, EMERGE_MODE);
             }
         };
     }
@@ -260,7 +262,7 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
         importProjectNotificationSubscriber.subscribe(view.getProjectName());
 
         try {
-            projectServiceClient.importProject(appContext.getWorkspaceId(), view.getProjectName(), false, projectConfig.getSource())
+            projectServiceClient.importProject(appContext.getDevMachine(), view.getProjectName(), projectConfig.getSource())
                                 .then(new Operation<Void>() {
                                     @Override
                                     public void apply(Void arg) throws OperationException {
@@ -287,13 +289,13 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
     private void resolveProject(final ProjectConfigDto projectConfig) {
         final String projectName = projectConfig.getName();
         final String workspaceId = appContext.getWorkspaceId();
-        projectServiceClient.resolveSources(workspaceId, projectName)
+        projectServiceClient.resolveSources(appContext.getDevMachine(), Path.valueOf(projectConfig.getPath()))
                             .then(new Operation<List<SourceEstimation>>() {
                                 @Override
                                 public void apply(List<SourceEstimation> result) throws OperationException {
                                     for (SourceEstimation estimation : result) {
                                         final Promise<ProjectTypeDto> projectTypePromise =
-                                                projectTypeServiceClient.getProjectType(workspaceId, estimation.getType());
+                                                projectTypeServiceClient.getProjectType(appContext.getDevMachine(), estimation.getType());
                                         projectTypePromise.then(new Operation<ProjectTypeDto>() {
                                             @Override
                                             public void apply(ProjectTypeDto arg) throws OperationException {
@@ -322,7 +324,7 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
      */
     private void updateProject(final ProjectConfigDto projectConfig) {
         try {
-            projectServiceClient.updateProject(appContext.getWorkspaceId(), projectConfig.getName(), projectConfig)
+            projectServiceClient.updateProject(appContext.getDevMachine(), Path.valueOf(projectConfig.getPath()), projectConfig)
                                 .then(new Operation<ProjectConfigDto>() {
                                     @Override
                                     public void apply(ProjectConfigDto result) throws OperationException {

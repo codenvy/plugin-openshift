@@ -87,7 +87,7 @@ public class ConfigureProjectPresenter extends AbstractWizardPage<NewApplication
             }
         });
 
-        projectServiceClient.getProjects(appContext.getWorkspaceId()).then(new Operation<List<ProjectConfigDto>>() {
+        projectServiceClient.getProjects(appContext.getDevMachine()).then(new Operation<List<ProjectConfigDto>>() {
             @Override
             public void apply(List<ProjectConfigDto> projects) throws OperationException {
                 cheProjects.clear();
@@ -97,7 +97,6 @@ public class ConfigureProjectPresenter extends AbstractWizardPage<NewApplication
             }
         });
     }
-
 
     @Override
     public boolean isCompleted() {
@@ -203,17 +202,15 @@ public class ConfigureProjectPresenter extends AbstractWizardPage<NewApplication
     }
 
     private void setUpNewProjectRequest() {
-        ProjectRequest projectRequest;
-
         if (dataObject.getProjectRequest() == null) {
             dataObject.withProjectRequest(dtoFactory.createDto(ProjectRequest.class));
         }
 
-        projectRequest = dataObject.getProjectRequest();
-        projectRequest.withApiVersion("v1")
-                      .withDescription(view.getOpenShiftProjectDescription())
-                      .withDisplayName(view.getOpenShiftProjectDisplayName())
-                      .withMetadata(dtoFactory.createDto(ObjectMeta.class).withName(view.getOpenShiftNewProjectName()));
+        dataObject.getProjectRequest()
+                .withApiVersion("v1")
+                .withDescription(view.getOpenShiftProjectDescription())
+                .withDisplayName(view.getOpenShiftProjectDisplayName())
+                .withMetadata(dtoFactory.createDto(ObjectMeta.class).withName(view.getOpenShiftNewProjectName()));
 
         if (dataObject.getProject() != null) {
             dataObject.setProject(null);
@@ -240,4 +237,5 @@ public class ConfigureProjectPresenter extends AbstractWizardPage<NewApplication
         projectConfig.withName(view.getCheNewProjectName())
                      .withDescription(view.getCheProjectDescription());
     }
+
 }

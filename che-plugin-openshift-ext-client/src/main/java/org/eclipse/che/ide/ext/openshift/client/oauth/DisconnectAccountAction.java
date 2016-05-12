@@ -22,6 +22,7 @@ import org.eclipse.che.ide.rest.AsyncRequestCallback;
 
 import javax.inject.Inject;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 
@@ -54,12 +55,12 @@ public class DisconnectAccountAction extends Action {
             @Override
             protected void onSuccess(Void result) {
                 openshiftAuthorizationHandler.registerLogout();
-                notificationManager.notify(locale.logoutSuccessful(), SUCCESS, true);
+                notificationManager.notify(locale.logoutSuccessful(), SUCCESS, EMERGE_MODE);
             }
 
             @Override
             protected void onFailure(Throwable exception) {
-                notificationManager.notify(locale.logoutFailed(), FAIL, true);
+                notificationManager.notify(locale.logoutFailed(), FAIL, EMERGE_MODE);
             }
         });
     }

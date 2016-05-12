@@ -22,6 +22,7 @@ import org.eclipse.che.security.oauth.OAuthStatus;
 
 import javax.inject.Inject;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 
@@ -57,12 +58,12 @@ public class ConnectAccountAction extends Action {
                     return;
                 }
                 openshiftAuthorizationHandler.registerLogin();
-                notificationManager.notify(locale.loginSuccessful(), SUCCESS, true);
+                notificationManager.notify(locale.loginSuccessful(), SUCCESS, EMERGE_MODE);
             }
 
             @Override
             public void onFailure(Throwable caught) {
-                notificationManager.notify(locale.loginFailed(), FAIL, true);
+                notificationManager.notify(locale.loginFailed(), FAIL, EMERGE_MODE);
             }
         });
     }

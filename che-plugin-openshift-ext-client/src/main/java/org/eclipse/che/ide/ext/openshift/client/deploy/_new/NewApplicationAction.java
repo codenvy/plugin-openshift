@@ -16,7 +16,6 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftResources;
 import javax.validation.constraints.NotNull;
@@ -53,14 +52,19 @@ public class NewApplicationAction extends AbstractPerspectiveAction {
 
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
-        CurrentProject currentProject = appContext.getCurrentProject();
-        event.getPresentation().setVisible(currentProject != null);
-        event.getPresentation().setEnabled(currentProject != null
-                                           && !currentProject.getRootProject().getMixins().contains(OPENSHIFT_PROJECT_TYPE_ID));
+        if (appContext.getResources().length != 1) {
+            event.getPresentation().setVisible(false);
+            event.getPresentation().setEnabled(false);
+            return;
+        }
+
+        event.getPresentation().setVisible(true);
+        event.getPresentation().setEnabled(appContext.getRootProject().getMixins().contains(OPENSHIFT_PROJECT_TYPE_ID));
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         presenter.show();
     }
+
 }

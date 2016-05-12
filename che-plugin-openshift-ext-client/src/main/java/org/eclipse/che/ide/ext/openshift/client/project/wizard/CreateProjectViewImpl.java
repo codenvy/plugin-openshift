@@ -78,7 +78,7 @@ public class CreateProjectViewImpl extends Window implements CreateProjectView {
         addButtonToFooter(createBtn);
         createBtn.addStyleName(resources.Css().buttonLoader());
 
-        nextBtn = createButton(constants.next(), "openshift-create-from-template-next-button", new ClickHandler() {
+        nextBtn = createButton(constants.buttonNext(), "openshift-create-from-template-next-button", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 delegate.onNextClicked();
@@ -86,7 +86,7 @@ public class CreateProjectViewImpl extends Window implements CreateProjectView {
         });
         addButtonToFooter(nextBtn);
 
-        prevBtn = createButton(constants.back(), "openshift-create-from-template-prev-button", new ClickHandler() {
+        prevBtn = createButton(constants.buttonBack(), "openshift-create-from-template-prev-button", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 delegate.onPreviousClicked();

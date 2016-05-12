@@ -15,6 +15,7 @@ import com.google.gwt.core.client.JsArrayMixed;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
@@ -27,6 +28,7 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.JsPromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
+import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.wizard.AbstractWizard;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftServiceClient;
@@ -41,6 +43,7 @@ import org.eclipse.che.ide.ext.openshift.shared.dto.Project;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Route;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Service;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Template;
+import org.eclipse.che.ide.projectimport.wizard.ImportWizard;
 import org.eclipse.che.ide.projectimport.wizard.ImportWizardFactory;
 
 import javax.validation.constraints.NotNull;
@@ -59,9 +62,9 @@ import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConst
  *
  * @author Vlad Zhukovskiy
  * @author Sergii Leschenko
- * @author Vitaliy Guliy
  */
 public class CreateProjectWizard extends AbstractWizard<NewApplicationRequest> {
+
     private static final String APPLICATION_PARAMETER_NAME = "APPLICATION_NAME";
     private static final String APPLICATION_LABEL_NAME     = "application";
 
@@ -86,25 +89,7 @@ public class CreateProjectWizard extends AbstractWizard<NewApplicationRequest> {
                     .thenPromise(processTemplate())
                     .thenPromise(processTemplateMetadata())
                     .then(onSuccess(callback))
-                    .catchError(onFailed(callback));
-    }
-
-    private Operation<JsArrayMixed> onSuccess(final CompleteCallback callback) {
-        return new Operation<JsArrayMixed>() {
-            @Override
-            public void apply(JsArrayMixed arg) throws OperationException {
-                importWizardFactory.newWizard(dataObject.getProjectConfigDto()).complete(callback);
-            }
-        };
-    }
-
-    private Operation<PromiseError> onFailed(final CompleteCallback callback) {
-        return new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError arg) throws OperationException {
-                callback.onFailure(arg.getCause());
-            }
-        };
+                    .catchError(onError(callback));
     }
 
     private Promise<Project> getProject() {
@@ -179,10 +164,10 @@ public class CreateProjectWizard extends AbstractWizard<NewApplicationRequest> {
                             }
 
                             dataObject.getProjectConfigDto()
-                                      .withSource(dtoFactory.createDto(SourceStorageDto.class)
-                                                            .withType("git")
-                                                            .withLocation(gitSource.getUri())
-                                                            .withParameters(importOptions));
+                                    .withSource(dtoFactory.createDto(SourceStorageDto.class)
+                                            .withType("git")
+                                            .withLocation(gitSource.getUri())
+                                            .withParameters(importOptions));
 
                             promises.add(openshiftClient.createBuildConfig(bConfig));
                             break;
@@ -202,6 +187,25 @@ public class CreateProjectWizard extends AbstractWizard<NewApplicationRequest> {
                 }
 
                 return Promises.all(promises.toArray(new Promise<?>[promises.size()]));
+            }
+        };
+    }
+
+    private Operation<JsArrayMixed> onSuccess(final CompleteCallback callback) {
+        return new Operation<JsArrayMixed>() {
+            @Override
+            public void apply(JsArrayMixed arg) throws OperationException {
+                MutableProjectConfig mutableProjectConfig = new MutableProjectConfig(dataObject.getProjectConfigDto());
+                importWizardFactory.newWizard(mutableProjectConfig).complete(callback);
+            }
+        };
+    }
+
+    private Operation<PromiseError> onError(final CompleteCallback callback) {
+        return new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError arg) throws OperationException {
+                callback.onFailure(arg.getCause());
             }
         };
     }

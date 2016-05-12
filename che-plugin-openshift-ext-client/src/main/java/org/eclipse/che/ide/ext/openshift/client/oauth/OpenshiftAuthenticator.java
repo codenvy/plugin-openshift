@@ -30,6 +30,7 @@ import javax.validation.constraints.NotNull;
  * @author Sergii Leschenko
  */
 public class OpenshiftAuthenticator implements OAuthCallback {
+
     private final OpenshiftLocalizationConstant locale;
     private final String                        baseUrl;
     private final AppContext                    appContext;
@@ -52,8 +53,7 @@ public class OpenshiftAuthenticator implements OAuthCallback {
         dialogFactory.createConfirmDialog(locale.authorizationRequestTitle(), locale.authorizationRequestMessage(), new ConfirmCallback() {
             @Override
             public void accepted() {
-                JsOAuthWindow authWindow = new JsOAuthWindow(getAuthUrl(), "error.url", 500, 980, OpenshiftAuthenticator.this);
-                authWindow.loginWithOAuth();
+                new JsOAuthWindow(getAuthUrl(), "error.url", 500, 980, OpenshiftAuthenticator.this).login();
             }
         }, new CancelCallback() {
             @Override

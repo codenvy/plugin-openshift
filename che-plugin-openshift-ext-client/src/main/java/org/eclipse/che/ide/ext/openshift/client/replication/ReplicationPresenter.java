@@ -32,6 +32,7 @@ import java.util.List;
 
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_APPLICATION_VARIABLE_NAME;
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 
@@ -112,7 +113,7 @@ public class ReplicationPresenter implements ConfigPresenter, ReplicationView.Ac
             @Override
             public void apply(PromiseError arg) throws OperationException {
                 final ServiceError serviceError = dtoFactory.createDtoFromJson(arg.getMessage(), ServiceError.class);
-                notificationManager.notify(serviceError.getMessage(), FAIL, true);
+                notificationManager.notify(serviceError.getMessage(), FAIL, EMERGE_MODE);
             }
         };
     }
@@ -159,7 +160,7 @@ public class ReplicationPresenter implements ConfigPresenter, ReplicationView.Ac
                 replicasNumber = arg.getSpec().getReplicas();
                 view.setReplicas(replicasNumber);
                 view.enableMinusButton(replicasNumber > 1);
-                notificationManager.notify(locale.applicationConfigsScaledSuccess(replicasNumber), SUCCESS, true);
+                notificationManager.notify(locale.applicationConfigsScaledSuccess(replicasNumber), SUCCESS, EMERGE_MODE);
             }
         }).catchError(onFail());
     }

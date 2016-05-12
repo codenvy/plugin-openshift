@@ -154,7 +154,7 @@ public class ImportApplicationViewImpl extends Window implements ImportApplicati
         addButtonToFooter(importButton);
         importButton.addStyleName(ideResources.Css().buttonLoader());
 
-        cancelButton = createButton(constants.cancel(), "importApplication-cancel-button", new ClickHandler() {
+        cancelButton = createButton(constants.buttonCancel(), "importApplication-cancel-button", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 delegate.onCancelClicked();

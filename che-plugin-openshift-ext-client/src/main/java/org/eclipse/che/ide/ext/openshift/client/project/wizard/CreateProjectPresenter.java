@@ -29,6 +29,7 @@ import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConst
 
 import javax.validation.constraints.NotNull;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 
@@ -110,7 +111,7 @@ public class CreateProjectPresenter implements Wizard.UpdateDelegate, CreateProj
                 view.animateCreateButton(false);
                 view.setBlocked(false);
 
-                notificationManager.notify(locale.createFromTemplateSuccess(), SUCCESS, true);
+                notificationManager.notify(locale.createFromTemplateSuccess(), SUCCESS, EMERGE_MODE);
                 view.closeWizard();
 
                 Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -129,7 +130,7 @@ public class CreateProjectPresenter implements Wizard.UpdateDelegate, CreateProj
                 view.setBlocked(false);
 
                 String message = e.getMessage() != null ? e.getMessage() : locale.createFromTemplateFailed();
-                notificationManager.notify(message, FAIL, true);
+                notificationManager.notify(message, FAIL, EMERGE_MODE);
             }
         });
     }
