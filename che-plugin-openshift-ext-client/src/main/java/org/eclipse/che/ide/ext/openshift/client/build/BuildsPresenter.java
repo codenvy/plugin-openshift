@@ -49,6 +49,7 @@ import static org.eclipse.che.ide.ext.openshift.shared.dto.BuildStatus.Phase.Fai
 import static org.eclipse.che.ide.ext.openshift.shared.dto.BuildStatus.Phase.New;
 import static org.eclipse.che.ide.ext.openshift.shared.dto.BuildStatus.Phase.Pending;
 import static org.eclipse.che.ide.ext.openshift.shared.dto.BuildStatus.Phase.Running;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
@@ -146,7 +147,7 @@ public class BuildsPresenter extends BasePresenter implements BuildsView.ActionD
      * Checks workspace projects for being deployed on OpenShift and starts observation for builds for that projects.
      */
     private void checkWorkspaceProjects() {
-        projectServiceClient.getProjects(appContext.getWorkspaceId()).then(new Operation<List<ProjectConfigDto>>() {
+        projectServiceClient.getProjects(appContext.getDevMachine()).then(new Operation<List<ProjectConfigDto>>() {
             @Override
             public void apply(List<ProjectConfigDto> projects) throws OperationException {
                 for (ProjectConfigDto project : projects) {
@@ -239,7 +240,7 @@ public class BuildsPresenter extends BasePresenter implements BuildsView.ActionD
         String buildId = build.getMetadata().getNamespace() + "/" + build.getMetadata().getName();
 
         if (!notifications.containsKey(buildId)) {
-            StatusNotification notification = new StatusNotification(locale.buildStatusRunning(buildId), PROGRESS, true);
+            StatusNotification notification = new StatusNotification(locale.buildStatusRunning(buildId), PROGRESS, FLOAT_MODE);
             notificationManager.notify(notification);
             notifications.put(buildId, notification);
         }
@@ -266,7 +267,7 @@ public class BuildsPresenter extends BasePresenter implements BuildsView.ActionD
             notification.setTitle(locale.buildStatusRunning(buildId));
             notification.setStatus(PROGRESS);
         } else {
-            StatusNotification notification = new StatusNotification(locale.buildStatusRunning(buildId), PROGRESS, true);
+            StatusNotification notification = new StatusNotification(locale.buildStatusRunning(buildId), PROGRESS, FLOAT_MODE);
             notificationManager.notify(notification);
             notifications.put(buildId, notification);
         }

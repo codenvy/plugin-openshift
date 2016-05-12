@@ -32,7 +32,9 @@ import java.util.List;
 import java.util.Map;
 
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID;
+import org.eclipse.che.ide.resource.Path;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 
@@ -80,14 +82,14 @@ public class UnlinkProjectAction extends AbstractPerspectiveAction {
             attributes.remove(OpenshiftProjectTypeConstants.OPENSHIFT_APPLICATION_VARIABLE_NAME);
             attributes.remove(OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME);
 
-            projectServiceClient.updateProject(appContext.getWorkspaceId(), projectConfig.getPath(), projectConfig)
+            projectServiceClient.updateProject(appContext.getDevMachine(), Path.valueOf(projectConfig.getPath()), projectConfig)
                                 .then(new Operation<ProjectConfigDto>() {
                                     @Override
                                     public void apply(ProjectConfigDto result) throws OperationException {
                                         appContext.getCurrentProject().setRootProject(result);
                                         notificationManager.notify(locale.unlinkProjectSuccessful(result.getName()),
-                                                                   SUCCESS,
-                                                                   true);
+                                                SUCCESS,
+                                                EMERGE_MODE);
                                     }
                                 })
                                 .catchError(new Operation<PromiseError>() {
@@ -95,7 +97,7 @@ public class UnlinkProjectAction extends AbstractPerspectiveAction {
                                     public void apply(PromiseError promiseError) throws OperationException {
                                         notificationManager.notify(locale.unlinkProjectFailed() + " " + promiseError.getMessage(),
                                                                    FAIL,
-                                                                   true);
+                                                                   EMERGE_MODE);
                                     }
                                 });
         }

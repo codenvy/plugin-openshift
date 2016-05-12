@@ -37,6 +37,7 @@ import java.util.List;
 
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_APPLICATION_VARIABLE_NAME;
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
@@ -169,7 +170,7 @@ public class RouteConfigPresenter implements ConfigPresenter, RouteConfigView.Ac
             @Override
             public void apply(PromiseError arg) throws OperationException {
                 final ServiceError serviceError = dtoFactory.createDtoFromJson(arg.getMessage(), ServiceError.class);
-                notificationManager.notify(errorTitle + "." + serviceError.getMessage(), FAIL, true);
+                notificationManager.notify(errorTitle + "." + serviceError.getMessage(), FAIL, EMERGE_MODE);
             }
         };
     }

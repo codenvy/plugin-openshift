@@ -31,6 +31,7 @@ import java.util.List;
  * @author Sergii Leschenko
  */
 public interface OpenshiftServiceClient {
+
     Promise<OpenshiftServerInfo> getServerInfo();
 
     /** Templates */

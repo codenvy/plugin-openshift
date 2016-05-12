@@ -214,7 +214,7 @@ public class NewApplicationViewImpl extends Window implements NewApplicationView
         deployBtn.addStyleName(coreResources.Css().buttonLoader());
         addButtonToFooter(deployBtn);
 
-        cancelBtn = createButton(constants.cancel(), "deployCheProject-cancel-button", new ClickHandler() {
+        cancelBtn = createButton(constants.buttonCancel(), "deployCheProject-cancel-button", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 delegate.onCancelClicked();

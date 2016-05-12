@@ -94,6 +94,7 @@ import static org.eclipse.che.ide.ext.openshift.client.deploy._new.NewApplicatio
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_APPLICATION_VARIABLE_NAME;
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 
@@ -198,7 +199,7 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
     }
 
     private void getGitRemoteRepositories(final ProjectConfigDto projectConfig) {
-        gitService.remoteList(appContext.getWorkspaceId(), projectConfig, null, true)
+        gitService.remoteList(appContext.getDevMachine(), projectConfig, null, true)
                   .then(new Operation<List<Remote>>() {
                       @Override
                       public void apply(List<Remote> result) throws OperationException {
@@ -215,7 +216,7 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
                   .catchError(new Operation<PromiseError>() {
                       @Override
                       public void apply(PromiseError arg) throws OperationException {
-                          notificationManager.notify(locale.getGitRemoteRepositoryError(projectConfig.getName()), FAIL, true);
+                          notificationManager.notify(locale.getGitRemoteRepositoryError(projectConfig.getName()), FAIL, EMERGE_MODE);
                       }
                   });
     }
@@ -327,7 +328,7 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
                                 notificationManager
                                         .notify(locale.deployProjectSuccess(appContext.getCurrentProject().getRootProject().getName()),
                                                 SUCCESS,
-                                                true);
+                                                EMERGE_MODE);
                                 setupMixin(project);
                             }
                         })
@@ -349,7 +350,7 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
     private void handleError(PromiseError error) {
         view.showLoader(false);
         final ServiceError serviceError = dtoFactory.createDtoFromJson(error.getMessage(), ServiceError.class);
-        notificationManager.notify(serviceError.getMessage(), FAIL, true);
+        notificationManager.notify(serviceError.getMessage(), FAIL, EMERGE_MODE);
         view.showError(serviceError.getMessage());
     }
 
@@ -365,21 +366,21 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
         attributes.put(OPENSHIFT_APPLICATION_VARIABLE_NAME, newArrayList(osAppName));
         attributes.put(OPENSHIFT_NAMESPACE_VARIABLE_NAME, newArrayList(project.getMetadata().getName()));
 
-        projectService.updateProject(appContext.getWorkspaceId(), projectConfig.getPath(), projectConfig)
+        projectService.updateProject(appContext.getDevMachine(), projectConfig)
                       .then(new Operation<ProjectConfigDto>() {
                           @Override
                           public void apply(ProjectConfigDto project) throws OperationException {
                               eventBus.fireEvent(new ProjectUpdatedEvent(projectConfig.getPath(), project));
                               notificationManager.notify(locale.linkProjectWithExistingSuccess(projectConfig.getName(), osAppName),
                                                          SUCCESS,
-                                                         true);
+                                                         EMERGE_MODE);
                           }
                       })
                       .catchError(new Operation<PromiseError>() {
                           @Override
                           public void apply(PromiseError arg) throws OperationException {
                               final ServiceError serviceError = dtoFactory.createDtoFromJson(arg.getMessage(), ServiceError.class);
-                              notificationManager.notify(serviceError.getMessage(), FAIL, true);
+                              notificationManager.notify(serviceError.getMessage(), FAIL, EMERGE_MODE);
                           }
                       });
     }

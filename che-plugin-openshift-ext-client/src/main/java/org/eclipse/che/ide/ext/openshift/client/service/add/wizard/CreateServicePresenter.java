@@ -27,6 +27,7 @@ import org.eclipse.che.ide.ext.openshift.shared.dto.Template;
 
 import javax.validation.constraints.NotNull;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 
@@ -106,7 +107,7 @@ public class CreateServicePresenter implements Wizard.UpdateDelegate, CreateServ
                 view.animateCreateButton(false);
                 view.setBlocked(false);
 
-                notificationManager.notify(locale.createServiceFromTemplateSuccess(), SUCCESS, true);
+                notificationManager.notify(locale.createServiceFromTemplateSuccess(), SUCCESS, EMERGE_MODE);
                 view.closeWizard();
             }
 
@@ -117,7 +118,7 @@ public class CreateServicePresenter implements Wizard.UpdateDelegate, CreateServ
                 view.setBlocked(false);
 
                 String message = e.getMessage() != null ? e.getMessage() : locale.createFromTemplateFailed();
-                notificationManager.notify(locale.createServiceFromTemplateFailed() + " " + message, FAIL, true);
+                notificationManager.notify(locale.createServiceFromTemplateFailed() + " " + message, FAIL, EMERGE_MODE);
             }
         });
     }

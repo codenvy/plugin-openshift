@@ -38,6 +38,7 @@ import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConst
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
@@ -99,7 +100,7 @@ public class StartBuildAction extends AbstractPerspectiveAction {
                         .catchError(new Operation<PromiseError>() {
                             @Override
                             public void apply(PromiseError arg) throws OperationException {
-                                notificationManager.notify(locale.startBuildError() + " " + arg.getMessage(), FAIL, true);
+                                notificationManager.notify(locale.startBuildError() + " " + arg.getMessage(), FAIL, EMERGE_MODE);
                             }
                         });
     }

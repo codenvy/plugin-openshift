@@ -38,6 +38,7 @@ import java.util.List;
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_APPLICATION_VARIABLE_NAME;
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 
@@ -93,7 +94,7 @@ public class DeleteProjectPresenter extends ValidateAuthenticationPresenter {
                         })
                         .catchError(handleError(namespace));
         } else {
-            notificationManager.notify(locale.projectIsNotLinkedToOpenShiftError(projectConfig.getName()), FAIL, true);
+            notificationManager.notify(locale.projectIsNotLinkedToOpenShiftError(projectConfig.getName()), FAIL, EMERGE_MODE);
         }
     }
 
@@ -125,7 +126,7 @@ public class DeleteProjectPresenter extends ValidateAuthenticationPresenter {
                         service.deleteProject(nameSpace).then(new Operation<Void>() {
                             @Override
                             public void apply(Void arg) throws OperationException {
-                                notificationManager.notify(locale.deleteProjectSuccess(nameSpace), SUCCESS, true);
+                                notificationManager.notify(locale.deleteProjectSuccess(nameSpace), SUCCESS, EMERGE_MODE);
                                 removeOpenshiftMixin(projectConfig, nameSpace);
                             }
                         })
@@ -146,7 +147,7 @@ public class DeleteProjectPresenter extends ValidateAuthenticationPresenter {
         return new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError promiseError) throws OperationException {
-                notificationManager.notify(locale.deleteProjectFailed(nameSpace) + " " + promiseError.getMessage(), FAIL, true);
+                notificationManager.notify(locale.deleteProjectFailed(nameSpace) + " " + promiseError.getMessage(), FAIL, EMERGE_MODE);
             }
         };
     }
@@ -156,12 +157,12 @@ public class DeleteProjectPresenter extends ValidateAuthenticationPresenter {
         projectConfig.getAttributes().remove(OPENSHIFT_NAMESPACE_VARIABLE_NAME);
         projectConfig.getAttributes().remove(OPENSHIFT_APPLICATION_VARIABLE_NAME);
 
-        projectService.updateProject(appContext.getWorkspaceId(), projectConfig.getPath(), projectConfig)
+        projectService.updateProject(appContext.getDevMachine(), projectConfig)
                       .then(new Operation<ProjectConfigDto>() {
                           @Override
                           public void apply(ProjectConfigDto configDto) throws OperationException {
                               appContext.getCurrentProject().setRootProject(configDto);
-                              notificationManager.notify(locale.projectSuccessfullyReset(configDto.getName()), SUCCESS, true);
+                              notificationManager.notify(locale.projectSuccessfullyReset(configDto.getName()), SUCCESS, EMERGE_MODE);
                           }
                       }).catchError(handleError(nameSpace));
     }
@@ -174,4 +175,5 @@ public class DeleteProjectPresenter extends ValidateAuthenticationPresenter {
         result = result.substring(0, result.length() - 3);//cut last ", "
         return result;
     }
+
 }

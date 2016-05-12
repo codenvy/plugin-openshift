@@ -119,7 +119,7 @@ public class LinkProjectWithExistingApplicationViewImpl extends Window implement
                 });
         addButtonToFooter(linkButton);
 
-        cancelButton = createButton(constants.cancel(), "linkProjectWithExistingApplication-cancel-button", new ClickHandler() {
+        cancelButton = createButton(constants.buttonCancel(), "linkProjectWithExistingApplication-cancel-button", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 delegate.onCancelClicked();
