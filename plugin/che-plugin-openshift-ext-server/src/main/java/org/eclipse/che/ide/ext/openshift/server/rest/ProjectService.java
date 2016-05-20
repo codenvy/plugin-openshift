@@ -45,7 +45,7 @@ import static org.eclipse.che.ide.ext.openshift.server.DtoConverter.toOpenshiftR
 /**
  * @author Sergii Leschenko
  */
-@Path("/openshift/{ws_id}/project")
+@Path("/openshift/project")
 public class ProjectService {
     private final ClientFactory clientFactory;
 

@@ -156,7 +156,7 @@ public class LinkProjectWithExistingApplicationViewImpl extends Window implement
                                                                        buildConfigDelegate);
             categoriesList.add(category);
         }
-        buildConfigList.render(categoriesList);
+        buildConfigList.render(categoriesList, true);
     }
 
     @Override

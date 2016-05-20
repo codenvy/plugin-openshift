@@ -40,7 +40,7 @@ import static org.eclipse.che.ide.ext.openshift.server.DtoConverter.toDto;
 /**
  * @author Sergii Leschenko
  */
-@Path("/openshift/{ws-id}/namespace/{namespace}/build")
+@Path("/openshift/namespace/{namespace}/build")
 public class BuildService {
     private final ClientFactory clientFactory;
 

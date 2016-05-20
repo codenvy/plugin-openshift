@@ -89,7 +89,7 @@ public class ClientFactory {
      */
     public IClient getOpenshiftClient() throws UnauthorizedException, ServerException {
         try {
-            final String userId = EnvironmentContext.getCurrent().getUser().getId();
+            final String userId = EnvironmentContext.getCurrent().getSubject().getUserId();
             return token2clientCache.get(getToken(userId));
         } catch (ExecutionException e) {
             final Throwable cause = e.getCause();
@@ -111,7 +111,7 @@ public class ClientFactory {
      *         when some exception occurs during getting of access token
      */
     public IHttpClient getHttpClient() throws UnauthorizedException, ServerException {
-        return newIHttpClient(EnvironmentContext.getCurrent().getUser().getId());
+        return newIHttpClient(EnvironmentContext.getCurrent().getSubject().getUserId());
     }
 
     private String getToken(String userId) throws ServerException, UnauthorizedException {

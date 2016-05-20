@@ -22,7 +22,7 @@ import javax.ws.rs.core.MediaType;
 /**
  * @author Sergii Leschenko
  */
-@Path("/openshift/{ws-id}/")
+@Path("/openshift")
 public class OpenshiftApiInfoService {
     private final ClientFactory clientFactory;
 

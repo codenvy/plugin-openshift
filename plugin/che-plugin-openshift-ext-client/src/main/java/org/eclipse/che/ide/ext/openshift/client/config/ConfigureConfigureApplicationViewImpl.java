@@ -127,7 +127,7 @@ public class ConfigureConfigureApplicationViewImpl extends Window implements Con
     public void setConfigs(List<ConfigPresenter> configViews) {
         List<Category<?>> categoriesList = new ArrayList<>();
         categoriesList.add(new Category<ConfigPresenter>("Configs", configViewRenderer, configViews, configDelegate));
-        configsList.render(categoriesList);
+        configsList.render(categoriesList, true);
     }
 
     @Override

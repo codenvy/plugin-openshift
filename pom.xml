@@ -79,6 +79,12 @@
                 <type>war</type>
             </dependency>
             <dependency>
+                <groupId>org.eclipse.che</groupId>
+                <artifactId>openshift-plugin-assembly-wsmaster-war</artifactId>
+                <version>${project.version}</version>
+                <type>war</type>
+            </dependency>
+            <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-openshift-ext-client</artifactId>
                 <version>${project.version}</version>
@@ -86,11 +92,6 @@
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-openshift-ext-server</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>che-plugin-openshift-ext-shared</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

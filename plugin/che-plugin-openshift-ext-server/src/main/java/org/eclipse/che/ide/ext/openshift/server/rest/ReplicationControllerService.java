@@ -40,7 +40,7 @@ import static org.eclipse.che.ide.ext.openshift.server.DtoConverter.toOpenshiftR
 /**
  * @author Sergii Leschenko
  */
-@Path("/openshift/{ws-id}/namespace/{namespace}/replicationcontroller")
+@Path("/openshift/namespace/{namespace}/replicationcontroller")
 public class ReplicationControllerService {
     private final ClientFactory clientFactory;
 

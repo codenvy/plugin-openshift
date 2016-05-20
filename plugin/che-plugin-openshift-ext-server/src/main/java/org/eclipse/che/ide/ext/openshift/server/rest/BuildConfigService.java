@@ -48,7 +48,7 @@ import static org.eclipse.che.ide.ext.openshift.server.DtoConverter.toOpenshiftR
 /**
  * @author Sergii Leschenko
  */
-@Path("/openshift/{ws-id}/namespace/{namespace}/buildconfig")
+@Path("/openshift/namespace/{namespace}/buildconfig")
 public class BuildConfigService {
     private final ClientFactory clientFactory;
 

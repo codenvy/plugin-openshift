@@ -95,6 +95,7 @@
             <plugin>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-dto-maven-plugin</artifactId>
+                <version>${che.version}</version>
                 <executions>
                     <execution>
                         <phase>process-sources</phase>

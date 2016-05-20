@@ -17,14 +17,14 @@
         <artifactId>openshift-plugin-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
         <version>4.3.0-RC1-SNAPSHOT</version>
-	<relativePath>../pom.xml</relativePath>
-    </parent>   
+        <relativePath>../pom.xml</relativePath>
+    </parent>
     <groupId>org.eclipse.che.plugin</groupId>
     <artifactId>che-plugin-openshift-parent</artifactId>
     <packaging>pom</packaging>
     <name>Che Plugin :: Openshift :: Parent</name>
     <modules>
-	<module>che-plugin-openshift-ext-shared</module>
+        <module>che-plugin-openshift-ext-shared</module>
         <module>che-plugin-openshift-oauth2</module>
         <module>che-plugin-openshift-ext-server</module>
         <module>che-plugin-openshift-ext-client</module>

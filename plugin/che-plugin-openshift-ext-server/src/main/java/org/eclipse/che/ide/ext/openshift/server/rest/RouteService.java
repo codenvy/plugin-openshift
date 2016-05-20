@@ -43,7 +43,7 @@ import static org.eclipse.che.ide.ext.openshift.server.DtoConverter.toOpenshiftR
 /**
  * @author Sergii Leschenko
  */
-@Path("/openshift/{ws-id}/namespace/{namespace}/route")
+@Path("/openshift/namespace/{namespace}/route")
 public class RouteService {
     private final ClientFactory clientFactory;
 

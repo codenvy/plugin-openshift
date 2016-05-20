@@ -210,7 +210,7 @@ public class ImportApplicationViewImpl extends Window implements ImportApplicati
                                                                        buildConfigDelegate);
             categoriesList.add(category);
         }
-        buildConfigList.render(categoriesList);
+        buildConfigList.render(categoriesList, true);
 
         buildConfigList.setVisible(!buildConfigs.isEmpty());
         nothingToShowLabel.setVisible(buildConfigs.isEmpty());

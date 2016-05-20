@@ -19,9 +19,10 @@
     <inherits name="com.google.gwt.json.JSON"/>
     <inherits name='org.eclipse.che.ide.Api'/>
     <inherits name="com.google.gwt.inject.Inject"/>
-    <inherits name="org.eclipse.che.api.Auth"/>
-    <inherits name="org.eclipse.che.api.Core"/>
+    <inherits name="org.eclipse.che.api.auth.Auth"/>
+    <inherits name="org.eclipse.che.api.core.Core"/>
     <inherits name="org.eclipse.che.ide.Util"/>
+    <inherits name="org.eclipse.che.ide.ui.CodenvyUI"/>
 
     <source path="client"/>
     <source path="shared"/>
