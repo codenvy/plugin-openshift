@@ -52,7 +52,7 @@
     <inherits name='org.eclipse.che.ide.ext.dashboard.Dashboard'/>
     <inherits name='org.eclipse.che.ide.ext.ssh.MachineSsh'/>
     <inherits name='org.eclipse.che.ide.ext.git.Git'/>
-    <inherits name='org.eclipse.che.plugin.ssh.key.SshKey'/>
+    <inherits name="org.eclipse.che.ide.ext.git.ssh.Ssh"/>
     <inherits name='org.eclipse.che.plugin.github.GitHub'/>
     <inherits name='org.eclipse.che.ide.editor.orion.OrionEditor'/>
     <inherits name="org.eclipse.che.ide.orion.OrionCompare"/>
