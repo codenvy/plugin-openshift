@@ -34,6 +34,7 @@ import org.eclipse.che.api.user.server.dao.PreferenceDao;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.everrest.CheAsynchronousJobPool;
 import org.eclipse.che.git.impl.nativegit.NativeGitConnectionFactory;
+import org.eclipse.che.ide.ext.openshift.server.inject.OpenshiftModule;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.security.oauth.RemoteOAuthTokenProvider;
 import org.everrest.core.impl.async.AsynchronousJobPool;
@@ -65,6 +66,7 @@ public class WsAgentModule extends AbstractModule {
         install(new ProjectApiModule());
         install(new org.eclipse.che.swagger.deploy.DocsModule());
         install(new org.eclipse.che.api.debugger.server.DebuggerModule());
+        install(new OpenshiftModule());
 
         bind(GitUserResolver.class).to(LocalGitUserResolver.class);
         bind(GitConnectionFactory.class).to(NativeGitConnectionFactory.class);
