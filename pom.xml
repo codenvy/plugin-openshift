@@ -35,7 +35,7 @@
     </scm>
     <properties>
         <che.version>4.3.0-RC1-SNAPSHOT</che.version>
-        <com.openshift.restclient.version>4.0.0.Final</com.openshift.restclient.version>
+        <com.openshift.restclient.version>4.0.5.Final</com.openshift.restclient.version>
         <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>
     </properties>
     <dependencyManagement>
