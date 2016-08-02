@@ -32,6 +32,7 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.event.project.ProjectUpdatedEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.collections.Jso;
 import org.eclipse.che.ide.collections.js.JsoArray;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -41,6 +42,7 @@ import org.eclipse.che.ide.ext.openshift.client.OpenshiftServiceClient;
 import org.eclipse.che.ide.ext.openshift.client.ValidateAuthenticationPresenter;
 import org.eclipse.che.ide.ext.openshift.client.oauth.OpenshiftAuthenticator;
 import org.eclipse.che.ide.ext.openshift.client.oauth.OpenshiftAuthorizationHandler;
+import org.eclipse.che.ide.ext.openshift.client.util.DtoConverter;
 import org.eclipse.che.ide.ext.openshift.client.util.OpenshiftValidator;
 import org.eclipse.che.ide.ext.openshift.shared.dto.BuildConfig;
 import org.eclipse.che.ide.ext.openshift.shared.dto.BuildConfigSpec;
@@ -183,22 +185,22 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
     @Override
     protected void onSuccessAuthentication() {
         reset();
-
-        if (appContext.getCurrentProject() != null) {
+        final Resource resource = appContext.getResource();
+        if (resource != null && resource.getRelatedProject().isPresent()) {
+            final org.eclipse.che.ide.api.resources.Project project = resource.getRelatedProject().get();
             //Check is Git repository:
-            ProjectConfigDto projectConfig = appContext.getCurrentProject().getRootProject();
-            List<String> listVcsProvider = projectConfig.getAttributes().get("vcs.provider.name");
+            List<String> listVcsProvider = project.getAttributes().get("vcs.provider.name");
             if (listVcsProvider != null && listVcsProvider.contains("git")) {
-                getGitRemoteRepositories(projectConfig);
+                getGitRemoteRepositories(project);
             } else {
                 dialogFactory.createMessageDialog(locale.notGitRepositoryWarningTitle(),
-                                                  locale.notGitRepositoryWarning(projectConfig.getName()),
+                                                  locale.notGitRepositoryWarning(project.getName()),
                                                   null).show();
             }
         }
     }
 
-    private void getGitRemoteRepositories(final ProjectConfigDto projectConfig) {
+    private void getGitRemoteRepositories(final org.eclipse.che.ide.api.resources.Project projectConfig) {
         gitService.remoteList(appContext.getDevMachine(), projectConfig, null, true)
                   .then(new Operation<List<Remote>>() {
                       @Override
@@ -222,8 +224,8 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
     }
 
     private void loadOpenShiftData() {
-        final ProjectConfigDto projectConfig = appContext.getCurrentProject().getRootProject();
-        view.setApplicationName(projectConfig.getName());
+        final org.eclipse.che.ide.api.resources.Project project = appContext.getResource().getRelatedProject().get();
+        view.setApplicationName(project.getName());
         view.show();
 
         osService.getProjects().then(new Operation<List<Project>>() {
@@ -326,7 +328,7 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
                                 view.showLoader(false);
                                 view.hide();
                                 notificationManager
-                                        .notify(locale.deployProjectSuccess(appContext.getCurrentProject().getRootProject().getName()),
+                                        .notify(locale.deployProjectSuccess(appContext.getRootProject().getName()),
                                                 SUCCESS,
                                                 EMERGE_MODE);
                                 setupMixin(project);
@@ -355,7 +357,7 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
     }
 
     private void setupMixin(Project project) {
-        final ProjectConfigDto projectConfig = appContext.getCurrentProject().getRootProject();
+        final ProjectConfigDto projectConfig = DtoConverter.toDto(dtoFactory, appContext.getResource().getRelatedProject().get());
 
         List<String> mixins = projectConfig.getMixins();
         if (!mixins.contains(OPENSHIFT_PROJECT_TYPE_ID)) {
@@ -366,7 +368,7 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
         attributes.put(OPENSHIFT_APPLICATION_VARIABLE_NAME, newArrayList(osAppName));
         attributes.put(OPENSHIFT_NAMESPACE_VARIABLE_NAME, newArrayList(project.getMetadata().getName()));
 
-        projectService.updateProject(appContext.getDevMachine(), projectConfig.getPath(), projectConfig)
+        projectService.updateProject(projectConfig)
                       .then(new Operation<ProjectConfigDto>() {
                           @Override
                           public void apply(ProjectConfigDto project) throws OperationException {

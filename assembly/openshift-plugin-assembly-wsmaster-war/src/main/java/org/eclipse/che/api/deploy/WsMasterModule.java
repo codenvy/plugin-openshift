@@ -30,7 +30,7 @@ public class WsMasterModule extends AbstractModule {
         bind(org.eclipse.che.api.ssh.server.SshService.class);
         bind(org.eclipse.che.api.machine.server.recipe.RecipeService.class);
         bind(org.eclipse.che.api.user.server.UserService.class);
-        bind(org.eclipse.che.api.user.server.UserProfileService.class);
+        bind(org.eclipse.che.api.user.server.ProfileService.class);
         bind(org.eclipse.che.api.workspace.server.stack.StackLoader.class);
         bind(org.eclipse.che.api.workspace.server.stack.StackService.class);
         bind(org.eclipse.che.api.workspace.server.WorkspaceService.class);

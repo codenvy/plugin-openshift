@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.openshift.client.project;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -21,8 +22,10 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants;
 
@@ -45,60 +48,73 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUC
 @Singleton
 public class UnlinkProjectAction extends AbstractPerspectiveAction {
 
-    private final AppContext                    appContext;
-    private final ProjectServiceClient          projectServiceClient;
-    private final NotificationManager           notificationManager;
+    private final AppContext           appContext;
+    private final ProjectServiceClient projectServiceClient;
+    private final NotificationManager  notificationManager;
+    private final DtoFactory           dtoFactory;
     private final OpenshiftLocalizationConstant locale;
 
     @Inject
     public UnlinkProjectAction(AppContext appContext,
                                ProjectServiceClient projectServiceClient,
                                NotificationManager notificationManager,
+                               DtoFactory dtoFactory,
                                OpenshiftLocalizationConstant locale) {
         super(Collections.singletonList(PROJECT_PERSPECTIVE_ID), locale.unlinkProjectActionTitle(), null, null, null);
         this.appContext = appContext;
         this.projectServiceClient = projectServiceClient;
         this.notificationManager = notificationManager;
+        this.dtoFactory = dtoFactory;
         this.locale = locale;
     }
 
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
-        final CurrentProject currentProject = appContext.getCurrentProject();
-        event.getPresentation().setVisible(currentProject != null);
-        event.getPresentation().setEnabled(currentProject != null
-                                           && currentProject.getRootProject().getMixins().contains(OPENSHIFT_PROJECT_TYPE_ID));
+        final Resource resource = appContext.getResource();
+        if (resource != null) {
+            final Optional<Project> relatedProject = resource.getRelatedProject();
+            event.getPresentation().setVisible(relatedProject.isPresent());
+            event.getPresentation().setEnabled(relatedProject.isPresent()
+                                               && relatedProject.get().getMixins().contains(OPENSHIFT_PROJECT_TYPE_ID));
+        }
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        final ProjectConfigDto projectConfig = appContext.getCurrentProject().getRootProject();
-        List<String> mixins = projectConfig.getMixins();
-        if (mixins.contains(OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID)) {
-            mixins.remove(OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID);
-
-            Map<String, List<String>> attributes = projectConfig.getAttributes();
-            attributes.remove(OpenshiftProjectTypeConstants.OPENSHIFT_APPLICATION_VARIABLE_NAME);
-            attributes.remove(OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME);
-
-            projectServiceClient.updateProject(appContext.getDevMachine(), projectConfig.getPath(), projectConfig)
-                                .then(new Operation<ProjectConfigDto>() {
-                                    @Override
-                                    public void apply(ProjectConfigDto result) throws OperationException {
-                                        appContext.getCurrentProject().setRootProject(result);
-                                        notificationManager.notify(locale.unlinkProjectSuccessful(result.getName()),
-                                                                   SUCCESS,
-                                                                   EMERGE_MODE);
-                                    }
-                                })
-                                .catchError(new Operation<PromiseError>() {
-                                    @Override
-                                    public void apply(PromiseError promiseError) throws OperationException {
-                                        notificationManager.notify(locale.unlinkProjectFailed() + " " + promiseError.getMessage(),
-                                                                   FAIL,
-                                                                   EMERGE_MODE);
-                                    }
-                                });
+        final Resource resource = appContext.getResource();
+        if (resource != null && resource.getRelatedProject().isPresent()) {
+            final Project relatedProject = resource.getRelatedProject().get();
+            List<String> mixins = relatedProject.getMixins();
+            if (mixins.contains(OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID)) {
+                mixins.remove(OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID);
+                Map<String, List<String>> attributes = relatedProject.getAttributes();
+                attributes.remove(OpenshiftProjectTypeConstants.OPENSHIFT_APPLICATION_VARIABLE_NAME);
+                attributes.remove(OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME);
+                final ProjectConfigDto dto = dtoFactory.createDto(ProjectConfigDto.class)
+                                                       .withPath(relatedProject.getPath())
+                                                       .withDescription(relatedProject.getDescription())
+                                                       .withType(relatedProject.getType())
+                                                       .withMixins(mixins)
+                                                       .withAttributes(attributes);
+                projectServiceClient.updateProject(dto)
+                                    .then(new Operation<ProjectConfigDto>() {
+                                        @Override
+                                        public void apply(ProjectConfigDto result) throws OperationException {
+                                            //appContext.getCurrentProject().setRootProject(result);
+                                            notificationManager.notify(locale.unlinkProjectSuccessful(result.getName()),
+                                                                       SUCCESS,
+                                                                       EMERGE_MODE);
+                                        }
+                                    })
+                                    .catchError(new Operation<PromiseError>() {
+                                        @Override
+                                        public void apply(PromiseError promiseError) throws OperationException {
+                                            notificationManager.notify(locale.unlinkProjectFailed() + " " + promiseError.getMessage(),
+                                                                       FAIL,
+                                                                       EMERGE_MODE);
+                                        }
+                                    });
+            }
         }
     }
 }

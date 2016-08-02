@@ -21,7 +21,6 @@ import org.eclipse.che.ide.api.project.ProjectServiceClient;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.parts.PartStackType;
@@ -73,7 +72,6 @@ public class BuildsPresenter extends BasePresenter implements BuildsView.ActionD
     private final OpenshiftLocalizationConstant  locale;
     private final ProjectServiceClient           projectServiceClient;
     private final OpenshiftWebSocketPathProvider wsPathProvider;
-    private final AppContext                     appContext;
 
     private String webSocketBasePath = null;
 
@@ -96,8 +94,7 @@ public class BuildsPresenter extends BasePresenter implements BuildsView.ActionD
                            final DtoFactory dtoFactory,
                            final NotificationManager notificationManager,
                            final OpenshiftLocalizationConstant locale,
-                           final ProjectServiceClient projectServiceClient,
-                           final AppContext appContext) {
+                           final ProjectServiceClient projectServiceClient) {
         this.view = view;
         this.workspaceAgent = workspaceAgent;
         this.dtoFactory = dtoFactory;
@@ -105,7 +102,6 @@ public class BuildsPresenter extends BasePresenter implements BuildsView.ActionD
         this.locale = locale;
         this.projectServiceClient = projectServiceClient;
         this.wsPathProvider = wsPathProvider;
-        this.appContext = appContext;
 
         view.setDelegate(this);
 
@@ -147,7 +143,7 @@ public class BuildsPresenter extends BasePresenter implements BuildsView.ActionD
      * Checks workspace projects for being deployed on OpenShift and starts observation for builds for that projects.
      */
     private void checkWorkspaceProjects() {
-        projectServiceClient.getProjects(appContext.getDevMachine()).then(new Operation<List<ProjectConfigDto>>() {
+        projectServiceClient.getProjects().then(new Operation<List<ProjectConfigDto>>() {
             @Override
             public void apply(List<ProjectConfigDto> projects) throws OperationException {
                 for (ProjectConfigDto project : projects) {

@@ -16,8 +16,9 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.app.CurrentProject;
 
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.client.service.add.wizard.CreateServicePresenter;
 
@@ -52,10 +53,15 @@ public class AddServiceAction extends AbstractPerspectiveAction {
 
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
-        CurrentProject currentProject = appContext.getCurrentProject();
-        event.getPresentation().setVisible(currentProject != null);
-        event.getPresentation().setEnabled(currentProject != null
-                                           && currentProject.getRootProject().getMixins().contains(OPENSHIFT_PROJECT_TYPE_ID));
+        final Resource resource = appContext.getResource();
+        if (resource != null && resource.getRelatedProject().isPresent()) {
+            final Project currentProject = resource.getRelatedProject().get();
+            event.getPresentation().setVisible(true);
+            event.getPresentation().setEnabled(currentProject != null
+                                               && currentProject.getMixins().contains(OPENSHIFT_PROJECT_TYPE_ID));
+        } else {
+            event.getPresentation().setEnabledAndVisible(false);
+        }
     }
 
     @Override

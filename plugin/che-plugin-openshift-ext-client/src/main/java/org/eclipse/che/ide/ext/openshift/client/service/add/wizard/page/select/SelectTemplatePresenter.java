@@ -26,14 +26,17 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
+import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftServiceClient;
 import org.eclipse.che.ide.ext.openshift.client.dto.NewServiceRequest;
+import org.eclipse.che.ide.ext.openshift.client.util.DtoConverter;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Template;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 
+import static org.eclipse.che.ide.ext.openshift.client.util.DtoConverter.toDto;
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
@@ -46,15 +49,16 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 @Singleton
 public class SelectTemplatePresenter extends AbstractWizardPage<NewServiceRequest> implements SelectTemplateView.ActionDelegate {
 
-    private final SelectTemplateView            view;
-    private final OpenshiftServiceClient        client;
-    private final NotificationManager           notificationManager;
-    private final AppContext                    appContext;
+    private final SelectTemplateView     view;
+    private final OpenshiftServiceClient client;
+    private final NotificationManager    notificationManager;
+    private final AppContext             appContext;
+    private final DtoFactory             dtoFactory;
     private final OpenshiftLocalizationConstant locale;
 
     public static final  String DEFAULT_NAMESPACE = "openshift";
     private static final String DATABASE_TAG      = "database";
-    
+
     private Template selectedTemplate;
 
     @Inject
@@ -62,22 +66,24 @@ public class SelectTemplatePresenter extends AbstractWizardPage<NewServiceReques
                                    OpenshiftServiceClient client,
                                    NotificationManager notificationManager,
                                    AppContext appContext,
+                                   DtoFactory dtoFactory,
                                    OpenshiftLocalizationConstant locale) {
         this.view = view;
         this.client = client;
         this.notificationManager = notificationManager;
         this.appContext = appContext;
+        this.dtoFactory = dtoFactory;
         this.locale = locale;
-        
+
         view.setDelegate(this);
     }
-    
+
     @Override
     public void init(NewServiceRequest dataObject) {
         super.init(dataObject);
         selectedTemplate = null;
-        
-        ProjectConfigDto projectConfig = appContext.getCurrentProject().getRootProject();
+
+        ProjectConfigDto projectConfig = toDto(dtoFactory, appContext.getRootProject());
         final String namespace = getAttributeValue(projectConfig, OPENSHIFT_NAMESPACE_VARIABLE_NAME);
 
         view.showLoadingTemplates();
@@ -98,7 +104,7 @@ public class SelectTemplatePresenter extends AbstractWizardPage<NewServiceReques
             }
         });
     }
-    
+
     private Function<List<Template>, List<Template>> filterByCategory(@NotNull final String category) {
         return new Function<List<Template>, List<Template>>() {
             @Override

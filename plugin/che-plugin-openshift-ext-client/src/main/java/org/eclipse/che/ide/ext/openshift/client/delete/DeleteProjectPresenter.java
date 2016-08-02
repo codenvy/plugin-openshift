@@ -14,6 +14,7 @@ import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.ide.api.project.ProjectServiceClient;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -22,6 +23,9 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftServiceClient;
 import org.eclipse.che.ide.ext.openshift.client.ValidateAuthenticationPresenter;
@@ -49,28 +53,30 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUC
 @Singleton
 public class DeleteProjectPresenter extends ValidateAuthenticationPresenter {
 
-    private final AppContext                    appContext;
-    private final DialogFactory                 dialogFactory;
+    private final AppContext    appContext;
+    private final DialogFactory dialogFactory;
+    private final DtoFactory    dtoFactory;
     private final OpenshiftLocalizationConstant locale;
-    private final OpenshiftServiceClient        service;
-    private final NotificationManager           notificationManager;
-    private final ProjectServiceClient          projectService;
-    private final MessageLoader                 loader;
+    private final OpenshiftServiceClient service;
+    private final NotificationManager    notificationManager;
+    private final ProjectServiceClient   projectService;
+    private final MessageLoader          loader;
 
     @Inject
     protected DeleteProjectPresenter(OpenshiftAuthenticator openshiftAuthenticator,
                                      OpenshiftAuthorizationHandler openshiftAuthorizationHandler,
                                      AppContext appContext,
                                      DialogFactory dialogFactory,
+                                     DtoFactory dtoFactory,
                                      OpenshiftLocalizationConstant locale,
                                      OpenshiftServiceClient service,
                                      ProjectServiceClient projectService,
                                      NotificationManager notificationManager,
                                      LoaderFactory loaderFactory) {
         super(openshiftAuthenticator, openshiftAuthorizationHandler, locale, notificationManager);
-
         this.appContext = appContext;
         this.dialogFactory = dialogFactory;
+        this.dtoFactory = dtoFactory;
         this.locale = locale;
         this.service = service;
         this.notificationManager = notificationManager;
@@ -80,34 +86,28 @@ public class DeleteProjectPresenter extends ValidateAuthenticationPresenter {
 
     @Override
     protected void onSuccessAuthentication() {
-        ProjectConfigDto projectConfig = appContext.getCurrentProject().getRootProject();
-        final String namespace = getAttributeValue(projectConfig, OPENSHIFT_NAMESPACE_VARIABLE_NAME);
-
-        if (!Strings.isNullOrEmpty(namespace)) {
-            loader.show(locale.retrievingProjectsData());
-            Promise<List<BuildConfig>> buildConfigs = service.getBuildConfigs(namespace);
-            buildConfigs.then(showConfirmDialog(projectConfig, namespace))
-                        .catchError(new Operation<PromiseError>() {
-                            @Override
-                            public void apply(PromiseError arg) throws OperationException {
-                                loader.hide();
-                            }
-                        })
-                        .catchError(handleError(namespace));
-        } else {
-            notificationManager.notify(locale.projectIsNotLinkedToOpenShiftError(projectConfig.getName()), FAIL, EMERGE_MODE);
+        final Resource resource = appContext.getResource();
+        if (resource != null && resource.getRelatedProject().isPresent()) {
+            Project project = resource.getRelatedProject().get();
+            final String namespace = project.getAttribute(OPENSHIFT_NAMESPACE_VARIABLE_NAME);
+            if (!Strings.isNullOrEmpty(namespace)) {
+                loader.show(locale.retrievingProjectsData());
+                Promise<List<BuildConfig>> buildConfigs = service.getBuildConfigs(namespace);
+                buildConfigs.then(showConfirmDialog(project, namespace))
+                            .catchError(new Operation<PromiseError>() {
+                                @Override
+                                public void apply(PromiseError arg) throws OperationException {
+                                    loader.hide();
+                                }
+                            })
+                            .catchError(handleError(namespace));
+            } else {
+                notificationManager.notify(locale.projectIsNotLinkedToOpenShiftError(project.getName()), FAIL, EMERGE_MODE);
+            }
         }
     }
 
-    private String getAttributeValue(ProjectConfigDto projectConfig, String value) {
-        List<String> attributes = projectConfig.getAttributes().get(value);
-        if (attributes == null || attributes.isEmpty()) {
-            return null;
-        }
-        return projectConfig.getAttributes().get(value).get(0);
-    }
-
-    private Operation<List<BuildConfig>> showConfirmDialog(final ProjectConfigDto projectConfig, final String nameSpace) {
+    private Operation<List<BuildConfig>> showConfirmDialog(final Project project, final String nameSpace) {
         return new Operation<List<BuildConfig>>() {
             @Override
             public void apply(List<BuildConfig> configs) throws OperationException {
@@ -128,7 +128,7 @@ public class DeleteProjectPresenter extends ValidateAuthenticationPresenter {
                             @Override
                             public void apply(Void arg) throws OperationException {
                                 notificationManager.notify(locale.deleteProjectSuccess(nameSpace), SUCCESS, EMERGE_MODE);
-                                removeOpenshiftMixin(projectConfig, nameSpace);
+                                removeOpenshiftMixin(project, nameSpace);
                             }
                         })
                         .catchError(new Operation<PromiseError>() {
@@ -153,16 +153,34 @@ public class DeleteProjectPresenter extends ValidateAuthenticationPresenter {
         };
     }
 
-    private void removeOpenshiftMixin(final ProjectConfigDto projectConfig, final String nameSpace) {
-        projectConfig.getMixins().remove(OPENSHIFT_PROJECT_TYPE_ID);
-        projectConfig.getAttributes().remove(OPENSHIFT_NAMESPACE_VARIABLE_NAME);
-        projectConfig.getAttributes().remove(OPENSHIFT_APPLICATION_VARIABLE_NAME);
+    private void removeOpenshiftMixin(final Project project, final String nameSpace) {
+        project.getMixins().remove(OPENSHIFT_PROJECT_TYPE_ID);
+        project.getAttributes().remove(OPENSHIFT_NAMESPACE_VARIABLE_NAME);
+        project.getAttributes().remove(OPENSHIFT_APPLICATION_VARIABLE_NAME);
 
-        projectService.updateProject(appContext.getDevMachine(), projectConfig.getPath(), projectConfig)
+        final SourceStorageDto sourceDto = dtoFactory.createDto(SourceStorageDto.class);
+
+        if (project.getSource() != null) {
+            sourceDto.setLocation(project.getSource().getLocation());
+            sourceDto.setType(project.getSource().getType());
+            sourceDto.setParameters(project.getSource().getParameters());
+        }
+
+        final ProjectConfigDto dto = dtoFactory.createDto(ProjectConfigDto.class)
+                                               .withName(project.getName())
+                                               .withPath(project.getPath())
+                                               .withDescription(project.getDescription())
+                                               .withType(project.getType())
+                                               .withMixins(project.getMixins())
+                                               .withAttributes(project.getAttributes())
+                                               .withSource(sourceDto);
+
+
+        projectService.updateProject(dto)
                       .then(new Operation<ProjectConfigDto>() {
                           @Override
                           public void apply(ProjectConfigDto configDto) throws OperationException {
-                              appContext.getCurrentProject().setRootProject(configDto);
+//                              appContext.getCurrentProject().setRootProject(configDto);
                               notificationManager.notify(locale.projectSuccessfullyReset(configDto.getName()), SUCCESS, EMERGE_MODE);
                           }
                       }).catchError(handleError(nameSpace));

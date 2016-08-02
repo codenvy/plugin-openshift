@@ -20,8 +20,9 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftServiceClient;
@@ -76,14 +77,13 @@ public class ReplicationPresenter implements ConfigPresenter, ReplicationView.Ac
     }
 
     private void loadReplicationData() {
-        final CurrentProject currentProject = appContext.getCurrentProject();
-        if (currentProject == null) {
+        final Resource resource = appContext.getResource();
+        if (resource == null || !resource.getRelatedProject().isPresent()) {
             return;
         }
-        final ProjectConfig projectDescription = currentProject.getRootProject();
-
-        String namespace = getAttributeValue(projectDescription, OPENSHIFT_NAMESPACE_VARIABLE_NAME);
-        String application = getAttributeValue(projectDescription, OPENSHIFT_APPLICATION_VARIABLE_NAME);
+        final Project project = resource.getRelatedProject().get();
+        String namespace = project.getAttribute(OPENSHIFT_NAMESPACE_VARIABLE_NAME);
+        String application = project.getAttribute(OPENSHIFT_APPLICATION_VARIABLE_NAME);
 
         service.getReplicationControllers(namespace, application)
                .then(showReplicas())

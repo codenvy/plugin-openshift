@@ -45,6 +45,7 @@ import org.eclipse.che.ide.ext.openshift.client.util.OpenshiftValidator;
 import org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants;
 import org.eclipse.che.ide.ext.openshift.shared.dto.BuildConfig;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Project;
+import org.eclipse.che.ide.resource.Path;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -147,7 +148,7 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
      * Load che projects for following verifications.
      */
     private void loadCheProjects() {
-        projectServiceClient.getProjects(appContext.getDevMachine()).then(new Operation<List<ProjectConfigDto>>() {
+        projectServiceClient.getProjects().then(new Operation<List<ProjectConfigDto>>() {
             @Override
             public void apply(List<ProjectConfigDto> result) throws OperationException {
                 cheProjects.clear();
@@ -260,7 +261,7 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
         importProjectNotificationSubscriber.subscribe(view.getProjectName());
 
         try {
-            projectServiceClient.importProject(appContext.getDevMachine(), view.getProjectName(), false, projectConfig.getSource())
+            projectServiceClient.importProject(Path.valueOf(view.getProjectName()), projectConfig.getSource())
                                 .then(new Operation<Void>() {
                                     @Override
                                     public void apply(Void arg) throws OperationException {
@@ -285,8 +286,8 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
      *         project's config
      */
     private void resolveProject(final ProjectConfigDto projectConfig) {
-        final String projectName = projectConfig.getName();
-        projectServiceClient.resolveSources(appContext.getDevMachine(), projectName)
+        final String path = projectConfig.getPath();
+        projectServiceClient.resolveSources(Path.valueOf(path))
                             .then(new Operation<List<SourceEstimation>>() {
                                 @Override
                                 public void apply(List<SourceEstimation> result) throws OperationException {
@@ -321,7 +322,7 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
      */
     private void updateProject(final ProjectConfigDto projectConfig) {
         try {
-            projectServiceClient.updateProject(appContext.getDevMachine(), projectConfig.getName(), projectConfig)
+            projectServiceClient.updateProject(projectConfig)
                                 .then(new Operation<ProjectConfigDto>() {
                                     @Override
                                     public void apply(ProjectConfigDto result) throws OperationException {

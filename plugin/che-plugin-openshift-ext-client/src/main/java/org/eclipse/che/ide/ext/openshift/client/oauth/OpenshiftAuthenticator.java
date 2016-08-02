@@ -69,7 +69,7 @@ public class OpenshiftAuthenticator implements OAuthCallback {
     }
 
     private String getAuthUrl() {
-        return baseUrl + "/oauth/authenticate?oauth_provider=openshift&userId=" + appContext.getCurrentUser().getProfile().getId()
+        return baseUrl + "/oauth/authenticate?oauth_provider=openshift&userId=" + appContext.getCurrentUser().getProfile().getUserId()
                + "&redirect_after_login="//TODO Fix redirect after login
                + Window.Location.getProtocol() + "//"
                + Window.Location.getHost() + "/dashboard/";
