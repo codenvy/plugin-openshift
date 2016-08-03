@@ -30,10 +30,10 @@ import org.eclipse.che.api.git.LocalGitUserResolver;
 import org.eclipse.che.api.project.server.ProjectApiModule;
 import org.eclipse.che.api.ssh.server.HttpSshServiceClient;
 import org.eclipse.che.api.ssh.server.SshServiceClient;
-import org.eclipse.che.api.user.server.dao.PreferenceDao;
+import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.everrest.CheAsynchronousJobPool;
-import org.eclipse.che.git.impl.nativegit.NativeGitConnectionFactory;
+import org.eclipse.che.git.impl.jgit.JGitConnectionFactory;
 import org.eclipse.che.ide.ext.openshift.server.inject.OpenshiftModule;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.security.oauth.RemoteOAuthTokenProvider;
@@ -69,7 +69,7 @@ public class WsAgentModule extends AbstractModule {
         install(new OpenshiftModule());
 
         bind(GitUserResolver.class).to(LocalGitUserResolver.class);
-        bind(GitConnectionFactory.class).to(NativeGitConnectionFactory.class);
+        bind(GitConnectionFactory.class).to(JGitConnectionFactory.class);
 
         bind(AsynchronousJobPool.class).to(CheAsynchronousJobPool.class);
         bind(ServiceBindingHelper.bindingKey(AsynchronousJobService.class, "/async/{ws-id}")).to(AsynchronousJobService.class);
