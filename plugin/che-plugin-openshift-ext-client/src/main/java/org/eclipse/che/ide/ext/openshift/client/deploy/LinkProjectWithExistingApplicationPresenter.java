@@ -13,17 +13,17 @@ package org.eclipse.che.ide.ext.openshift.client.deploy;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
-import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.api.git.shared.Remote;
-import org.eclipse.che.ide.api.project.ProjectServiceClient;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
@@ -35,19 +35,18 @@ import org.eclipse.che.ide.ext.openshift.shared.dto.BuildConfig;
 import org.eclipse.che.ide.ext.openshift.shared.dto.BuildSource;
 import org.eclipse.che.ide.ext.openshift.shared.dto.GitBuildSource;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Project;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_APPLICATION_VARIABLE_NAME;
-import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
-import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
+import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_APPLICATION_VARIABLE_NAME;
+import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
+import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID;
 
 /**
  * Presenter, which handles logic for linking current project with OpenShift application.
@@ -64,7 +63,6 @@ public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthent
     private final NotificationManager                    notificationManager;
     private final DialogFactory                          dialogFactory;
     private final OpenshiftServiceClient                 openShiftClient;
-    private final ProjectServiceClient                   projectServiceClient;
     private final GitServiceClient                       gitService;
     private final DtoFactory                             dtoFactory;
     private final Map<String, List<BuildConfig>>         buildConfigMap;
@@ -75,7 +73,6 @@ public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthent
     public LinkProjectWithExistingApplicationPresenter(OpenshiftLocalizationConstant locale,
                                                        LinkProjectWithExistingApplicationView view,
                                                        OpenshiftServiceClient openShiftClient,
-                                                       ProjectServiceClient projectServiceClient,
                                                        GitServiceClient gitService,
                                                        NotificationManager notificationManager,
                                                        DialogFactory dialogFactory,
@@ -95,7 +92,6 @@ public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthent
         this.dialogFactory = dialogFactory;
         this.dtoFactory = dtoFactory;
         this.openShiftClient = openShiftClient;
-        this.projectServiceClient = projectServiceClient;
         this.gitService = gitService;
         buildConfigMap = new HashMap<>();
     }
@@ -207,29 +203,23 @@ public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthent
             attributes.put(OPENSHIFT_NAMESPACE_VARIABLE_NAME, Collections.singletonList(namespace));
             attributes.put(OPENSHIFT_APPLICATION_VARIABLE_NAME, Collections.singletonList(application));
 
-            final ProjectConfigDto projectConfig = dtoFactory.createDto(ProjectConfigDto.class).withType(project.getType())
-                                                             .withPath(project.getPath())
-                                                             .withMixins(mixins)
-                                                             .withName(project.getName())
-                                                             .withAttributes(attributes);
+            MutableProjectConfig config = new MutableProjectConfig(project);
+            config.getMixins().addAll(mixins);
+            config.getAttributes().putAll(attributes);
 
-
-            projectServiceClient.updateProject(projectConfig)
-                                .then(new Operation<ProjectConfigDto>() {
-                                    @Override
-                                    public void apply(ProjectConfigDto result) throws OperationException {
-//                                    appContext.getCurrentProject().setRootProject(result);
-                                        notificationManager.notify(locale.linkProjectWithExistingSuccess(result.getName(), application),
-                                                                   SUCCESS,
-                                                                   EMERGE_MODE);
-                                    }
-                                })
-                                .catchError(new Operation<PromiseError>() {
-                                    @Override
-                                    public void apply(PromiseError promiseError) throws OperationException {
-                                        notificationManager.notify(promiseError.getMessage(), FAIL, EMERGE_MODE);
-                                    }
-                                });
+            project.update().withBody(config).send().then(new Operation<org.eclipse.che.ide.api.resources.Project>() {
+                @Override
+                public void apply(org.eclipse.che.ide.api.resources.Project project) throws OperationException {
+                    notificationManager.notify(locale.linkProjectWithExistingSuccess(project.getName(), application),
+                                               SUCCESS,
+                                               EMERGE_MODE);
+                }
+            }).catchError(new Operation<PromiseError>() {
+                @Override
+                public void apply(PromiseError promiseError) throws OperationException {
+                    notificationManager.notify(promiseError.getMessage(), FAIL, EMERGE_MODE);
+                }
+            });
         }
     }
 
