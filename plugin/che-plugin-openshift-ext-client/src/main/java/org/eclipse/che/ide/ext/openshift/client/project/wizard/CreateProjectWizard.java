@@ -94,8 +94,8 @@ public class CreateProjectWizard extends AbstractWizard<NewApplicationRequest> {
         return new Operation<JsArrayMixed>() {
             @Override
             public void apply(JsArrayMixed arg) throws OperationException {
-                final MutableProjectConfig dataObject = new MutableProjectConfig();
-                importWizardFactory.newWizard(dataObject).complete(callback);
+                final MutableProjectConfig config = new MutableProjectConfig(dataObject.getProjectConfigDto());
+                importWizardFactory.newWizard(config).complete(callback);
             }
         };
     }
