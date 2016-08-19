@@ -16,27 +16,24 @@ import java.util.List;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
 
+import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
-import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftServiceClient;
 import org.eclipse.che.ide.ext.openshift.client.dto.NewServiceRequest;
-import org.eclipse.che.ide.ext.openshift.client.util.DtoConverter;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Template;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 
-import static org.eclipse.che.ide.ext.openshift.client.util.DtoConverter.toDto;
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
@@ -53,7 +50,6 @@ public class SelectTemplatePresenter extends AbstractWizardPage<NewServiceReques
     private final OpenshiftServiceClient client;
     private final NotificationManager    notificationManager;
     private final AppContext             appContext;
-    private final DtoFactory             dtoFactory;
     private final OpenshiftLocalizationConstant locale;
 
     public static final  String DEFAULT_NAMESPACE = "openshift";
@@ -66,13 +62,11 @@ public class SelectTemplatePresenter extends AbstractWizardPage<NewServiceReques
                                    OpenshiftServiceClient client,
                                    NotificationManager notificationManager,
                                    AppContext appContext,
-                                   DtoFactory dtoFactory,
                                    OpenshiftLocalizationConstant locale) {
         this.view = view;
         this.client = client;
         this.notificationManager = notificationManager;
         this.appContext = appContext;
-        this.dtoFactory = dtoFactory;
         this.locale = locale;
 
         view.setDelegate(this);
@@ -83,8 +77,7 @@ public class SelectTemplatePresenter extends AbstractWizardPage<NewServiceReques
         super.init(dataObject);
         selectedTemplate = null;
 
-        ProjectConfigDto projectConfig = toDto(dtoFactory, appContext.getRootProject());
-        final String namespace = getAttributeValue(projectConfig, OPENSHIFT_NAMESPACE_VARIABLE_NAME);
+        final String namespace = getAttributeValue(appContext.getRootProject(), OPENSHIFT_NAMESPACE_VARIABLE_NAME);
 
         view.showLoadingTemplates();
 
@@ -145,7 +138,7 @@ public class SelectTemplatePresenter extends AbstractWizardPage<NewServiceReques
         };
     }
     
-    private String getAttributeValue(ProjectConfigDto projectConfig, String value) {
+    private String getAttributeValue(ProjectConfig projectConfig, String value) {
         List<String> attributes = projectConfig.getAttributes().get(value);
         if (attributes == null || attributes.isEmpty()) {
             return null;
