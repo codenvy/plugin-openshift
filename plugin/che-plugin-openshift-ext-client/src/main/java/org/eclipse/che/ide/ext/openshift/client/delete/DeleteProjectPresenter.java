@@ -14,38 +14,34 @@ import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
-import org.eclipse.che.ide.api.project.ProjectServiceClient;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
-import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftServiceClient;
 import org.eclipse.che.ide.ext.openshift.client.ValidateAuthenticationPresenter;
 import org.eclipse.che.ide.ext.openshift.client.oauth.OpenshiftAuthenticator;
 import org.eclipse.che.ide.ext.openshift.client.oauth.OpenshiftAuthorizationHandler;
 import org.eclipse.che.ide.ext.openshift.shared.dto.BuildConfig;
-import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
 
 import java.util.List;
 
-import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_APPLICATION_VARIABLE_NAME;
-import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
-import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID;
-
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
+import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_APPLICATION_VARIABLE_NAME;
+import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
+import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID;
 
 /**
  * @author Alexander Andrienko
@@ -55,11 +51,9 @@ public class DeleteProjectPresenter extends ValidateAuthenticationPresenter {
 
     private final AppContext    appContext;
     private final DialogFactory dialogFactory;
-    private final DtoFactory    dtoFactory;
     private final OpenshiftLocalizationConstant locale;
     private final OpenshiftServiceClient service;
     private final NotificationManager    notificationManager;
-    private final ProjectServiceClient   projectService;
     private final MessageLoader          loader;
 
     @Inject
@@ -67,20 +61,16 @@ public class DeleteProjectPresenter extends ValidateAuthenticationPresenter {
                                      OpenshiftAuthorizationHandler openshiftAuthorizationHandler,
                                      AppContext appContext,
                                      DialogFactory dialogFactory,
-                                     DtoFactory dtoFactory,
                                      OpenshiftLocalizationConstant locale,
                                      OpenshiftServiceClient service,
-                                     ProjectServiceClient projectService,
                                      NotificationManager notificationManager,
                                      LoaderFactory loaderFactory) {
         super(openshiftAuthenticator, openshiftAuthorizationHandler, locale, notificationManager);
         this.appContext = appContext;
         this.dialogFactory = dialogFactory;
-        this.dtoFactory = dtoFactory;
         this.locale = locale;
         this.service = service;
         this.notificationManager = notificationManager;
-        this.projectService = projectService;
         this.loader = loaderFactory.newLoader();
     }
 
@@ -158,32 +148,17 @@ public class DeleteProjectPresenter extends ValidateAuthenticationPresenter {
         project.getAttributes().remove(OPENSHIFT_NAMESPACE_VARIABLE_NAME);
         project.getAttributes().remove(OPENSHIFT_APPLICATION_VARIABLE_NAME);
 
-        final SourceStorageDto sourceDto = dtoFactory.createDto(SourceStorageDto.class);
+        MutableProjectConfig config = new MutableProjectConfig(project);
+        config.getMixins().remove(OPENSHIFT_PROJECT_TYPE_ID);
+        config.getAttributes().remove(OPENSHIFT_NAMESPACE_VARIABLE_NAME);
+        config.getAttributes().remove(OPENSHIFT_APPLICATION_VARIABLE_NAME);
 
-        if (project.getSource() != null) {
-            sourceDto.setLocation(project.getSource().getLocation());
-            sourceDto.setType(project.getSource().getType());
-            sourceDto.setParameters(project.getSource().getParameters());
-        }
-
-        final ProjectConfigDto dto = dtoFactory.createDto(ProjectConfigDto.class)
-                                               .withName(project.getName())
-                                               .withPath(project.getPath())
-                                               .withDescription(project.getDescription())
-                                               .withType(project.getType())
-                                               .withMixins(project.getMixins())
-                                               .withAttributes(project.getAttributes())
-                                               .withSource(sourceDto);
-
-
-        projectService.updateProject(dto)
-                      .then(new Operation<ProjectConfigDto>() {
-                          @Override
-                          public void apply(ProjectConfigDto configDto) throws OperationException {
-//                              appContext.getCurrentProject().setRootProject(configDto);
-                              notificationManager.notify(locale.projectSuccessfullyReset(configDto.getName()), SUCCESS, EMERGE_MODE);
-                          }
-                      }).catchError(handleError(nameSpace));
+        project.update().withBody(config).send().then(new Operation<Project>() {
+            @Override
+            public void apply(Project project) throws OperationException {
+                notificationManager.notify(locale.projectSuccessfullyReset(project.getName()), SUCCESS, EMERGE_MODE);
+            }
+        }).catchError(handleError(nameSpace));
     }
 
     private String getBuildConfigNames(List<BuildConfig> buildConfigs) {
