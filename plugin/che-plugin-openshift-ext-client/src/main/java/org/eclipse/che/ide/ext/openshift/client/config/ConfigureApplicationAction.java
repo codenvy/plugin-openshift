@@ -52,14 +52,14 @@ public class ConfigureApplicationAction extends AbstractPerspectiveAction {
         presenter.show();
     }
 
-
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
+        event.getPresentation().setVisible(true);
+
         final Resource resource = appContext.getResource();
         if (resource != null) {
             final Optional<Project> relatedProject = resource.getRelatedProject();
             if (relatedProject.isPresent()) {
-                event.getPresentation().setVisible(true);
                 event.getPresentation().setEnabled(relatedProject.get().isTypeOf(OPENSHIFT_PROJECT_TYPE_ID));
             }
         }
