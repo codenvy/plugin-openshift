@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.openshift.client.build;
 
+
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
@@ -21,8 +22,9 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftServiceClient;
 import org.eclipse.che.ide.ext.openshift.client.oauth.OpenshiftAuthorizationHandler;
@@ -70,48 +72,56 @@ public class StartBuildAction extends AbstractPerspectiveAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        final ProjectConfigDto projectConfig = appContext.getCurrentProject().getRootProject();
-        final String namespace = getAttributeValue(projectConfig, OPENSHIFT_NAMESPACE_VARIABLE_NAME);
-        final String application = getAttributeValue(projectConfig, OPENSHIFT_APPLICATION_VARIABLE_NAME);
+        final Resource resource = appContext.getResource();
+        if (resource != null && resource.getRelatedProject().isPresent()) {
+            final Project relatedProject = resource.getRelatedProject().get();
+            final String namespace = relatedProject.getAttribute(OPENSHIFT_NAMESPACE_VARIABLE_NAME);
+            final String application = relatedProject.getAttribute(OPENSHIFT_APPLICATION_VARIABLE_NAME);
+            openshiftService.getBuildConfigs(namespace, application)
+                            .thenPromise(new Function<List<BuildConfig>, Promise<BuildConfig>>() {
+                                @Override
+                                public Promise<BuildConfig> apply(List<BuildConfig> arg) throws FunctionException {
+                                    if (arg.isEmpty() || arg.size() > 1) {
+                                        throw new FunctionException(locale.noBuildConfigError());
+                                    }
 
-        openshiftService.getBuildConfigs(namespace, application)
-                        .thenPromise(new Function<List<BuildConfig>, Promise<BuildConfig>>() {
-                            @Override
-                            public Promise<BuildConfig> apply(List<BuildConfig> arg) throws FunctionException {
-                                if (arg.isEmpty() || arg.size() > 1) {
-                                    throw new FunctionException(locale.noBuildConfigError());
+                                    return Promises.resolve(arg.get(0));
                                 }
-
-                                return Promises.resolve(arg.get(0));
-                            }
-                        })
-                        .thenPromise(new Function<BuildConfig, Promise<Build>>() {
-                            @Override
-                            public Promise<Build> apply(BuildConfig buildConfig) throws FunctionException {
-                                return openshiftService.startBuild(namespace, buildConfig.getMetadata().getName());
-                            }
-                        })
-                        .then(new Operation<Build>() {
-                            @Override
-                            public void apply(Build startedBuild) throws OperationException {
-                                buildsPresenter.newBuildStarted(startedBuild);
-                            }
-                        })
-                        .catchError(new Operation<PromiseError>() {
-                            @Override
-                            public void apply(PromiseError arg) throws OperationException {
-                                notificationManager.notify(locale.startBuildError() + " " + arg.getMessage(), FAIL, EMERGE_MODE);
-                            }
-                        });
+                            })
+                            .thenPromise(new Function<BuildConfig, Promise<Build>>() {
+                                @Override
+                                public Promise<Build> apply(BuildConfig buildConfig) throws FunctionException {
+                                    return openshiftService.startBuild(namespace, buildConfig.getMetadata().getName());
+                                }
+                            })
+                            .then(new Operation<Build>() {
+                                @Override
+                                public void apply(Build startedBuild) throws OperationException {
+                                    buildsPresenter.newBuildStarted(startedBuild);
+                                }
+                            })
+                            .catchError(new Operation<PromiseError>() {
+                                @Override
+                                public void apply(PromiseError arg) throws OperationException {
+                                    notificationManager.notify(locale.startBuildError() + " " + arg.getMessage(), FAIL, EMERGE_MODE);
+                                }
+                            });
+        }
     }
 
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
-        final CurrentProject currentProject = appContext.getCurrentProject();
-        event.getPresentation().setVisible(currentProject != null);
-        event.getPresentation().setEnabled(authorizationHandler.isLoggedIn()
-                                           && currentProject != null
-                                           && currentProject.getRootProject().getMixins().contains(OPENSHIFT_PROJECT_TYPE_ID));
+        final Resource resource = appContext.getResource();
+        if (resource != null && resource.getRelatedProject().isPresent()) {
+            final Project currentProject = resource.getRelatedProject().get();
+            event.getPresentation().setVisible(true);
+            event.getPresentation().setEnabled(authorizationHandler.isLoggedIn()
+                                               && currentProject != null
+                                               && currentProject.getMixins().contains(OPENSHIFT_PROJECT_TYPE_ID));
+        } else {
+            event.getPresentation().setEnabledAndVisible(false);
+        }
+
     }
 
     /** Returns first value of attribute of null if it is absent in project descriptor */

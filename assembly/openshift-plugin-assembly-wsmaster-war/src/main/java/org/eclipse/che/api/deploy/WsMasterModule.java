@@ -16,7 +16,6 @@ import com.google.inject.name.Names;
 
 import org.eclipse.che.api.machine.shared.Constants;
 import org.eclipse.che.inject.DynaModule;
-import org.everrest.guice.ServiceBindingHelper;
 
 /** @author andrew00x */
 @DynaModule
@@ -30,14 +29,12 @@ public class WsMasterModule extends AbstractModule {
         bind(org.eclipse.che.api.ssh.server.SshService.class);
         bind(org.eclipse.che.api.machine.server.recipe.RecipeService.class);
         bind(org.eclipse.che.api.user.server.UserService.class);
-        bind(org.eclipse.che.api.user.server.UserProfileService.class);
+        bind(org.eclipse.che.api.user.server.ProfileService.class);
+        bind(org.eclipse.che.api.user.server.PreferencesService.class);
         bind(org.eclipse.che.api.workspace.server.stack.StackLoader.class);
         bind(org.eclipse.che.api.workspace.server.stack.StackService.class);
         bind(org.eclipse.che.api.workspace.server.WorkspaceService.class);
         bind(org.eclipse.che.api.workspace.server.event.WorkspaceMessenger.class).asEagerSingleton();
-        bind(org.everrest.core.impl.async.AsynchronousJobPool.class).to(org.eclipse.che.everrest.CheAsynchronousJobPool.class);
-        bind(ServiceBindingHelper.bindingKey(org.everrest.core.impl.async.AsynchronousJobService.class, "/async/{ws-id}"))
-                .to(org.everrest.core.impl.async.AsynchronousJobService.class);
         bind(org.eclipse.che.plugin.docker.machine.ext.DockerMachineExtServerChecker.class);
         bind(org.eclipse.che.plugin.docker.machine.ext.DockerMachineTerminalChecker.class);
         bind(org.eclipse.che.everrest.EverrestDownloadFileResponseFilter.class);
@@ -52,8 +49,8 @@ public class WsMasterModule extends AbstractModule {
         bind(org.eclipse.che.api.core.notification.WSocketEventBusServer.class);
         // additional ports for development of extensions
         Multibinder<org.eclipse.che.api.core.model.machine.ServerConf> machineServers = Multibinder.newSetBinder(binder(),
-                                                                                   org.eclipse.che.api.core.model.machine.ServerConf.class,
-                                                                                   Names.named("machine.docker.dev_machine.machine_servers"));
+                                                                                                                 org.eclipse.che.api.core.model.machine.ServerConf.class,
+                                                                                                                 Names.named("machine.docker.dev_machine.machine_servers"));
         machineServers.addBinding().toInstance(
                 new org.eclipse.che.api.machine.server.model.impl.ServerConfImpl(Constants.WSAGENT_DEBUG_REFERENCE, "4403/tcp", "http",
                                                                                  null));
@@ -64,9 +61,9 @@ public class WsMasterModule extends AbstractModule {
                    .toInstance("predefined-recipes.json");
 
 
-        bindConstant().annotatedWith(Names.named(org.eclipse.che.api.machine.server.wsagent.WsAgentLauncherImpl.WS_AGENT_PROCESS_START_COMMAND))
+        bindConstant().annotatedWith(Names.named(org.eclipse.che.api.agent.server.wsagent.WsAgentLauncherImpl.WS_AGENT_PROCESS_START_COMMAND))
                       .to("rm -rf ~/che && mkdir -p ~/che && unzip -qq /mnt/che/ws-agent.zip -d ~/che/ws-agent && " +
-                          "sudo chown -R $(id -u -n) /projects && " +
+                          "sudo sh -c \"chown -R $(id -u -n) /projects || true\" && " +
                           "export JPDA_ADDRESS=\"4403\" && ~/che/ws-agent/bin/catalina.sh jpda run");
         bindConstant().annotatedWith(Names.named(org.eclipse.che.plugin.docker.machine.DockerMachineImplTerminalLauncher.START_TERMINAL_COMMAND))
                       .to("mkdir -p ~/che " +
@@ -77,10 +74,10 @@ public class WsMasterModule extends AbstractModule {
 
         bind(org.eclipse.che.api.workspace.server.event.MachineStateListener.class).asEagerSingleton();
 
-        bind(org.eclipse.che.api.machine.server.wsagent.WsAgentLauncher.class)
-                .to(org.eclipse.che.api.machine.server.wsagent.WsAgentLauncherImpl.class);
+        bind(org.eclipse.che.api.agent.server.wsagent.WsAgentLauncher.class)
+                .to(org.eclipse.che.api.agent.server.wsagent.WsAgentLauncherImpl.class);
 
-        bind(org.eclipse.che.api.machine.server.terminal.MachineTerminalLauncher.class);
+        bind(org.eclipse.che.api.agent.server.terminal.MachineTerminalLauncher.class);
 
         Multibinder<org.eclipse.che.api.machine.server.spi.InstanceProvider> machineImageProviderMultibinder =
                 Multibinder.newSetBinder(binder(), org.eclipse.che.api.machine.server.spi.InstanceProvider.class);

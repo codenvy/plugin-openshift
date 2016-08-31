@@ -27,6 +27,7 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.JsPromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
+import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.wizard.AbstractWizard;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftServiceClient;
@@ -93,7 +94,8 @@ public class CreateProjectWizard extends AbstractWizard<NewApplicationRequest> {
         return new Operation<JsArrayMixed>() {
             @Override
             public void apply(JsArrayMixed arg) throws OperationException {
-                importWizardFactory.newWizard(dataObject.getProjectConfigDto()).complete(callback);
+                final MutableProjectConfig config = new MutableProjectConfig(dataObject.getProjectConfigDto());
+                importWizardFactory.newWizard(config).complete(callback);
             }
         };
     }

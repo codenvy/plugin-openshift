@@ -30,6 +30,8 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.wizard.AbstractWizard;
 import org.eclipse.che.ide.api.wizard.WizardPage;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -71,28 +73,24 @@ public class CreateServiceWizard extends AbstractWizard<NewServiceRequest> {
 
     @Override
     public void complete(final @NotNull CompleteCallback callback) {
-        ProjectConfigDto projectConfig = appContext.getCurrentProject().getRootProject();
-        nameSpace = getAttributeValue(projectConfig, OPENSHIFT_NAMESPACE_VARIABLE_NAME);
+        final Resource resource = appContext.getResource();
+        if (resource != null && resource.getRelatedProject().isPresent()) {
+            final Project project = resource.getRelatedProject().get();
+            nameSpace = project.getAttribute(OPENSHIFT_NAMESPACE_VARIABLE_NAME);
 
-        Template template = dataObject.getTemplate();
+            Template template = dataObject.getTemplate();
 
-        client.processTemplate(nameSpace, template).then(processTemplate())
-              .then(onSuccess(callback))
-              .catchError(new Operation<PromiseError>() {
-                  @Override
-                  public void apply(PromiseError promiseError) throws OperationException {
-                      callback.onFailure(promiseError.getCause());
-                  }
-              });
-    }
-
-    private String getAttributeValue(ProjectConfigDto projectConfig, String value) {
-        List<String> attributes = projectConfig.getAttributes().get(value);
-        if (attributes == null || attributes.isEmpty()) {
-            return null;
+            client.processTemplate(nameSpace, template).then(processTemplate())
+                  .then(onSuccess(callback))
+                  .catchError(new Operation<PromiseError>() {
+                      @Override
+                      public void apply(PromiseError promiseError) throws OperationException {
+                          callback.onFailure(promiseError.getCause());
+                      }
+                  });
         }
-        return projectConfig.getAttributes().get(value).get(0);
     }
+
 
     private Function<Template, Promise<JsArrayMixed>> processTemplate() {
         return new Function<Template, Promise<JsArrayMixed>>() {
@@ -127,7 +125,7 @@ public class CreateServiceWizard extends AbstractWizard<NewServiceRequest> {
         return new Function<DeploymentConfig, Promise<JsArrayMixed>>() {
             @Override
             public Promise<JsArrayMixed> apply(final DeploymentConfig serviceConfig) throws FunctionException {
-                String applicationName = appContext.getCurrentProject().getRootProject().getName();
+                String applicationName = appContext.getResource().getRelatedProject().get().getName();
                 return client.getDeploymentConfigs(nameSpace, applicationName)
                              .then(new Function<List<DeploymentConfig>, List<DeploymentConfig>>() {
                                  @Override

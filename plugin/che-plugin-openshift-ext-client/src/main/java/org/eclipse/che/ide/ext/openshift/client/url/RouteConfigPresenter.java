@@ -23,9 +23,10 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftServiceClient;
@@ -129,17 +130,13 @@ public class RouteConfigPresenter implements ConfigPresenter, RouteConfigView.Ac
     private void loadRouteUrls() {
         routes = Collections.emptyList();
         routeURLs = Collections.emptyList();
-
-        final CurrentProject currentProject = appContext.getCurrentProject();
-        if (currentProject == null) {
+        final Resource resource = appContext.getResource();
+        if (resource == null || !resource.getRelatedProject().isPresent()) {
             return;
         }
-        final ProjectConfig projectDescription = currentProject.getRootProject();
-
-        String namespace = getAttributeValue(projectDescription, OPENSHIFT_NAMESPACE_VARIABLE_NAME);
-        String application = getAttributeValue(projectDescription, OPENSHIFT_APPLICATION_VARIABLE_NAME);
-
-
+        final Project currentProject = resource.getRelatedProject().get();
+        String namespace = currentProject.getAttribute(OPENSHIFT_NAMESPACE_VARIABLE_NAME);
+        String application = currentProject.getAttribute(OPENSHIFT_APPLICATION_VARIABLE_NAME);
         service.getRoutes(namespace, application)
                .then(processRoutesToDisplay())
                .catchError(onFailure(locale.getRoutesError()));

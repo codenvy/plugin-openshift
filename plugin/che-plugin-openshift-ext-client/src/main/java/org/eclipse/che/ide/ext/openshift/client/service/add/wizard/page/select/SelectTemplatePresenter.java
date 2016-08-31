@@ -16,13 +16,13 @@ import java.util.List;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
 
+import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
@@ -46,15 +46,15 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 @Singleton
 public class SelectTemplatePresenter extends AbstractWizardPage<NewServiceRequest> implements SelectTemplateView.ActionDelegate {
 
-    private final SelectTemplateView            view;
-    private final OpenshiftServiceClient        client;
-    private final NotificationManager           notificationManager;
-    private final AppContext                    appContext;
+    private final SelectTemplateView     view;
+    private final OpenshiftServiceClient client;
+    private final NotificationManager    notificationManager;
+    private final AppContext             appContext;
     private final OpenshiftLocalizationConstant locale;
 
     public static final  String DEFAULT_NAMESPACE = "openshift";
     private static final String DATABASE_TAG      = "database";
-    
+
     private Template selectedTemplate;
 
     @Inject
@@ -68,17 +68,16 @@ public class SelectTemplatePresenter extends AbstractWizardPage<NewServiceReques
         this.notificationManager = notificationManager;
         this.appContext = appContext;
         this.locale = locale;
-        
+
         view.setDelegate(this);
     }
-    
+
     @Override
     public void init(NewServiceRequest dataObject) {
         super.init(dataObject);
         selectedTemplate = null;
-        
-        ProjectConfigDto projectConfig = appContext.getCurrentProject().getRootProject();
-        final String namespace = getAttributeValue(projectConfig, OPENSHIFT_NAMESPACE_VARIABLE_NAME);
+
+        final String namespace = getAttributeValue(appContext.getRootProject(), OPENSHIFT_NAMESPACE_VARIABLE_NAME);
 
         view.showLoadingTemplates();
 
@@ -98,7 +97,7 @@ public class SelectTemplatePresenter extends AbstractWizardPage<NewServiceReques
             }
         });
     }
-    
+
     private Function<List<Template>, List<Template>> filterByCategory(@NotNull final String category) {
         return new Function<List<Template>, List<Template>>() {
             @Override
@@ -139,7 +138,7 @@ public class SelectTemplatePresenter extends AbstractWizardPage<NewServiceReques
         };
     }
     
-    private String getAttributeValue(ProjectConfigDto projectConfig, String value) {
+    private String getAttributeValue(ProjectConfig projectConfig, String value) {
         List<String> attributes = projectConfig.getAttributes().get(value);
         if (attributes == null || attributes.isEmpty()) {
             return null;

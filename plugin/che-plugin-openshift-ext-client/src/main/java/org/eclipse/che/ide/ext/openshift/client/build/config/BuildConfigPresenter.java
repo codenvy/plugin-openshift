@@ -10,19 +10,20 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.openshift.client.build.config;
 
+import com.google.common.base.Optional;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftServiceClient;
@@ -80,18 +81,20 @@ public class BuildConfigPresenter implements ConfigPresenter, BuildConfigView.Ac
     }
 
     private void loadBuildConfig() {
-        final CurrentProject currentProject = appContext.getCurrentProject();
-        if (currentProject == null) {
+        final Resource resource = appContext.getResource();
+        if (resource == null) {
             return;
         }
-        final ProjectConfig projectDescription = currentProject.getRootProject();
+        final Optional<Project> project = resource.getRelatedProject();
 
-        String namespace = getAttributeValue(projectDescription, OPENSHIFT_NAMESPACE_VARIABLE_NAME);
-        String application = getAttributeValue(projectDescription, OPENSHIFT_APPLICATION_VARIABLE_NAME);
+        if (project.isPresent()) {
+            String namespace = project.get().getAttribute(OPENSHIFT_NAMESPACE_VARIABLE_NAME);
+            String application = project.get().getAttribute(OPENSHIFT_APPLICATION_VARIABLE_NAME);
 
-        service.getBuildConfigs(namespace, application)
-               .then(showBuildConfigs())
-               .catchError(onFail());
+            service.getBuildConfigs(namespace, application)
+                   .then(showBuildConfigs())
+                   .catchError(onFail());
+        }
     }
 
     private Operation<List<BuildConfig>> showBuildConfigs() {
@@ -152,15 +155,6 @@ public class BuildConfigPresenter implements ConfigPresenter, BuildConfigView.Ac
                 notificationManager.notify(serviceError.getMessage(), FAIL, StatusNotification.DisplayMode.EMERGE_MODE);
             }
         };
-    }
-
-    /** Returns first value of attribute of null if it is absent in project descriptor */
-    private String getAttributeValue(ProjectConfig projectDescriptor, String attibuteValue) {
-        final List<String> values = projectDescriptor.getAttributes().get(attibuteValue);
-        if (values == null || values.isEmpty()) {
-            return null;
-        }
-        return values.get(0);
     }
 
     @Override

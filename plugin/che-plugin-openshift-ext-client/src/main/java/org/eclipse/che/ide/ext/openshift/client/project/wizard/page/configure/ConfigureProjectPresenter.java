@@ -14,7 +14,6 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.project.ProjectServiceClient;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
@@ -44,7 +43,6 @@ public class ConfigureProjectPresenter extends AbstractWizardPage<NewApplication
 
     private final ConfigureProjectView          view;
     private final OpenshiftServiceClient        openShiftClient;
-    private final ProjectServiceClient          projectServiceClient;
     private final DtoFactory                    dtoFactory;
     private final OpenshiftLocalizationConstant locale;
     private final AppContext                    appContext;
@@ -54,13 +52,11 @@ public class ConfigureProjectPresenter extends AbstractWizardPage<NewApplication
     @Inject
     public ConfigureProjectPresenter(ConfigureProjectView view,
                                      OpenshiftServiceClient openShiftClient,
-                                     ProjectServiceClient projectServiceClient,
                                      DtoFactory dtoFactory,
                                      OpenshiftLocalizationConstant locale,
                                      AppContext appContext) {
         this.view = view;
         this.openShiftClient = openShiftClient;
-        this.projectServiceClient = projectServiceClient;
         this.dtoFactory = dtoFactory;
         this.locale = locale;
         this.appContext = appContext;
@@ -87,15 +83,10 @@ public class ConfigureProjectPresenter extends AbstractWizardPage<NewApplication
             }
         });
 
-        projectServiceClient.getProjects(appContext.getDevMachine()).then(new Operation<List<ProjectConfigDto>>() {
-            @Override
-            public void apply(List<ProjectConfigDto> projects) throws OperationException {
-                cheProjects.clear();
-                for (ProjectConfigDto project : projects) {
-                    cheProjects.add(project.getName());
-                }
-            }
-        });
+        cheProjects.clear();
+        for (org.eclipse.che.ide.api.resources.Project project : appContext.getProjects()) {
+            cheProjects.add(project.getName());
+        }
     }
 
 

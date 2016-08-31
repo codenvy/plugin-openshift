@@ -17,16 +17,13 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.api.project.ProjectServiceClient;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
+import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftWebSocketPathProvider;
@@ -44,16 +41,16 @@ import org.eclipse.che.ide.websocket.events.MessageReceivedHandler;
 import java.util.HashMap;
 import java.util.List;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
+import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
 import static org.eclipse.che.ide.ext.openshift.shared.dto.BuildStatus.Phase.Complete;
 import static org.eclipse.che.ide.ext.openshift.shared.dto.BuildStatus.Phase.Failed;
 import static org.eclipse.che.ide.ext.openshift.shared.dto.BuildStatus.Phase.New;
 import static org.eclipse.che.ide.ext.openshift.shared.dto.BuildStatus.Phase.Pending;
 import static org.eclipse.che.ide.ext.openshift.shared.dto.BuildStatus.Phase.Running;
-import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
 
 /**
  * Manages OpenShift builds.
@@ -71,9 +68,8 @@ public class BuildsPresenter extends BasePresenter implements BuildsView.ActionD
     private final DtoFactory                     dtoFactory;
     private final NotificationManager            notificationManager;
     private final OpenshiftLocalizationConstant  locale;
-    private final ProjectServiceClient           projectServiceClient;
     private final OpenshiftWebSocketPathProvider wsPathProvider;
-    private final AppContext                     appContext;
+    private AppContext appContext;
 
     private String webSocketBasePath = null;
 
@@ -96,14 +92,13 @@ public class BuildsPresenter extends BasePresenter implements BuildsView.ActionD
                            final DtoFactory dtoFactory,
                            final NotificationManager notificationManager,
                            final OpenshiftLocalizationConstant locale,
-                           final ProjectServiceClient projectServiceClient,
-                           final AppContext appContext) {
+                           AppContext appContext
+                          ) {
         this.view = view;
         this.workspaceAgent = workspaceAgent;
         this.dtoFactory = dtoFactory;
         this.notificationManager = notificationManager;
         this.locale = locale;
-        this.projectServiceClient = projectServiceClient;
         this.wsPathProvider = wsPathProvider;
         this.appContext = appContext;
 
@@ -147,31 +142,26 @@ public class BuildsPresenter extends BasePresenter implements BuildsView.ActionD
      * Checks workspace projects for being deployed on OpenShift and starts observation for builds for that projects.
      */
     private void checkWorkspaceProjects() {
-        projectServiceClient.getProjects(appContext.getDevMachine()).then(new Operation<List<ProjectConfigDto>>() {
-            @Override
-            public void apply(List<ProjectConfigDto> projects) throws OperationException {
-                for (ProjectConfigDto project : projects) {
-                    if (!project.getMixins().contains("openshift")) {
-                        continue;
-                    }
-
-                    List<String> namespaces = project.getAttributes().get(OPENSHIFT_NAMESPACE_VARIABLE_NAME);
-                    if (namespaces == null || namespaces.isEmpty()) {
-                        continue;
-                    }
-
-                    openView();
-
-                    String namespace = namespaces.get(0);
-                    view.showProject(namespace);
-                    if (!buildWatchers.containsKey(namespace)) {
-                        BuildsWatcher buildsWatcher = new BuildsWatcher(namespace);
-                        buildsWatcher.startWatching();
-                        buildWatchers.put(namespace, buildsWatcher);
-                    }
-                }
+        for (Project project : appContext.getProjects()) {
+            if (!project.getMixins().contains("openshift")) {
+                continue;
             }
-        });
+
+            List<String> namespaces = project.getAttributes().get(OPENSHIFT_NAMESPACE_VARIABLE_NAME);
+            if (namespaces == null || namespaces.isEmpty()) {
+                continue;
+            }
+
+            openView();
+
+            String namespace = namespaces.get(0);
+            view.showProject(namespace);
+            if (!buildWatchers.containsKey(namespace)) {
+                BuildsWatcher buildsWatcher = new BuildsWatcher(namespace);
+                buildsWatcher.startWatching();
+                buildWatchers.put(namespace, buildsWatcher);
+            }
+        }
     }
 
     /**

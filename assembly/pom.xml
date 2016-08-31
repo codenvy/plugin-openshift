@@ -16,11 +16,11 @@
     <parent>
         <artifactId>openshift-plugin-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>4.5.0-RC1-SNAPSHOT</version>
+        <version>4.6.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>che-openshift-assembly-parent</artifactId>
-    <version>4.5.0-RC1-SNAPSHOT</version>
+    <version>4.6.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Che IDE :: Parent</name>
     <modules>
