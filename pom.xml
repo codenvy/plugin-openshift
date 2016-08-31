@@ -34,7 +34,7 @@
         <url>https://github.com/codenvy/plugin-openshift</url>
     </scm>
     <properties>
-        <che.version>4.7.0-RC2-SNAPSHOT</che.version>
+        <che.version>4.7.0</che.version>
         <com.openshift.restclient.version>4.0.5.Final</com.openshift.restclient.version>
         <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>
     </properties>
