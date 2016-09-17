@@ -13,7 +13,7 @@ package org.eclipse.che.ide.ext.openshift.client.oauth;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.action.Action;
+import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
@@ -21,6 +21,7 @@ import org.eclipse.che.ide.ext.openshift.client.OpenshiftResources;
 import org.eclipse.che.security.oauth.OAuthStatus;
 
 import javax.inject.Inject;
+
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
@@ -29,7 +30,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUC
  * @author Sergii Leschenko
  */
 @Singleton
-public class ConnectAccountAction extends Action {
+public class ConnectAccountAction extends AbstractPerspectiveAction {
     private final OpenshiftAuthenticator        openshiftAuthenticator;
     private final OpenshiftAuthorizationHandler openshiftAuthorizationHandler;
     private final OpenshiftLocalizationConstant locale;
@@ -41,7 +42,7 @@ public class ConnectAccountAction extends Action {
                                 OpenshiftLocalizationConstant locale,
                                 NotificationManager notificationManager,
                                 OpenshiftResources resources) {
-        super(locale.connectAccountTitle(), null, null, resources.connect());
+        super(null, locale.connectAccountTitle(), null, null, resources.connect());
         this.openshiftAuthenticator = openshiftAuthenticator;
         this.openshiftAuthorizationHandler = openshiftAuthorizationHandler;
         this.locale = locale;
@@ -68,7 +69,7 @@ public class ConnectAccountAction extends Action {
     }
 
     @Override
-    public void update(ActionEvent e) {
+    public void updateInPerspective(ActionEvent e) {
         e.getPresentation().setVisible(!openshiftAuthorizationHandler.isLoggedIn());
     }
 }
