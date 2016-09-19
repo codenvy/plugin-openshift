@@ -12,15 +12,16 @@ package org.eclipse.che.ide.ext.openshift.client.oauth;
 
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.auth.OAuthServiceClient;
-import org.eclipse.che.ide.api.action.Action;
+import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.auth.OAuthServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftResources;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 
 import javax.inject.Inject;
+
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
@@ -29,7 +30,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUC
  * @author Sergii Leschenko
  */
 @Singleton
-public class DisconnectAccountAction extends Action {
+public class DisconnectAccountAction extends AbstractPerspectiveAction {
     private final OAuthServiceClient            oAuthServiceClient;
     private final OpenshiftAuthorizationHandler openshiftAuthorizationHandler;
     private final OpenshiftLocalizationConstant locale;
@@ -41,7 +42,7 @@ public class DisconnectAccountAction extends Action {
                                    OpenshiftLocalizationConstant locale,
                                    NotificationManager notificationManager,
                                    OpenshiftResources resources) {
-        super(locale.disconnectAccountTitle(), null, null, resources.disconnect());
+        super(null, locale.disconnectAccountTitle(), null, null, resources.disconnect());
         this.oAuthServiceClient = oAuthServiceClient;
         this.openshiftAuthorizationHandler = openshiftAuthorizationHandler;
         this.locale = locale;
@@ -65,7 +66,7 @@ public class DisconnectAccountAction extends Action {
     }
 
     @Override
-    public void update(ActionEvent e) {
+    public void updateInPerspective(ActionEvent e) {
         e.getPresentation().setVisible(openshiftAuthorizationHandler.isLoggedIn());
     }
 }
