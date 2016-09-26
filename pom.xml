@@ -16,11 +16,11 @@
     <parent>
         <artifactId>maven-depmgt-pom</artifactId>
         <groupId>org.eclipse.che.depmgt</groupId>
-        <version>4.7.0-RC2-SNAPSHOT</version>
+        <version>5.0.0-M3-SNAPSHOT</version>
     </parent>
     <groupId>org.eclipse.che</groupId>
     <artifactId>openshift-plugin-parent</artifactId>
-    <version>4.6.0-SNAPSHOT</version>
+    <version>0.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Openshift :: Plugin :: Parent</name>
     <modules>
@@ -34,7 +34,7 @@
         <url>https://github.com/codenvy/plugin-openshift</url>
     </scm>
     <properties>
-        <che.version>4.7.0</che.version>
+        <che.version>5.0.0-M3-SNAPSHOT</che.version>
         <com.openshift.restclient.version>4.0.5.Final</com.openshift.restclient.version>
         <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>
     </properties>
@@ -70,7 +70,7 @@
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>openshift-plugin-assembly-wsagent-server</artifactId>
                 <version>${project.version}</version>
-                <type>zip</type>
+                <type>tar.gz</type>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
