@@ -25,7 +25,6 @@ import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
-import org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
@@ -35,6 +34,8 @@ import static com.google.common.base.Preconditions.checkState;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
+import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_APPLICATION_VARIABLE_NAME;
+import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
@@ -84,11 +85,11 @@ public class UnlinkProjectAction extends AbstractPerspectiveAction {
         final Project project = projectOptional.get();
 
         checkNotNull(project);
-        checkState(project.getMixins().contains(OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID));
+        checkState(project.getMixins().contains(OPENSHIFT_PROJECT_TYPE_ID));
 
         MutableProjectConfig updateConfig = new MutableProjectConfig(project);
-        updateConfig.getAttributes().remove(OpenshiftProjectTypeConstants.OPENSHIFT_APPLICATION_VARIABLE_NAME);
-        updateConfig.getAttributes().remove(OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME);
+        updateConfig.getAttributes().remove(OPENSHIFT_APPLICATION_VARIABLE_NAME);
+        updateConfig.getAttributes().remove(OPENSHIFT_NAMESPACE_VARIABLE_NAME);
         updateConfig.getMixins().remove(OPENSHIFT_PROJECT_TYPE_ID);
 
         project.update()
