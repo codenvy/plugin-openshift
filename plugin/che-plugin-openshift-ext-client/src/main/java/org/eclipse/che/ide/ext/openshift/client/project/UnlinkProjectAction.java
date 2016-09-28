@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.openshift.client.project;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -22,6 +23,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants;
 
@@ -63,16 +65,23 @@ public class UnlinkProjectAction extends AbstractPerspectiveAction {
     public void updateInPerspective(@NotNull ActionEvent event) {
         event.getPresentation().setVisible(true);
 
-        final Project project = appContext.getRootProject();
+        final Resource resource = appContext.getResource();
 
-        if (project != null) {
-            event.getPresentation().setEnabled(project.getMixins().contains(OPENSHIFT_PROJECT_TYPE_ID));
+        if (resource != null) {
+            final Optional<Project> project = resource.getRelatedProject();
+            event.getPresentation().setEnabled(project.isPresent() && project.get().getMixins().contains(OPENSHIFT_PROJECT_TYPE_ID));
         }
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        final Project project = appContext.getRootProject();
+        final Resource resource = appContext.getResource();
+        checkNotNull(resource);
+
+        final Optional<Project> projectOptional = resource.getRelatedProject();
+        checkState(projectOptional.isPresent());
+
+        final Project project = projectOptional.get();
 
         checkNotNull(project);
         checkState(project.getMixins().contains(OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID));
