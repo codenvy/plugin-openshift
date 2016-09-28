@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.openshift.client.importapp;
 
-import com.google.gwt.core.client.Scheduler;
 import com.google.inject.Inject;
 
+import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.project.shared.Constants;
@@ -37,10 +37,10 @@ import org.eclipse.che.ide.ext.openshift.client.deploy.ApplicationManager;
 import org.eclipse.che.ide.ext.openshift.client.oauth.OpenshiftAuthenticator;
 import org.eclipse.che.ide.ext.openshift.client.oauth.OpenshiftAuthorizationHandler;
 import org.eclipse.che.ide.ext.openshift.client.util.OpenshiftValidator;
-import org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants;
 import org.eclipse.che.ide.ext.openshift.shared.dto.BuildConfig;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Project;
 import org.eclipse.che.ide.projectimport.wizard.ProjectResolver;
+import org.eclipse.che.ide.resource.Path;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,12 +52,14 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMod
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_APPLICATION_VARIABLE_NAME;
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
+import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID;
 
 /**
  * Presenter, which handles logic for importing OpenShift application to Che.
  *
  * @author Anna Shumilova
  * @author Vitaliy Guliy
+ * @author Vlad Zhukovskyi
  */
 public class ImportApplicationPresenter extends ValidateAuthenticationPresenter implements ImportApplicationView.ActionDelegate {
 
@@ -222,22 +224,14 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
 
         String contextDir = selectedBuildConfig.getSpec().getSource().getContextDir();
         if (contextDir != null && !contextDir.isEmpty()) {
-            importOptions.put("keepDirectory", contextDir);
+            importOptions.put("keepDir", contextDir);
         }
-
-        Map<String, List<String>> attributes = new HashMap<String, List<String>>();
-        attributes.put(OPENSHIFT_APPLICATION_VARIABLE_NAME, singletonList(selectedBuildConfig.getMetadata().getName()));
-
-        attributes.put(OPENSHIFT_NAMESPACE_VARIABLE_NAME, singletonList(selectedBuildConfig.getMetadata().getNamespace()));
 
         importProjectNotificationSubscriber.subscribe(view.getProjectName());
 
         MutableProjectConfig importConfig = new MutableProjectConfig();
         importConfig.setName(view.getProjectName());
-        importConfig.setMixins(singletonList(OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID));
-        importConfig.setAttributes(attributes);
-        importConfig.setType(Constants.BLANK_ID);
-        importConfig.setDescription(view.getProjectDescription());
+        importConfig.setPath(Path.valueOf(view.getProjectName()).makeAbsolute().toString());
         importConfig.setSource(new SourceStorage() {
             @Override
             public String getType() {
@@ -255,49 +249,64 @@ public class ImportApplicationPresenter extends ValidateAuthenticationPresenter 
             }
         });
 
-        appContext.getWorkspaceRoot()
-                  .importProject()
-                  .withBody(importConfig)
-                  .send()
-                  .thenPromise(
-                          new Function<org.eclipse.che.ide.api.resources.Project, Promise<org.eclipse.che.ide.api.resources.Project>>() {
-                              @Override
-                              public Promise<org.eclipse.che.ide.api.resources.Project> apply(
-                                      org.eclipse.che.ide.api.resources.Project project) throws FunctionException {
+        importOSProject(importConfig)
+                .thenPromise(new Function<org.eclipse.che.ide.api.resources.Project, Promise<org.eclipse.che.ide.api.resources.Project>>() {
+                    @Override
+                    public Promise<org.eclipse.che.ide.api.resources.Project> apply(org.eclipse.che.ide.api.resources.Project project)
+                            throws FunctionException {
+                        return setupOSMixin(project, selectedBuildConfig);
+                    }
+                })
+                .thenPromise(new Function<org.eclipse.che.ide.api.resources.Project, Promise<org.eclipse.che.ide.api.resources.Project>>() {
+                    @Override
+                    public Promise<org.eclipse.che.ide.api.resources.Project> apply(org.eclipse.che.ide.api.resources.Project project)
+                            throws FunctionException {
+                        return projectResolver.resolve(project);
+                    }
+                })
+                .then(new Operation<org.eclipse.che.ide.api.resources.Project>() {
+                    @Override
+                    public void apply(org.eclipse.che.ide.api.resources.Project project) throws OperationException {
+                        view.animateImportButton(false);
+                        view.setBlocked(false);
+                        view.closeView();
 
-                                  return projectResolver.resolve(project).then(new Operation<org.eclipse.che.ide.api.resources.Project>() {
-                                      @Override
-                                      public void apply(org.eclipse.che.ide.api.resources.Project project) throws OperationException {
-                                          view.animateImportButton(false);
-                                          view.setBlocked(false);
-                                          view.closeView();
+                        final String namespace = project.getAttributes().get(OPENSHIFT_NAMESPACE_VARIABLE_NAME).get(0);
 
-                                          final String namespace = project.getAttributes().get(OPENSHIFT_NAMESPACE_VARIABLE_NAME).get(0);
-                                          Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-                                              @Override
-                                              public void execute() {
-                                                  buildsPresenter.newApplicationCreated(namespace);
-                                              }
-                                          });
+                        buildsPresenter.newApplicationCreated(namespace);
 
-                                          importProjectNotificationSubscriber.onSuccess();
+                        importProjectNotificationSubscriber.onSuccess();
 
-                                          updateApplicationLabel(selectedBuildConfig);
-                                      }
-                                  }).catchError(new Operation<PromiseError>() {
-                                      @Override
-                                      public void apply(PromiseError promiseError) throws OperationException {
-                                          createProjectFailure(promiseError.getCause());
-                                      }
-                                  });
-                              }
-                          })
-                  .catchError(new Operation<PromiseError>() {
-                      @Override
-                      public void apply(PromiseError promiseError) throws OperationException {
-                          createProjectFailure(promiseError.getCause());
-                      }
-                  });
+                        updateApplicationLabel(selectedBuildConfig);
+                    }
+                })
+                .catchError(new Operation<PromiseError>() {
+                    @Override
+                    public void apply(PromiseError error) throws OperationException {
+                        createProjectFailure(error.getCause());
+                    }
+                });
+    }
+
+    private Promise<org.eclipse.che.ide.api.resources.Project> importOSProject(ProjectConfig importConfig) {
+        return appContext.getWorkspaceRoot().importProject().withBody(importConfig).send();
+    }
+
+    private Promise<org.eclipse.che.ide.api.resources.Project> setupOSMixin(org.eclipse.che.ide.api.resources.Project project,
+                                                                            BuildConfig buildConfig) {
+        MutableProjectConfig updateConfig = new MutableProjectConfig(project);
+
+        Map<String, List<String>> attributes = new HashMap<>();
+        attributes.put(OPENSHIFT_APPLICATION_VARIABLE_NAME, singletonList(buildConfig.getMetadata().getName()));
+        attributes.put(OPENSHIFT_NAMESPACE_VARIABLE_NAME, singletonList(buildConfig.getMetadata().getNamespace()));
+
+        updateConfig.getMixins().add(OPENSHIFT_PROJECT_TYPE_ID);
+
+        updateConfig.getAttributes().putAll(attributes);
+        updateConfig.setDescription(view.getProjectDescription());
+        updateConfig.setType(Constants.BLANK_ID);
+
+        return project.update().withBody(updateConfig).send();
     }
 
     /**
