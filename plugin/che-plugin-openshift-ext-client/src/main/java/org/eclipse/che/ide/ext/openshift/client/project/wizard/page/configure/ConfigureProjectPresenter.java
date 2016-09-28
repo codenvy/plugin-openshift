@@ -28,6 +28,7 @@ import org.eclipse.che.ide.ext.openshift.client.util.OpenshiftValidator;
 import org.eclipse.che.ide.ext.openshift.shared.dto.ObjectMeta;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Project;
 import org.eclipse.che.ide.ext.openshift.shared.dto.ProjectRequest;
+import org.eclipse.che.ide.resource.Path;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -229,6 +230,7 @@ public class ConfigureProjectPresenter extends AbstractWizardPage<NewApplication
 
         projectConfig = dataObject.getProjectConfigDto();
         projectConfig.withName(view.getCheNewProjectName())
+                     .withPath(Path.valueOf(view.getCheNewProjectName()).makeAbsolute().toString())
                      .withDescription(view.getCheProjectDescription());
     }
 }

@@ -25,7 +25,6 @@ import org.eclipse.che.ide.ext.openshift.client.WizardFactory;
 import org.eclipse.che.ide.ext.openshift.client.dto.NewApplicationRequest;
 import org.eclipse.che.ide.ext.openshift.client.project.wizard.page.configure.ConfigureProjectPresenter;
 import org.eclipse.che.ide.ext.openshift.client.project.wizard.page.template.SelectTemplatePresenter;
-import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
 
 import javax.validation.constraints.NotNull;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
@@ -103,7 +102,7 @@ public class CreateProjectPresenter implements Wizard.UpdateDelegate, CreateProj
         wizard.complete(new Wizard.CompleteCallback() {
             @Override
             public void onCompleted() {
-                final String namespace = wizard.getDataObject().getProjectConfigDto().getAttributes().get(OPENSHIFT_NAMESPACE_VARIABLE_NAME).get(0);
+                final String namespace = wizard.getDataObject().getProject().getMetadata().getName();
 
                 configProjectPage.setEnabled(true);
                 updateControls();
