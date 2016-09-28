@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.openshift.client.project;
 
-import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -23,14 +22,14 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.resources.Project;
-import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
-import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
@@ -41,6 +40,7 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
  * Action for unlink Che project from OpenShift.
  *
  * @author Sergii Leschenko
+ * @author Vlad Zhukovskyi
  */
 @Singleton
 public class UnlinkProjectAction extends AbstractPerspectiveAction {
@@ -61,44 +61,41 @@ public class UnlinkProjectAction extends AbstractPerspectiveAction {
 
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
-        final Resource resource = appContext.getResource();
-        if (resource != null) {
-            final Optional<Project> relatedProject = resource.getRelatedProject();
-            event.getPresentation().setVisible(relatedProject.isPresent());
-            event.getPresentation().setEnabled(relatedProject.isPresent()
-                                               && relatedProject.get().getMixins().contains(OPENSHIFT_PROJECT_TYPE_ID));
+        event.getPresentation().setVisible(true);
+
+        final Project project = appContext.getRootProject();
+
+        if (project != null) {
+            event.getPresentation().setEnabled(project.getMixins().contains(OPENSHIFT_PROJECT_TYPE_ID));
         }
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        final Resource resource = appContext.getResource();
-        if (resource != null && resource.getRelatedProject().isPresent()) {
-            final Project relatedProject = resource.getRelatedProject().get();
-            List<String> mixins = relatedProject.getMixins();
-            if (mixins.contains(OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID)) {
-                MutableProjectConfig config = new MutableProjectConfig(relatedProject);
-                config.getAttributes().remove(OpenshiftProjectTypeConstants.OPENSHIFT_APPLICATION_VARIABLE_NAME);
-                config.getAttributes().remove(OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME);
+        final Project project = appContext.getRootProject();
 
-                config.getMixins().remove(OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID);
+        checkNotNull(project);
+        checkState(project.getMixins().contains(OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID));
 
-                relatedProject.update().withBody(config).send().then(new Operation<Project>() {
-                    @Override
-                    public void apply(Project project) throws OperationException {
-                        notificationManager.notify(locale.unlinkProjectSuccessful(project.getName()),
-                                                   SUCCESS,
-                                                   EMERGE_MODE);
-                    }
-                }).catchError(new Operation<PromiseError>() {
-                    @Override
-                    public void apply(PromiseError promiseError) throws OperationException {
-                        notificationManager.notify(locale.unlinkProjectFailed() + " " + promiseError.getMessage(),
-                                                   FAIL,
-                                                   EMERGE_MODE);
-                    }
-                });
-            }
-        }
+        MutableProjectConfig updateConfig = new MutableProjectConfig(project);
+        updateConfig.getAttributes().remove(OpenshiftProjectTypeConstants.OPENSHIFT_APPLICATION_VARIABLE_NAME);
+        updateConfig.getAttributes().remove(OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME);
+        updateConfig.getMixins().remove(OPENSHIFT_PROJECT_TYPE_ID);
+
+        project.update()
+               .withBody(updateConfig)
+               .send()
+               .then(new Operation<Project>() {
+                   @Override
+                   public void apply(Project project) throws OperationException {
+                       notificationManager.notify(locale.unlinkProjectSuccessful(project.getName()), SUCCESS, EMERGE_MODE);
+                   }
+               })
+               .catchError(new Operation<PromiseError>() {
+                   @Override
+                   public void apply(PromiseError error) throws OperationException {
+                       notificationManager.notify(locale.unlinkProjectFailed() + " " + error.getMessage(), FAIL, EMERGE_MODE);
+                   }
+               });
     }
 }
