@@ -71,6 +71,8 @@ public class UnlinkProjectAction extends AbstractPerspectiveAction {
         if (resource != null) {
             final Optional<Project> project = resource.getRelatedProject();
             event.getPresentation().setEnabled(project.isPresent() && project.get().getMixins().contains(OPENSHIFT_PROJECT_TYPE_ID));
+        } else {
+            event.getPresentation().setEnabledAndVisible(false);
         }
     }
 

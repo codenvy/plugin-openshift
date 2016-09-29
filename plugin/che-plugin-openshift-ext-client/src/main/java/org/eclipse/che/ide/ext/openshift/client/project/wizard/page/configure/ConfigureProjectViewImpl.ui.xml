@@ -72,9 +72,6 @@
                         <g:Label ui:field="cheProjectNameErrorLabel" width="100%" wordWrap="true" addStyleNames="{resources.css.labelErrorPosition}"/>
                         <g:Label text="Description"/>
                         <g:TextArea ui:field="cheProjectDescriptionInput" addStyleNames="{resources.css.textInput} {style.spacing}" height="60px"/>
-                        <g:Label text="Privacy"/>
-                        <g:RadioButton name="privacy" ui:field="chePublicProject" text="Public" checked="true" addStyleNames="{style.spacingChoice}"/>
-                        <g:RadioButton name="privacy" ui:field="chePrivateProject" text="Private"/>
                     </g:FlowPanel>
                 </g:north>
             </g:DockLayoutPanel>

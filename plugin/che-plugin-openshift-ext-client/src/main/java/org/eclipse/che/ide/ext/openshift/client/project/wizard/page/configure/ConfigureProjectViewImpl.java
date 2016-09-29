@@ -86,12 +86,6 @@ public class ConfigureProjectViewImpl implements ConfigureProjectView {
     @UiField
     ScrollPanel osExistProjectListPanel;
 
-    @UiField
-    RadioButton chePublicProject;
-
-    @UiField
-    RadioButton chePrivateProject;
-
     OpenshiftResources openshiftResources;
 
     private SimpleList<Project> projectsList;
@@ -116,7 +110,6 @@ public class ConfigureProjectViewImpl implements ConfigureProjectView {
                                          new SimpleList.ListItemRenderer<Project>() {
                                              @Override
                                              public void render(Element listItemBase, Project itemData) {
-                                                 //TODO rework this method to proper display each project name
                                                  SpanElement container = Elements.createSpanElement();
                                                  container.setInnerText(itemData.getMetadata().getName());
 
@@ -334,8 +327,5 @@ public class ConfigureProjectViewImpl implements ConfigureProjectView {
 
         cheProjectNameInput.setEnabled(enabled);
         cheProjectDescriptionInput.setEnabled(enabled);
-
-        chePublicProject.setEnabled(enabled);
-        chePrivateProject.setEnabled(enabled);
     }
 }

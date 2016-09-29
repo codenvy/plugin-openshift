@@ -17,6 +17,7 @@ import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftResources;
+import org.eclipse.che.ide.ext.openshift.client.oauth.OpenshiftAuthorizationHandler;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
@@ -31,27 +32,30 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
 @Singleton
 public class ImportApplicationAction extends AbstractPerspectiveAction {
 
-    private final ImportApplicationPresenter presenter;
+    private final ImportApplicationPresenter    presenter;
+    private final OpenshiftAuthorizationHandler authorizationHandler;
 
     @Inject
     public ImportApplicationAction(OpenshiftLocalizationConstant locale,
                                    OpenshiftResources resources,
-                                   final ImportApplicationPresenter presenter) {
+                                   ImportApplicationPresenter presenter,
+                                   OpenshiftAuthorizationHandler authorizationHandler) {
         super(Collections.singletonList(PROJECT_PERSPECTIVE_ID),
               locale.importApplicationAction(),
               locale.linkProjectWithExistingApplicationAction(),
               null,
               resources.importApplication());
         this.presenter = presenter;
+        this.authorizationHandler = authorizationHandler;
     }
 
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
-        event.getPresentation().setEnabled(true);
+        event.getPresentation().setEnabled(authorizationHandler.isLoggedIn());
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        this.presenter.show();
+        presenter.show();
     }
 }

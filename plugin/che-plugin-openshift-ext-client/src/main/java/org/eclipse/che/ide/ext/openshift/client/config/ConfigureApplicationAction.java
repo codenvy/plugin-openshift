@@ -62,6 +62,8 @@ public class ConfigureApplicationAction extends AbstractPerspectiveAction {
             if (relatedProject.isPresent()) {
                 event.getPresentation().setEnabled(relatedProject.get().isTypeOf(OPENSHIFT_PROJECT_TYPE_ID));
             }
+        } else {
+            event.getPresentation().setEnabledAndVisible(false);
         }
     }
 }
