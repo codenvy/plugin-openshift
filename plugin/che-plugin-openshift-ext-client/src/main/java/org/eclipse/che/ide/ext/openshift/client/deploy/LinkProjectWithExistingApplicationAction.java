@@ -20,6 +20,7 @@ import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftResources;
+import org.eclipse.che.ide.ext.openshift.client.oauth.OpenshiftAuthorizationHandler;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
@@ -37,12 +38,14 @@ public class LinkProjectWithExistingApplicationAction extends AbstractPerspectiv
 
     private final LinkProjectWithExistingApplicationPresenter presenter;
     private final AppContext                                  appContext;
+    private final OpenshiftAuthorizationHandler               authorizationHandler;
 
     @Inject
     public LinkProjectWithExistingApplicationAction(OpenshiftLocalizationConstant locale,
-                                                    final LinkProjectWithExistingApplicationPresenter presenter,
+                                                    LinkProjectWithExistingApplicationPresenter presenter,
                                                     AppContext appContext,
-                                                    OpenshiftResources resources) {
+                                                    OpenshiftResources resources,
+                                                    OpenshiftAuthorizationHandler authorizationHandler) {
         super(Collections.singletonList(PROJECT_PERSPECTIVE_ID),
               locale.linkProjectWithExistingApplicationAction(),
               locale.linkProjectWithExistingApplicationAction(),
@@ -50,6 +53,7 @@ public class LinkProjectWithExistingApplicationAction extends AbstractPerspectiv
               resources.linkToExistingApplication());
         this.presenter = presenter;
         this.appContext = appContext;
+        this.authorizationHandler = authorizationHandler;
     }
 
     @Override
@@ -59,7 +63,8 @@ public class LinkProjectWithExistingApplicationAction extends AbstractPerspectiv
             final Project currentProject = resource.getRelatedProject().get();
             event.getPresentation().setVisible(true);
             event.getPresentation().setEnabled(currentProject != null
-                                               && currentProject.getMixins().contains(OPENSHIFT_PROJECT_TYPE_ID));
+                                               && currentProject.getMixins().contains(OPENSHIFT_PROJECT_TYPE_ID)
+                                               && authorizationHandler.isLoggedIn());
         } else {
             event.getPresentation().setEnabledAndVisible(false);
         }

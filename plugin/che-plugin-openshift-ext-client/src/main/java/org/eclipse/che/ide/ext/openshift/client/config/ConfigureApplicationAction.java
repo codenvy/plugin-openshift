@@ -20,6 +20,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
+import org.eclipse.che.ide.ext.openshift.client.oauth.OpenshiftAuthorizationHandler;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
@@ -37,14 +38,17 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
 public class ConfigureApplicationAction extends AbstractPerspectiveAction {
     private final AppContext                    appContext;
     private final ConfigureApplicationPresenter presenter;
+    private final OpenshiftAuthorizationHandler authorizationHandler;
 
     @Inject
     public ConfigureApplicationAction(AppContext appContext,
                                       ConfigureApplicationPresenter presenter,
-                                      OpenshiftLocalizationConstant locale) {
+                                      OpenshiftLocalizationConstant locale,
+                                      OpenshiftAuthorizationHandler authorizationHandler) {
         super(Collections.singletonList(PROJECT_PERSPECTIVE_ID), locale.applicationConfigAction(), null, null, null);
         this.appContext = appContext;
         this.presenter = presenter;
+        this.authorizationHandler = authorizationHandler;
     }
 
     @Override
@@ -60,7 +64,8 @@ public class ConfigureApplicationAction extends AbstractPerspectiveAction {
         if (resource != null) {
             final Optional<Project> relatedProject = resource.getRelatedProject();
             if (relatedProject.isPresent()) {
-                event.getPresentation().setEnabled(relatedProject.get().isTypeOf(OPENSHIFT_PROJECT_TYPE_ID));
+                event.getPresentation().setEnabled(relatedProject.get().getMixins().contains(OPENSHIFT_PROJECT_TYPE_ID)
+                                                   && authorizationHandler.isLoggedIn());
             }
         } else {
             event.getPresentation().setEnabledAndVisible(false);
