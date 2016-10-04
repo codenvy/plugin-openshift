@@ -60,7 +60,7 @@ public class NewApplicationAction extends AbstractPerspectiveAction {
             final Optional<Project> relatedProject = resource.getRelatedProject();
             if (relatedProject.isPresent()) {
                 event.getPresentation().setVisible(true);
-                event.getPresentation().setEnabled(relatedProject.get().isTypeOf(OPENSHIFT_PROJECT_TYPE_ID));
+                event.getPresentation().setEnabled(relatedProject.get().getMixins().contains(OPENSHIFT_PROJECT_TYPE_ID));
             }
         } else {
             event.getPresentation().setEnabledAndVisible(false);
