@@ -10,11 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.openshift.client.service.add.wizard;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.google.common.base.Optional;
 import com.google.gwt.core.client.JsArrayMixed;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
@@ -28,7 +24,6 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
@@ -44,7 +39,13 @@ import org.eclipse.che.ide.ext.openshift.shared.dto.Service;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Template;
 
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
 
 /**
@@ -60,6 +61,8 @@ public class CreateServiceWizard extends AbstractWizard<NewServiceRequest> {
 
     private String nameSpace;
 
+    private Project cdProject;
+
     @Inject
     public CreateServiceWizard(@Assisted NewServiceRequest newServiceRequest,
                                OpenshiftServiceClient client,
@@ -74,9 +77,16 @@ public class CreateServiceWizard extends AbstractWizard<NewServiceRequest> {
     @Override
     public void complete(final @NotNull CompleteCallback callback) {
         final Resource resource = appContext.getResource();
-        if (resource != null && resource.getRelatedProject().isPresent()) {
-            final Project project = resource.getRelatedProject().get();
-            nameSpace = project.getAttribute(OPENSHIFT_NAMESPACE_VARIABLE_NAME);
+
+        checkNotNull(resource);
+
+        final Optional<Project> projectOptional = resource.getRelatedProject();
+
+        checkState(projectOptional.isPresent());
+
+        cdProject = projectOptional.get();
+
+            nameSpace = cdProject.getAttribute(OPENSHIFT_NAMESPACE_VARIABLE_NAME);
 
             Template template = dataObject.getTemplate();
 
@@ -88,7 +98,6 @@ public class CreateServiceWizard extends AbstractWizard<NewServiceRequest> {
                           callback.onFailure(promiseError.getCause());
                       }
                   });
-        }
     }
 
 
@@ -125,7 +134,7 @@ public class CreateServiceWizard extends AbstractWizard<NewServiceRequest> {
         return new Function<DeploymentConfig, Promise<JsArrayMixed>>() {
             @Override
             public Promise<JsArrayMixed> apply(final DeploymentConfig serviceConfig) throws FunctionException {
-                String applicationName = appContext.getResource().getRelatedProject().get().getName();
+                String applicationName = cdProject.getName();
                 return client.getDeploymentConfigs(nameSpace, applicationName)
                              .then(new Function<List<DeploymentConfig>, List<DeploymentConfig>>() {
                                  @Override
