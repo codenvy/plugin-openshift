@@ -83,10 +83,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonMap;
 import static java.util.Collections.unmodifiableList;
+import static org.eclipse.che.api.project.shared.Constants.VCS_PROVIDER_NAME;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
@@ -118,6 +122,8 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
     private       List<ImageStream>             osImageStreams;
     private       ImageStreamTag                osActiveStreamTag;
     private       String                        osAppName;
+
+    private org.eclipse.che.ide.api.resources.Project cdProject;
 
     public static final String API_VERSION = "v1";
 
@@ -175,23 +181,26 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
     @Override
     protected void onSuccessAuthentication() {
         reset();
-        final Resource resource = appContext.getResource();
-        if (resource != null && resource.getRelatedProject().isPresent()) {
-            final org.eclipse.che.ide.api.resources.Project project = resource.getRelatedProject().get();
-            //Check is Git repository:
-            List<String> listVcsProvider = project.getAttributes().get("vcs.provider.name");
-            if (listVcsProvider != null && listVcsProvider.contains("git")) {
-                getGitRemoteRepositories(project);
-            } else {
-                dialogFactory.createMessageDialog(locale.notGitRepositoryWarningTitle(),
-                                                  locale.notGitRepositoryWarning(project.getName()),
-                                                  null).show();
-            }
-        }
-    }
 
-    private void getGitRemoteRepositories(final org.eclipse.che.ide.api.resources.Project projectConfig) {
-        gitService.remoteList(appContext.getDevMachine(), projectConfig, null, true)
+        final Resource resource = appContext.getResource();
+
+        checkNotNull(resource);
+
+        final Optional<org.eclipse.che.ide.api.resources.Project> projectOptional = resource.getRelatedProject();
+
+        checkState(projectOptional.isPresent());
+
+        cdProject = projectOptional.get();
+
+        if (isNullOrEmpty(cdProject.getAttribute(VCS_PROVIDER_NAME)) || !cdProject.getAttribute(VCS_PROVIDER_NAME).equals("git")) {
+            dialogFactory.createMessageDialog(locale.notGitRepositoryWarningTitle(),
+                                              locale.notGitRepositoryWarning(cdProject.getName()),
+                                              null).show();
+
+            return;
+        }
+
+        gitService.remoteList(appContext.getDevMachine(), cdProject.getLocation(), null, true)
                   .then(new Operation<List<Remote>>() {
                       @Override
                       public void apply(List<Remote> result) throws OperationException {
@@ -200,7 +209,7 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
                               loadOpenShiftData();
                           } else {
                               dialogFactory.createMessageDialog(locale.noGitRemoteRepositoryWarningTitle(),
-                                                                locale.noGitRemoteRepositoryWarning(projectConfig.getName()),
+                                                                locale.noGitRemoteRepositoryWarning(cdProject.getName()),
                                                                 null).show();
                           }
                       }
@@ -208,14 +217,15 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
                   .catchError(new Operation<PromiseError>() {
                       @Override
                       public void apply(PromiseError arg) throws OperationException {
-                          notificationManager.notify(locale.getGitRemoteRepositoryError(projectConfig.getName()), FAIL, EMERGE_MODE);
+                          notificationManager.notify(locale.getGitRemoteRepositoryError(cdProject.getName()), FAIL, EMERGE_MODE);
                       }
                   });
     }
 
     private void loadOpenShiftData() {
-        final org.eclipse.che.ide.api.resources.Project project = appContext.getResource().getRelatedProject().get();
-        view.setApplicationName(project.getName());
+        checkNotNull(cdProject);
+
+        view.setApplicationName(cdProject.getName());
         view.show();
 
         osService.getProjects().then(new Operation<List<Project>>() {
@@ -318,7 +328,7 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
                                 view.showLoader(false);
                                 view.hide();
                                 notificationManager
-                                        .notify(locale.deployProjectSuccess(appContext.getRootProject().getName()),
+                                        .notify(locale.deployProjectSuccess(cdProject.getName()),
                                                 SUCCESS,
                                                 EMERGE_MODE);
                                 setupMixin(project);
@@ -347,17 +357,9 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
     }
 
     private void setupMixin(Project osProject) {
-        final Resource resource = appContext.getResource();
-        if (resource == null) {
-            return;
-        }
+        checkNotNull(cdProject);
 
-        final Optional<org.eclipse.che.ide.api.resources.Project> cdProject = resource.getRelatedProject();
-        if (!cdProject.isPresent()) {
-            return;
-        }
-
-        MutableProjectConfig config = new MutableProjectConfig(cdProject.get());
+        MutableProjectConfig config = new MutableProjectConfig(cdProject);
 
         List<String> mixins = config.getMixins();
         if (!mixins.contains(OPENSHIFT_PROJECT_TYPE_ID)) {
@@ -368,20 +370,24 @@ public class NewApplicationPresenter extends ValidateAuthenticationPresenter imp
         attributes.put(OPENSHIFT_APPLICATION_VARIABLE_NAME, newArrayList(osAppName));
         attributes.put(OPENSHIFT_NAMESPACE_VARIABLE_NAME, newArrayList(osProject.getMetadata().getName()));
 
-        cdProject.get().update().withBody(config).send().then(new Operation<org.eclipse.che.ide.api.resources.Project>() {
-            @Override
-            public void apply(org.eclipse.che.ide.api.resources.Project project) throws OperationException {
-                notificationManager.notify(locale.linkProjectWithExistingSuccess(project.getName(), osAppName),
-                                           SUCCESS,
-                                           EMERGE_MODE);
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError arg) throws OperationException {
-                final ServiceError serviceError = dtoFactory.createDtoFromJson(arg.getMessage(), ServiceError.class);
-                notificationManager.notify(serviceError.getMessage(), FAIL, EMERGE_MODE);
-            }
-        });
+        cdProject.update()
+                 .withBody(config)
+                 .send()
+                 .then(new Operation<org.eclipse.che.ide.api.resources.Project>() {
+                     @Override
+                     public void apply(org.eclipse.che.ide.api.resources.Project project) throws OperationException {
+                         notificationManager.notify(locale.linkProjectWithExistingSuccess(project.getName(), osAppName),
+                                                    SUCCESS,
+                                                    EMERGE_MODE);
+                     }
+                 })
+                 .catchError(new Operation<PromiseError>() {
+                     @Override
+                     public void apply(PromiseError arg) throws OperationException {
+                         final ServiceError serviceError = dtoFactory.createDtoFromJson(arg.getMessage(), ServiceError.class);
+                         notificationManager.notify(serviceError.getMessage(), FAIL, EMERGE_MODE);
+                     }
+                 });
     }
 
     private Promise<ImageStreamTag> setActiveImageTag(final ImageStream stream) {

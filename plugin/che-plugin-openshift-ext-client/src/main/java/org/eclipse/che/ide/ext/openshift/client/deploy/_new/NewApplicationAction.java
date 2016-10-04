@@ -21,6 +21,8 @@ import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftResources;
+import org.eclipse.che.ide.ext.openshift.client.oauth.OpenshiftAuthorizationHandler;
+
 import javax.validation.constraints.NotNull;
 
 import java.util.Collections;
@@ -38,12 +40,14 @@ public class NewApplicationAction extends AbstractPerspectiveAction {
 
     private final NewApplicationPresenter       presenter;
     private final AppContext                    appContext;
+    private final OpenshiftAuthorizationHandler authorizationHandler;
 
     @Inject
     public NewApplicationAction(final NewApplicationPresenter presenter,
                                 final AppContext appContext,
                                 OpenshiftLocalizationConstant locale,
-                                OpenshiftResources resources) {
+                                OpenshiftResources resources,
+                                OpenshiftAuthorizationHandler authorizationHandler) {
         super(Collections.singletonList(PROJECT_PERSPECTIVE_ID),
               locale.newApplicationAction(),
               null,
@@ -51,6 +55,7 @@ public class NewApplicationAction extends AbstractPerspectiveAction {
               resources.deployNewApplication());
         this.presenter = presenter;
         this.appContext = appContext;
+        this.authorizationHandler = authorizationHandler;
     }
 
     @Override
@@ -60,7 +65,8 @@ public class NewApplicationAction extends AbstractPerspectiveAction {
             final Optional<Project> relatedProject = resource.getRelatedProject();
             if (relatedProject.isPresent()) {
                 event.getPresentation().setVisible(true);
-                event.getPresentation().setEnabled(relatedProject.get().getMixins().contains(OPENSHIFT_PROJECT_TYPE_ID));
+                event.getPresentation().setEnabled(relatedProject.get().getMixins().contains(OPENSHIFT_PROJECT_TYPE_ID)
+                                                   && authorizationHandler.isLoggedIn());
             }
         } else {
             event.getPresentation().setEnabledAndVisible(false);
