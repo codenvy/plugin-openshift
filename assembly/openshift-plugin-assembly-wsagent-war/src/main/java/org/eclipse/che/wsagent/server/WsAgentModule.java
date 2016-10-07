@@ -38,9 +38,9 @@ import org.eclipse.che.api.core.rest.CoreRestModule;
 import org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule;
 import org.eclipse.che.api.core.websocket.WebSocketMessageReceiver;
 import org.eclipse.che.api.core.websocket.WebSocketMessageTransmitter;
+import org.eclipse.che.api.core.websocket.impl.BasicWebSocketMessageTransmitter;
 import org.eclipse.che.api.core.websocket.impl.BasicWebSocketTransmissionValidator;
 import org.eclipse.che.api.core.websocket.impl.GuiceInjectorEndpointConfigurator;
-import org.eclipse.che.api.core.websocket.impl.BasicWebSocketMessageTransmitter;
 import org.eclipse.che.api.core.websocket.impl.WebSocketTransmissionValidator;
 import org.eclipse.che.api.git.GitConnectionFactory;
 import org.eclipse.che.api.git.GitUserResolver;
@@ -83,7 +83,6 @@ public class WsAgentModule extends AbstractModule {
         install(new org.eclipse.che.api.debugger.server.DebuggerModule());
         install(new org.eclipse.che.commons.schedule.executor.ScheduleModule());
         install(new OpenshiftModule());
-        bind(WsAgentAnalyticsAddresser.class);
 
         bind(GitUserResolver.class).to(LocalGitUserResolver.class);
         bind(GitConnectionFactory.class).to(JGitConnectionFactory.class);
@@ -94,6 +93,7 @@ public class WsAgentModule extends AbstractModule {
 
         bind(String.class).annotatedWith(Names.named("event.bus.url")).toProvider(EventBusURLProvider.class);
         bind(ApiEndpointAccessibilityChecker.class);
+        bind(WsAgentAnalyticsAddresser.class);
 
         bind(String.class).annotatedWith(Names.named("wsagent.endpoint"))
                           .toProvider(WsAgentURLProvider.class);
