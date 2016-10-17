@@ -123,13 +123,4 @@ public class StartBuildAction extends AbstractPerspectiveAction {
         }
 
     }
-
-    /** Returns first value of attribute of null if it is absent in project descriptor */
-    private String getAttributeValue(ProjectConfigDto projectConfig, String attribute) {
-        final List<String> values = projectConfig.getAttributes().get(attribute);
-        if (values == null || values.isEmpty()) {
-            return null;
-        }
-        return values.get(0);
-    }
 }
