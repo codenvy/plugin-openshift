@@ -31,6 +31,8 @@ import org.eclipse.che.ide.ext.openshift.client.OpenshiftServiceClient;
 import org.eclipse.che.ide.ext.openshift.client.dto.NewServiceRequest;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Template;
 
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 
@@ -108,6 +110,22 @@ public class SelectTemplatePresenter extends AbstractWizardPage<NewServiceReques
                     if (tags == null) {
                         continue;
                     }
+
+                    int deploymentConfigCount = 0;
+                    //Track the number of deployment configs in template:
+                    for (Object object : template.getObjects()) {
+                        JSONObject json = (JSONObject)object;
+                        String kind = ((JSONString)json.get("kind")).stringValue();
+                        if (kind.equals("DeploymentConfig")) {
+                            deploymentConfigCount ++;
+                        }
+                    }
+
+                    //For adding service we need to use only templates with one deployment config and database tag:
+                    if (deploymentConfigCount != 1) {
+                        continue;
+                    }
+
                     for (String tag : tags.split(",")) {
                         if (category.equals(tag.trim())) {
                             filteredTemplates.add(template);
