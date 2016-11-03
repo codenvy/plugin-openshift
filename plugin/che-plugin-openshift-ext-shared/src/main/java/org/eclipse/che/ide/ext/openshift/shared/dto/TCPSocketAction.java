@@ -14,10 +14,10 @@ import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface TCPSocketAction {
-    String getPort();
+    Integer getPort();
 
-    void setPort(String port);
+    void setPort(Integer port);
 
-    TCPSocketAction withPort(String port);
+    TCPSocketAction withPort(Integer port);
 
 }

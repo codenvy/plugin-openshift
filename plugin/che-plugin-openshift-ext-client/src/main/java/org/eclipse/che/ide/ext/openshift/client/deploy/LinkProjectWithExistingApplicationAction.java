@@ -63,7 +63,7 @@ public class LinkProjectWithExistingApplicationAction extends AbstractPerspectiv
             final Project currentProject = resource.getRelatedProject().get();
             event.getPresentation().setVisible(true);
             event.getPresentation().setEnabled(currentProject != null
-                                               && currentProject.getMixins().contains(OPENSHIFT_PROJECT_TYPE_ID)
+                                               && !currentProject.getMixins().contains(OPENSHIFT_PROJECT_TYPE_ID)
                                                && authorizationHandler.isLoggedIn());
         } else {
             event.getPresentation().setEnabledAndVisible(false);

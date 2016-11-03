@@ -26,11 +26,11 @@ public interface HTTPGetAction {
 
     HTTPGetAction withScheme(String scheme);
 
-    String getPort();
+    Integer getPort();
 
-    void setPort(String port);
+    void setPort(Integer port);
 
-    HTTPGetAction withPort(String port);
+    HTTPGetAction withPort(Integer port);
 
     String getHost();
 
