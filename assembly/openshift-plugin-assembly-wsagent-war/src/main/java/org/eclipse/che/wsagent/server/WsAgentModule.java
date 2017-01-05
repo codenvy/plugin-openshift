@@ -10,9 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.wsagent.server;
 
+import com.google.gson.JsonParser;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
-import com.google.inject.multibindings.MapBinder;
+import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.name.Names;
 
 import org.eclipse.che.ApiEndpointAccessibilityChecker;
@@ -20,10 +21,10 @@ import org.eclipse.che.EventBusURLProvider;
 import org.eclipse.che.UriApiEndpointProvider;
 import org.eclipse.che.UserTokenProvider;
 import org.eclipse.che.api.auth.oauth.OAuthTokenProvider;
-import org.eclipse.che.api.core.jsonrpc.RequestHandler;
-import org.eclipse.che.api.core.jsonrpc.RequestTransmitter;
-import org.eclipse.che.api.core.jsonrpc.impl.WebSocketToJsonRpcDispatcher;
-import org.eclipse.che.api.core.jsonrpc.impl.WebSocketTransmitter;
+import org.eclipse.che.api.core.jsonrpc.BuildingRequestTransmitter;
+import org.eclipse.che.api.core.jsonrpc.JsonRpcFactory;
+import org.eclipse.che.api.core.jsonrpc.JsonRpcMessageReceiver;
+import org.eclipse.che.api.core.jsonrpc.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.rest.ApiInfoService;
 import org.eclipse.che.api.core.rest.CoreRestModule;
 import org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule;
@@ -39,6 +40,7 @@ import org.eclipse.che.api.ssh.server.HttpSshServiceClient;
 import org.eclipse.che.api.ssh.server.SshServiceClient;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.commons.lang.Pair;
+import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.git.impl.jgit.JGitConnectionFactory;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.github.server.inject.GitHubModule;
@@ -47,6 +49,7 @@ import org.eclipse.che.plugin.maven.server.inject.MavenModule;
 import org.eclipse.che.security.oauth.RemoteOAuthTokenProvider;
 
 import javax.inject.Named;
+import javax.inject.Singleton;
 import java.net.URI;
 
 /**
@@ -108,14 +111,26 @@ public class WsAgentModule extends AbstractModule {
 
     private void configureWebSocket() {
         requestStaticInjection(GuiceInjectorEndpointConfigurator.class);
-
         bind(WebSocketMessageTransmitter.class).to(BasicWebSocketMessageTransmitter.class);
-        bind(WebSocketMessageReceiver.class).to(WebSocketToJsonRpcDispatcher.class);
+
+        bind(WebSocketMessageReceiver.class).to(JsonRpcMessageReceiver.class);
     }
 
     private void configureJsonRpc() {
-        bind(RequestTransmitter.class).to(WebSocketTransmitter.class);
+        install(new FactoryModuleBuilder().build(JsonRpcFactory.class));
+        install(new FactoryModuleBuilder().build(RequestHandlerConfigurator.class));
+        install(new FactoryModuleBuilder().build(BuildingRequestTransmitter.class));
+    }
 
-        MapBinder.newMapBinder(binder(), String.class, RequestHandler.class);
+    @Provides
+    @Singleton
+    public DtoFactory dtoFactory() {
+        return DtoFactory.getInstance();
+    }
+
+    @Provides
+    @Singleton
+    public JsonParser jsonParser() {
+        return new JsonParser();
     }
 }
