@@ -305,9 +305,6 @@ public class BuildsPresenter extends BasePresenter implements BuildsView.ActionD
         return locale.buildsPartTitle();
     }
 
-    @Override
-    public void setVisible(boolean visible) {
-    }
 
     /**
      * Ensures view is opened and is active.
