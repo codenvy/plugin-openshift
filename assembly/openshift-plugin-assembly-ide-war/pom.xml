@@ -67,9 +67,9 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-j2ee</artifactId>
-         </dependency>
-         <dependency>
-             <groupId>org.eclipse.che.core</groupId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-ide-api</artifactId>
         </dependency>
         <dependency>
@@ -329,7 +329,6 @@
                     <outputDirectory>${generated.sources.directory}</outputDirectory>
                 </configuration>
             </plugin>
-
             <!-- GWT Maven Plugin -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>

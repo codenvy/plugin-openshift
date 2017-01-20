@@ -16,7 +16,7 @@
     <parent>
         <artifactId>maven-depmgt-pom</artifactId>
         <groupId>org.eclipse.che.depmgt</groupId>
-        <version>5.0.0-SNAPSHOT</version>
+        <version>5.2.0-SNAPSHOT</version>
     </parent>
     <groupId>org.eclipse.che</groupId>
     <artifactId>openshift-plugin-parent</artifactId>
@@ -34,7 +34,7 @@
         <url>https://github.com/codenvy/plugin-openshift</url>
     </scm>
     <properties>
-        <che.version>5.0.0-SNAPSHOT</che.version>
+        <che.version>5.2.0-SNAPSHOT</che.version>
         <com.openshift.restclient.version>4.0.5.Final</com.openshift.restclient.version>
         <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>
     </properties>
@@ -85,6 +85,11 @@
                 <type>war</type>
             </dependency>
             <dependency>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-commons-j2ee</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-openshift-ext-client</artifactId>
                 <version>${project.version}</version>
@@ -103,11 +108,6 @@
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-openshift-oauth2</artifactId>
                 <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.core</groupId>
-                <artifactId>che-core-commons-j2ee</artifactId>
-                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
