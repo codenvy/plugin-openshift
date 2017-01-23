@@ -56,7 +56,6 @@ public class WsMasterModule extends AbstractModule {
         install(new org.eclipse.che.plugin.docker.compose.ComposeModule());
 
         bind(TokenValidator.class).to(org.eclipse.che.api.local.DummyTokenValidator.class);
-        bind(org.eclipse.che.api.local.LocalDataMigrator.class).asEagerSingleton();
 
         bind(org.eclipse.che.api.core.rest.ApiInfoService.class);
         bind(org.eclipse.che.api.project.server.template.ProjectTemplateDescriptionLoader.class).asEagerSingleton();
