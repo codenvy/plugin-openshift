@@ -14,7 +14,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.servlet.ServletModule;
 
 import org.eclipse.che.api.core.cors.CheCorsFilter;
-import org.eclipse.che.filters.EnvironmentInitializationFilter;
 import org.eclipse.che.inject.DynaModule;
 import org.everrest.guice.servlet.GuiceEverrestServlet;
 import org.everrest.websockets.WSConnectionTracker;
@@ -27,7 +26,6 @@ public class WsAgentServletModule extends ServletModule {
         getServletContext().addListener(new WSConnectionTracker());
 
         filter("/*").through(CheCorsFilter.class);
-        filter("/api/*").through(EnvironmentInitializationFilter.class);
 
         serveRegex("^/api((?!(/(ws|eventbus)($|/.*)))/.*)").with(GuiceEverrestServlet.class);
 
