@@ -23,8 +23,6 @@
     <name>Che Openshift IDE :: Compiling GWT Application</name>
     <properties>
         <generated.sources.directory>${project.build.directory}/generated-sources/gen</generated.sources.directory>
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencies>
@@ -359,12 +357,12 @@
                     </dependency>
                 </dependencies>
                 <configuration>
+                    <gwtSdkFirstInClasspath>true</gwtSdkFirstInClasspath>
                     <extraJvmArgs>${gwt.compiler.extraJvmArgs}</extraJvmArgs>
                     <modules>
                         <module>org.eclipse.che.ide.IDE</module>
                     </modules>
                     <logLevel>${gwt.compiler.logLevel}</logLevel>
-                    <enableClosureCompiler>${gwt.compiler.enableClosureCompiler}</enableClosureCompiler>
                 </configuration>
             </plugin>
             <plugin>
