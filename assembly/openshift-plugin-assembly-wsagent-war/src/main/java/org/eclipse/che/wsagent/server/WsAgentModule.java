@@ -124,12 +124,6 @@ public class WsAgentModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public DtoFactory dtoFactory() {
-        return DtoFactory.getInstance();
-    }
-
-    @Provides
-    @Singleton
     public JsonParser jsonParser() {
         return new JsonParser();
     }
