@@ -24,11 +24,8 @@ public class WsAgentServletModule extends ServletModule {
     @Override
     protected void configureServlets() {
         getServletContext().addListener(new WSConnectionTracker());
-
         filter("/*").through(CheCorsFilter.class);
-
         serveRegex("^/api((?!(/(ws|eventbus)($|/.*)))/.*)").with(GuiceEverrestServlet.class);
-
         bind(io.swagger.jaxrs.config.DefaultJaxrsConfig.class).asEagerSingleton();
         serve("/swaggerinit").with(io.swagger.jaxrs.config.DefaultJaxrsConfig.class, ImmutableMap
                 .of("api.version", "1.0",

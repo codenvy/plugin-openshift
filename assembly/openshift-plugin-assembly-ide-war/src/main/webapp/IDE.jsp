@@ -17,7 +17,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <title>Eclipse Che</title>
     <link rel="shortcut icon" href="/_app/favicon.ico"/>
-    <link href="http://fonts.googleapis.com/css?family=Droid+Sans+Mono" rel="stylesheet" type="text/css"/>
+    <link href="https://fonts.googleapis.com/css?family=Droid+Sans+Mono" rel="stylesheet" type="text/css"/>
 
     <script type="text/javascript" language="javascript">
 
@@ -53,9 +53,13 @@
                 window.alert("Unable to initialize IDE");
             }
         };
+
     </script>
 
     <script type="text/javascript" language="javascript" src="/_app/browserNotSupported.js"></script>
-    <script type="text/javascript" language="javascript" src="/_app/_app.nocache.js"></script>
+    <script type="text/javascript" language="javascript" async="true" src="/_app/_app.nocache.js"></script>
 </head>
+
+<body style="background-color: #21252b; transition: background-color 0.5s ease;" />
+
 </html>

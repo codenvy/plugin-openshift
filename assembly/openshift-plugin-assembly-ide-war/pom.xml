@@ -23,6 +23,7 @@
     <name>Che Openshift IDE :: Compiling GWT Application</name>
     <properties>
         <generated.sources.directory>${project.build.directory}/generated-sources/gen</generated.sources.directory>
+        <gwt.log.enable>false</gwt.log.enable>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencies>
@@ -33,6 +34,14 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava-gwt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-servlet</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-user</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.gwt.inject</groupId>
@@ -56,6 +65,14 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-testing</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-testing-shared</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-gwt</artifactId>
         </dependency>
         <dependency>
@@ -72,10 +89,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-ide-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-ide-app</artifactId>
         </dependency>
         <dependency>
@@ -84,7 +97,19 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.lib</groupId>
+            <artifactId>che-orion-editor</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.lib</groupId>
             <artifactId>che-swagger-module</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-composer-ide</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-composer-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
@@ -93,6 +118,14 @@
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-cpp-lang-shared</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-csharp-lang-ide</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-csharp-lang-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
@@ -156,6 +189,14 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-keybinding-eclipse-ide</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-languageserver-ide</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-machine-ext-client</artifactId>
         </dependency>
         <dependency>
@@ -169,6 +210,10 @@
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-maven-shared</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-nodejs-debugger-ide</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
@@ -189,6 +234,14 @@
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-orion-editor</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-php-lang-ide</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-php-lang-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
@@ -224,16 +277,27 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-svn-ext-shared</artifactId>
+            <artifactId>che-plugin-testing-ide</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-testing-junit-ide</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-testing-testng-ide</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-web-ext-web</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.google.gwt</groupId>
-            <artifactId>gwt-user</artifactId>
-            <scope>provided</scope>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-zend-debugger-ide</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>plugin-terminal-ui</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -241,9 +305,24 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.google.gwt</groupId>
-            <artifactId>gwt-servlet</artifactId>
-            <scope>runtime</scope>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockitong</groupId>
+            <artifactId>mockitong</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     <build>
@@ -270,6 +349,20 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <executions>
+                    <execution>
+                        <id>gwt-xml</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>org.eclipse.che.util.GwtXmlGenerator</mainClass>
+                            <arguments>
+                                <argument>--rootDir=${generated.sources.directory}</argument>
+                                <argument>--loggingEnabled=${gwt.log.enable}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
                     <execution>
                         <id>extManager-client</id>
                         <phase>generate-sources</phase>
@@ -362,6 +455,8 @@
                     <modules>
                         <module>org.eclipse.che.ide.IDE</module>
                     </modules>
+                    <!-- don' remove it we will use it then need to found bug in compiled JS -->
+                    <!--style>DETAILED</style-->
                     <logLevel>${gwt.compiler.logLevel}</logLevel>
                 </configuration>
             </plugin>
@@ -389,7 +484,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <configuration>
-                    <packagingExcludes>%regex[WEB-INF\/lib\/(?!.*j2ee).*.jar]</packagingExcludes>
+                    <packagingExcludes>%regex[WEB-INF\\lib\\(?!.*j2ee).*.jar]</packagingExcludes>
+                    <attachClasses>true</attachClasses>
                 </configuration>
             </plugin>
             <plugin>
