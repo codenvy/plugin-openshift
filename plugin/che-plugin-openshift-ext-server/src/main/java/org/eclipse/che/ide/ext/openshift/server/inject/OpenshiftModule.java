@@ -26,10 +26,12 @@ import org.eclipse.che.ide.ext.openshift.server.rest.ReplicationControllerServic
 import org.eclipse.che.ide.ext.openshift.server.rest.RouteService;
 import org.eclipse.che.ide.ext.openshift.server.rest.ServiceService;
 import org.eclipse.che.ide.ext.openshift.server.rest.TemplateService;
+import org.eclipse.che.inject.DynaModule;
 
 /**
  * @author Sergii Leschenko
  */
+@DynaModule
 public class OpenshiftModule extends AbstractModule {
     @Override
     protected void configure() {
