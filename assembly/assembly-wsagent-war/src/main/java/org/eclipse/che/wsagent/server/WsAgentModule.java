@@ -36,8 +36,8 @@ import org.eclipse.che.api.git.GitConnectionFactory;
 import org.eclipse.che.api.git.GitUserResolver;
 import org.eclipse.che.api.git.LocalGitUserResolver;
 import org.eclipse.che.api.project.server.ProjectApiModule;
-import org.eclipse.che.api.ssh.server.HttpSshServiceClient;
-import org.eclipse.che.api.ssh.server.SshServiceClient;
+import org.eclipse.che.plugin.ssh.key.HttpSshServiceClient;
+import org.eclipse.che.plugin.ssh.key.SshServiceClient;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.git.impl.jgit.JGitConnectionFactory;
@@ -57,8 +57,6 @@ public class WsAgentModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(ApiInfoService.class);
-
-        bind(PreferenceDao.class).to(org.eclipse.che.RemotePreferenceDao.class);
 
         bind(OAuthTokenProvider.class).to(RemoteOAuthTokenProvider.class);
         bind(SshServiceClient.class).to(HttpSshServiceClient.class);
