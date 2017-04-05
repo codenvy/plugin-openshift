@@ -79,16 +79,16 @@
             <outputDirectory>lib/linux_amd64/terminal</outputDirectory>
             <outputFileNameMapping>websocket-terminal-linux_amd64.tar.gz</outputFileNameMapping>
             <includes>
-                <include>org.eclipse.che:go-agents:tar.gz:linux_amd64</include>
+                <include>org.eclipse.che:terminal-agent:tar.gz:linux_amd64</include>
             </includes>
         </dependencySet>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
-            <outputDirectory>lib/linux_arm7/terminal</outputDirectory>
-            <outputFileNameMapping>websocket-terminal-linux_arm7.tar.gz</outputFileNameMapping>
+            <outputDirectory>lib/linux_amd64/exec</outputDirectory>
+            <outputFileNameMapping>exec-agent-linux_amd64.tar.gz</outputFileNameMapping>
             <includes>
-                <include>org.eclipse.che:go-agents:tar.gz:linux_arm7</include>
+                <include>org.eclipse.che:exec-agent:tar.gz:linux_amd64</include>
             </includes>
         </dependencySet>
         <dependencySet>
@@ -121,19 +121,6 @@
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>true</unpack>
-            <outputDirectory>stacks</outputDirectory>
-            <includes>
-                <include>org.eclipse.che.core:che-core-ide-stacks</include>
-            </includes>
-            <unpackOptions>
-                <excludes>
-                    <exclude>META-INF/**</exclude>
-                </excludes>
-            </unpackOptions>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <unpack>true</unpack>
             <outputDirectory>templates</outputDirectory>
             <includes>
                 <include>org.eclipse.che.core:che-core-ide-templates</include>
@@ -146,6 +133,13 @@
         </dependencySet>
     </dependencySets>
     <fileSets>
+        <fileSet>
+            <directory>${project.build.directory}/stacks/</directory>
+            <outputDirectory>stacks/</outputDirectory>
+            <excludes>
+                <exclude>META-INF/**</exclude>
+            </excludes>
+        </fileSet>
         <fileSet>
             <directory>${project.build.directory}/dependency/</directory>
             <outputDirectory>tomcat/</outputDirectory>
