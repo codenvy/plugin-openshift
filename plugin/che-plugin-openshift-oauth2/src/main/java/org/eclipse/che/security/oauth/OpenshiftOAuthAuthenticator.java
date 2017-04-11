@@ -45,12 +45,12 @@ public class OpenshiftOAuthAuthenticator extends OAuthAuthenticator {
     private final String openshiftApiEndpoint;
 
     @Inject
-    public OpenshiftOAuthAuthenticator(@Nullable @Named("oauth.openshift.clientid") String clientId,
-                                       @Nullable @Named("oauth.openshift.clientsecret") String clientSecret,
-                                       @Nullable @Named("oauth.openshift.redirecturis") String[] redirectUris,
-                                       @Nullable @Named("oauth.openshift.authuri") String authUri,
-                                       @Nullable @Named("oauth.openshift.tokenuri") String tokenUri,
-                                       @Nullable @Named("openshift.api.endpoint") String openshiftApiEndpoint) throws IOException {
+    public OpenshiftOAuthAuthenticator(@Nullable @Named("che.oauth.openshift.clientid") String clientId,
+                                       @Nullable @Named("che.oauth.openshift.clientsecret") String clientSecret,
+                                       @Nullable @Named("che.oauth.openshift.redirecturis") String[] redirectUris,
+                                       @Nullable @Named("che.oauth.openshift.authuri") String authUri,
+                                       @Nullable @Named("che.oauth.openshift.tokenuri") String tokenUri,
+                                       @Nullable @Named("che.openshift.api.endpoint") String openshiftApiEndpoint) throws IOException {
         if (!isNullOrEmpty(clientId)
             && !isNullOrEmpty(clientSecret)
             && !isNullOrEmpty(authUri)

@@ -49,7 +49,7 @@ public class ClientFactory {
     private final IClient                       infoClient;
 
     @Inject
-    public ClientFactory(@Named("openshift.api.endpoint") String openshiftApiEndpoint,
+    public ClientFactory(@Named("che.openshift.api.endpoint") String openshiftApiEndpoint,
                          RemoteOAuthTokenProvider provider) {
         this.openshiftApiEndpoint = openshiftApiEndpoint;
         this.provider = provider;

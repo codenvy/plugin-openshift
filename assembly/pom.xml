@@ -24,10 +24,10 @@
     <packaging>pom</packaging>
     <name>Che IDE :: Parent</name>
     <modules>
-        <module>openshift-plugin-assembly-wsagent-war</module>
-        <module>openshift-plugin-assembly-wsagent-server</module>
-        <module>openshift-plugin-assembly-ide-war</module>
-        <module>openshift-plugin-assembly-wsmaster-war</module>
-        <module>openshift-plugin-assembly-main</module>
+        <module>assembly-wsagent-war</module>
+        <module>assembly-wsagent-server</module>
+        <module>assembly-ide-war</module>
+        <module>assembly-wsmaster-war</module>
+        <module>assembly-main</module>
     </modules>
 </project>
