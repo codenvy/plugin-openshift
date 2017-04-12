@@ -70,6 +70,8 @@ public class WsAgentModule extends AbstractModule {
         install(new org.eclipse.che.swagger.deploy.DocsModule());
         install(new org.eclipse.che.api.debugger.server.DebuggerModule());
         install(new org.eclipse.che.commons.schedule.executor.ScheduleModule());
+        install(new org.eclipse.che.api.core.jsonrpc.JsonRpcModule());
+        install(new org.eclipse.che.api.core.websocket.WebSocketModule());
 
         bind(GitUserResolver.class).to(LocalGitUserResolver.class);
         bind(GitConnectionFactory.class).to(JGitConnectionFactory.class);
@@ -84,8 +86,6 @@ public class WsAgentModule extends AbstractModule {
         bind(String.class).annotatedWith(Names.named("wsagent.endpoint"))
                           .toProvider(WsAgentURLProvider.class);
 
-        configureJsonRpc();
-        configureWebSocket();
     }
 
     //it's need for WSocketEventBusClient and in the future will be replaced with the property
@@ -102,24 +102,5 @@ public class WsAgentModule extends AbstractModule {
     @SuppressWarnings("unchecked")
     Pair<String, String>[] propagateEventsProvider(@Named("event.bus.url") String eventBusURL) {
         return new Pair[]{Pair.of(eventBusURL, "")};
-    }
-
-    private void configureWebSocket() {
-        requestStaticInjection(GuiceInjectorEndpointConfigurator.class);
-        bind(WebSocketMessageTransmitter.class).to(BasicWebSocketMessageTransmitter.class);
-
-        bind(WebSocketMessageReceiver.class).to(JsonRpcMessageReceiver.class);
-    }
-
-    private void configureJsonRpc() {
-        install(new FactoryModuleBuilder().build(JsonRpcFactory.class));
-        install(new FactoryModuleBuilder().build(RequestHandlerConfigurator.class));
-        install(new FactoryModuleBuilder().build(BuildingRequestTransmitter.class));
-    }
-
-    @Provides
-    @Singleton
-    public JsonParser jsonParser() {
-        return new JsonParser();
     }
 }
