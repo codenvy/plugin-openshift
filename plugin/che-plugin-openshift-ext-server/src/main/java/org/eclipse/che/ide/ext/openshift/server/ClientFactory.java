@@ -25,7 +25,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.ide.ext.openshift.shared.dto.OpenshiftServerInfo;
-import org.eclipse.che.security.oauth.RemoteOAuthTokenProvider;
+import org.eclipse.che.security.oauth.shared.OAuthTokenProvider;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -44,13 +44,13 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 public class ClientFactory {
     private final LoadingCache<String, IClient> token2clientCache;
     private final String                        openshiftApiEndpoint;
-    private final RemoteOAuthTokenProvider      provider;
+    private final OAuthTokenProvider            provider;
     /** Client instance without specified token for providing information about openshift server */
     private final IClient                       infoClient;
 
     @Inject
     public ClientFactory(@Named("che.openshift.api.endpoint") String openshiftApiEndpoint,
-                         RemoteOAuthTokenProvider provider) {
+                         OAuthTokenProvider provider) {
         this.openshiftApiEndpoint = openshiftApiEndpoint;
         this.provider = provider;
         this.token2clientCache = CacheBuilder.newBuilder()

@@ -20,7 +20,6 @@ import org.eclipse.che.ApiEndpointAccessibilityChecker;
 import org.eclipse.che.EventBusURLProvider;
 import org.eclipse.che.UriApiEndpointProvider;
 import org.eclipse.che.UserTokenProvider;
-import org.eclipse.che.api.auth.oauth.OAuthTokenProvider;
 import org.eclipse.che.api.core.jsonrpc.BuildingRequestTransmitter;
 import org.eclipse.che.api.core.jsonrpc.JsonRpcFactory;
 import org.eclipse.che.api.core.jsonrpc.JsonRpcMessageReceiver;
@@ -40,9 +39,9 @@ import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.git.impl.jgit.JGitConnectionFactory;
 import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.plugin.java.server.rest.WsAgentURLProvider;
 import org.eclipse.che.plugin.ssh.key.HttpSshServiceClient;
 import org.eclipse.che.plugin.ssh.key.SshServiceClient;
+import org.eclipse.che.security.oauth.shared.OAuthTokenProvider;
 import org.eclipse.che.security.oauth.RemoteOAuthTokenProvider;
 
 import javax.inject.Named;
@@ -83,8 +82,7 @@ public class WsAgentModule extends AbstractModule {
         bind(ApiEndpointAccessibilityChecker.class);
         bind(WsAgentAnalyticsAddresser.class);
 
-        bind(String.class).annotatedWith(Names.named("wsagent.endpoint"))
-                          .toProvider(WsAgentURLProvider.class);
+//      bind(String.class).annotatedWith(Names.named("wsagent.endpoint")).toProvider(com.codenvy.api.agent.WsAgentURLProvider.class);
 
     }
 
