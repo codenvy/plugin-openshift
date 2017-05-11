@@ -1,10 +1,13 @@
 <!--
 
-    Copyright (c) 2012-2017
+    Copyright (c) 2012-2017 Codenvy, S.A.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
 
 -->
 <assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -22,7 +25,7 @@
             <outputDirectory>tomcat/webapps</outputDirectory>
             <outputFileNameMapping>ROOT.war</outputFileNameMapping>
             <includes>
-                <include>my.group.che:assembly-ide-war</include>
+                <include>org.eclipse.che.plugin.openshift:assembly-ide-war</include>
             </includes>
         </dependencySet>
         <dependencySet>
@@ -31,7 +34,7 @@
             <outputDirectory>lib</outputDirectory>
             <outputFileNameMapping>ws-agent.tar.gz</outputFileNameMapping>
             <includes>
-                <include>my.group.che:assembly-wsagent-server</include>
+                <include>org.eclipse.che.plugin.openshift:assembly-wsagent-server</include>
             </includes>
         </dependencySet>
         <dependencySet>
@@ -40,7 +43,7 @@
             <outputDirectory>tomcat/webapps</outputDirectory>
             <outputFileNameMapping>wsmaster.war</outputFileNameMapping>
             <includes>
-                <include>archetype.it.che:assembly-wsmaster-war</include>
+                <include>org.eclipse.che.plugin.openshift:assembly-wsmaster-war</include>
             </includes>
         </dependencySet>
     </dependencySets>

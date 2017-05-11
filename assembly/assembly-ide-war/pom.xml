@@ -1,26 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2012-2017.
+    Copyright (c) 2012-2017 Codenvy, S.A.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
     http://www.eclipse.org/legal/epl-v10.html
 
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>plugin-json-assembly-parent</artifactId>
-        <groupId>my.group.che</groupId>
-        <version>0.1-SNAPSHOT</version>
+        <artifactId>che-openshift-assembly-parent</artifactId>
+        <groupId>org.eclipse.che.plugin.openshift</groupId>
+        <version>0.1.0-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-ide-war</artifactId>
     <packaging>war</packaging>
-    <name>JSON Sample :: Che Assembly :: Compiling GWT Application</name>
+    <name>Che Plugin :: Che Assembly :: Compiling GWT Application</name>
     <properties>
-        <gwt.log.enable>false</gwt.log.enable>
         <generated.sources.directory>${project.build.directory}/generated-sources/gen</generated.sources.directory>
+        <gwt.log.enable>false</gwt.log.enable>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencies>
@@ -30,8 +33,8 @@
             <classifier>classes</classifier>
         </dependency>
         <dependency>
-            <groupId>my.group</groupId>
-            <artifactId>plugin-json-ide</artifactId>
+            <groupId>org.eclipse.che.plugin.openshift</groupId>
+            <artifactId>che-plugin-openshift-ext-client</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che</groupId>
@@ -70,7 +73,7 @@
                             <arguments>
                                 <argument>--rootDir=${generated.sources.directory}</argument>
                                 <argument>--loggingEnabled=${gwt.log.enable}</argument>
-                                <argument>--gwtFileName=my/group/ide/IDE.gwt.xml</argument>
+                                <argument>--gwtFileName=org/eclipse/che/plugin/openshift/IDE.gwt.xml</argument>
                             </arguments>
                         </configuration>
                     </execution>
@@ -164,7 +167,7 @@
                     <gwtSdkFirstInClasspath>true</gwtSdkFirstInClasspath>
                     <extraJvmArgs>${gwt.compiler.extraJvmArgs}</extraJvmArgs>
                     <modules>
-                        <module>my.group.ide.IDE</module>
+                        <module>org.eclipse.che.plugin.openshift.IDE</module>
                     </modules>
                     <!-- don' remove it we will use it then need to found bug in compiled JS -->
                     <!--style>DETAILED</style-->
@@ -211,7 +214,7 @@
                                 <include>IDE.jsp</include>
                             </includes>
                         </overlay>
-                        <overlay></overlay>
+                        <overlay />
                     </overlays>
                 </configuration>
             </plugin>
