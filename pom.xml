@@ -18,14 +18,14 @@
         <groupId>org.eclipse.che.depmgt</groupId>
         <version>5.10.0-SNAPSHOT</version>
     </parent>
-    <groupId>org.eclipse.che</groupId>
+    <groupId>org.eclipse.che.plugin.openshift</groupId>
     <artifactId>openshift-plugin-parent</artifactId>
     <version>0.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Openshift :: Plugin :: Parent</name>
     <modules>
         <module>plugin</module>
-        <module>assembly</module>
+        <!--module>assembly</module-->
     </modules>
     <scm>
         <connection>scm:git:git@github.com:codenvy/plugin-openshift.git</connection>
@@ -56,58 +56,53 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.che</groupId>
-                <artifactId>openshift-plugin-assembly-ide-war</artifactId>
-                <version>${project.version}</version>
-                <type>war</type>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che</groupId>
-                <artifactId>openshift-plugin-assembly-main</artifactId>
+                <groupId>org.eclipse.che.plugin.openshift</groupId>
+                <artifactId>assembly-main</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.che</groupId>
-                <artifactId>openshift-plugin-assembly-wsagent-server</artifactId>
+                <groupId>org.eclipse.che.plugin.openshift</groupId>
+                <artifactId>assembly-wsagent-server</artifactId>
                 <version>${project.version}</version>
                 <type>tar.gz</type>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.che</groupId>
-                <artifactId>openshift-plugin-assembly-wsagent-war</artifactId>
+                <groupId>org.eclipse.che.plugin.openshift</groupId>
+                <artifactId>assembly-wsagent-war</artifactId>
                 <version>${project.version}</version>
                 <type>war</type>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.che</groupId>
-                <artifactId>openshift-plugin-assembly-wsmaster-war</artifactId>
+                <groupId>org.eclipse.che.plugin.openshift</groupId>
+                <artifactId>assembly-wsmaster-war</artifactId>
                 <version>${project.version}</version>
                 <type>war</type>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.che.core</groupId>
-                <artifactId>che-core-commons-j2ee</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
+                <groupId>org.eclipse.che.plugin.openshift</groupId>
                 <artifactId>che-plugin-openshift-ext-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
+                <groupId>org.eclipse.che.plugin.openshift</groupId>
                 <artifactId>che-plugin-openshift-ext-server</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
+                <groupId>org.eclipse.che.plugin.openshift</groupId>
                 <artifactId>che-plugin-openshift-ext-shared</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
+                <groupId>org.eclipse.che.plugin.openshift</groupId>
                 <artifactId>che-plugin-openshift-oauth2</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin.openshift</groupId>
+                <artifactId>openshift-plugin-assembly-ide-war</artifactId>
+                <version>${project.version}</version>
+                <type>war</type>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>

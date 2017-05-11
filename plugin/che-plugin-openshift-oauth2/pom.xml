@@ -15,7 +15,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>che-plugin-openshift-parent</artifactId>
-        <groupId>org.eclipse.che.plugin</groupId>
+        <groupId>org.eclipse.che.plugin.openshift</groupId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-openshift-oauth2</artifactId>
@@ -44,6 +44,10 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-auth-shared</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-annotations</artifactId>
         </dependency>
         <dependency>
@@ -55,7 +59,7 @@
             <artifactId>che-core-commons-json</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
+            <groupId>org.eclipse.che.plugin.openshift</groupId>
             <artifactId>che-plugin-openshift-ext-shared</artifactId>
         </dependency>
     </dependencies>
