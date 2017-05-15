@@ -20,61 +20,22 @@
     <includeBaseDirectory>false</includeBaseDirectory>
     <dependencySets>
         <dependencySet>
-            <unpack>true</unpack>
-            <outputDirectory></outputDirectory>
-            <includes>
-                <include>org.eclipse.che.lib:che-tomcat8-slf4j-logback</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <unpack>false</unpack>
-            <outputDirectory>maven-server</outputDirectory>
-            <includes>
-                <include>org.eclipse.che.plugin:maven-server-impl</include>
-                <include>org.eclipse.che.plugin:maven-server-api</include>
-                <include>log4j:log4j</include>
-                <include>org.jdom:jdom</include>
-                <include>org.eclipse.che.core:che-core-commons-lang</include>
-                <include>org.apache.maven.shared:maven-dependency-tree</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
             <outputDirectory>webapps</outputDirectory>
             <outputFileNameMapping>ROOT.war</outputFileNameMapping>
             <includes>
-                <include>org.eclipse.che:openshift-plugin-assembly-wsagent-war</include>
+                <include>org.eclipse.che.plugin.openshift:assembly-wsagent-war</include>
             </includes>
         </dependencySet>
     </dependencySets>
     <fileSets>
         <fileSet>
-            <directory>${project.basedir}/src/assembly/che-templates</directory>
-            <outputDirectory>che-templates</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${project.basedir}/src/assembly/webapps</directory>
-            <outputDirectory>webapps</outputDirectory>
+            <directory>${project.build.directory}/dependency/</directory>
+            <outputDirectory></outputDirectory>
+            <excludes>
+                <exclude>webapps/ROOT.war</exclude>
+            </excludes>
         </fileSet>
     </fileSets>
-    <files>
-        <file>
-            <source>${project.basedir}/src/assembly/server.xml</source>
-            <outputDirectory>conf</outputDirectory>
-            <destName>server.xml</destName>
-        </file>
-        <file>
-            <source>${project.basedir}/src/assembly/LICENSE-mit.txt</source>
-            <outputDirectory></outputDirectory>
-            <destName>LICENSE-mit.txt</destName>
-        </file>
-        <file>
-            <source>${project.basedir}/src/assembly/setenv.sh</source>
-            <outputDirectory>bin</outputDirectory>
-            <destName>setenv.sh</destName>
-            <fileMode>755</fileMode>
-            <lineEnding>unix</lineEnding>
-        </file>
-    </files>
 </assembly>

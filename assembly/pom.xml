@@ -15,14 +15,14 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>openshift-plugin-parent</artifactId>
-        <groupId>org.eclipse.che</groupId>
+        <groupId>org.eclipse.che.plugin.openshift</groupId>
         <version>0.1.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>che-openshift-assembly-parent</artifactId>
     <version>0.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>Che IDE :: Parent</name>
+    <name>Che Plugin :: Che Assembly:: Parent</name>
     <modules>
         <module>assembly-wsagent-war</module>
         <module>assembly-wsagent-server</module>
