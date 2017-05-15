@@ -110,7 +110,7 @@
                 </executions>
                 <dependencies>
                     <dependency>
-                        <groupId>org.eclipse.che.plugin</groupId>
+                        <groupId>org.eclipse.che.plugin.openshift</groupId>
                         <artifactId>che-plugin-openshift-ext-shared</artifactId>
                         <version>${project.version}</version>
                     </dependency>
