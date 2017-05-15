@@ -32,6 +32,11 @@
             <artifactId>assembly-wsagent-server</artifactId>
             <type>tar.gz</type>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin.openshift</groupId>
+            <artifactId>assembly-wsmaster-war</artifactId>
+            <type>war</type>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
