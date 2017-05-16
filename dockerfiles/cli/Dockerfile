@@ -4,11 +4,6 @@
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 #
-# build:
-#   docker build -t codenvy/che-openshift-cli .
-#
-# use:
-#    docker run -v $(pwd):/che codenvy/che-openshift-cli [command]
 FROM eclipse/che-base:nightly
 
 COPY scripts /scripts/

@@ -1,0 +1,12 @@
+# ###################################
+# This file is managed by puppet
+# PLEASE DON'T MODIFY BY HAND
+# ###################################
+
+che.openshift.api.endpoint=<%= scope.lookupvar('addon::che_openshift_api_endpoint') %>
+che.oauth.openshift.authuri=<%= scope.lookupvar('addon::che_oauth_openshift_authuri') %>
+che.oauth.openshift.tokenuri=<%= scope.lookupvar('addon::che_oauth_openshift_tokenuri') %>
+che.oauth.openshift.clientid=<%= scope.lookupvar('addon::che_oauth_openshift_clientid') %>
+che.oauth.openshift.clientsecret=<%= scope.lookupvar('addon::che_oauth_openshift_clientsecret') %>
+che.oauth.openshift.redirecturis=<%= scope.lookupvar('addon::che_oauth_openshift_redirecturis') %>
+
