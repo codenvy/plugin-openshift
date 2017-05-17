@@ -9,5 +9,6 @@
 #
 
 FROM eclipse/che-init:nightly
+COPY /addon/addon.env /etc/puppet/addon.env
 COPY /addon/addon.pp /etc/puppet/manifests/
 COPY /addon/modules/ /etc/puppet/addon/
