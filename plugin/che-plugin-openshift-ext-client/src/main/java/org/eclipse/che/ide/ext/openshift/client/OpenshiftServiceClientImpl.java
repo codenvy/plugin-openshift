@@ -70,6 +70,7 @@ public class OpenshiftServiceClientImpl implements OpenshiftServiceClient {
                                   .send(dtoUnmarshaller.newUnmarshaller(OpenshiftServerInfo.class));
     }
 
+    @Override
     public Promise<List<Template>> getTemplates(final String namespace) {
         return asyncRequestFactory.createGetRequest(openshiftPath() + "/namespace/" + namespace + "/template")
                                   .header(ACCEPT, MimeType.APPLICATION_JSON)
@@ -77,6 +78,7 @@ public class OpenshiftServiceClientImpl implements OpenshiftServiceClient {
 
     }
 
+    @Override
     public Promise<Template> processTemplate(final String namespace, final Template template) {
         return asyncRequestFactory.createPostRequest(openshiftPath() + "/namespace/" + namespace + "/template/process", template)
                                   .header(ACCEPT, MimeType.APPLICATION_JSON)

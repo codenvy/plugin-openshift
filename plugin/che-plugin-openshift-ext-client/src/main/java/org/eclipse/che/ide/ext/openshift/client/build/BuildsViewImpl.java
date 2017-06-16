@@ -25,7 +25,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.ide.Resources;
-import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Build;
@@ -120,16 +119,13 @@ public class BuildsViewImpl extends BaseView<BuildsView.ActionDelegate> implemen
     private BuildLogger selectedBuildLogger;
 
     @Inject
-    public BuildsViewImpl(PartStackUIResources partStackUIResources,
-                          BuildsViewImplUiBinder uiBinder,
+    public BuildsViewImpl(BuildsViewImplUiBinder uiBinder,
                           Resources ideResources,
                           OpenshiftLocalizationConstant locale) {
-        super(partStackUIResources);
         this.ideResources = ideResources;
         mainPanel = new SplitLayoutPanel(3);
         setContentWidget(uiBinder.createAndBindUi(this));
         setTitle(locale.buildsPartTooltip());
-        minimizeButton.ensureDebugId("openshift-builds-minimizePartButton");
     }
 
     @Override
