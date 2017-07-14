@@ -126,7 +126,7 @@ public class LinkProjectWithExistingApplicationPresenter extends ValidateAuthent
             return;
         }
 
-        gitService.remoteList(appContext.getDevMachine(), cdProject.getLocation(), null, true)
+        gitService.remoteList(cdProject.getLocation(), null, true)
                   .then(new Operation<List<Remote>>() {
                       @Override
                       public void apply(List<Remote> result) throws OperationException {
