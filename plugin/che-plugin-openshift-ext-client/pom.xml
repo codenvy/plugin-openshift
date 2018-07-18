@@ -19,7 +19,7 @@
         <version>0.1.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-openshift-ext-client</artifactId>
-    <packaging>jar</packaging>
+    <packaging>gwt-lib</packaging>
     <name>Che Plugin :: Openshift :: Client</name>
     <properties>
         <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>
@@ -60,6 +60,11 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-auth-shared</artifactId>
+            <classifier>sources</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-auth-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -68,6 +73,11 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-dto</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-git-shared</artifactId>
+            <classifier>sources</classifier>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -110,15 +120,17 @@
             <artifactId>che-plugin-openshift-ext-shared</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.plugin.openshift</groupId>
+            <artifactId>che-plugin-openshift-ext-shared</artifactId>
+            <classifier>sources</classifier>
+        </dependency>
+        <dependency>
             <groupId>org.vectomatic</groupId>
             <artifactId>lib-gwt-svg</artifactId>
         </dependency>
     </dependencies>
     <build>
         <resources>
-            <resource>
-                <directory>src/main/java</directory>
-            </resource>
             <resource>
                 <directory>src/main/resources</directory>
             </resource>
@@ -127,6 +139,14 @@
             </resource>
         </resources>
         <plugins>
+            <plugin>
+                <groupId>net.ltgt.gwt.maven</groupId>
+                <artifactId>gwt-maven-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <moduleName>org.eclipse.che.ide.ext.openshift.Openshift</moduleName>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-dto-maven-plugin</artifactId>

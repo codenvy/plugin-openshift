@@ -16,7 +16,7 @@
     <parent>
         <artifactId>maven-depmgt-pom</artifactId>
         <groupId>org.eclipse.che.depmgt</groupId>
-        <version>5.15.0-SNAPSHOT</version>
+        <version>6.8.0</version>
     </parent>
     <groupId>org.eclipse.che.plugin.openshift</groupId>
     <artifactId>openshift-plugin-parent</artifactId>
@@ -34,7 +34,7 @@
         <url>https://github.com/codenvy/plugin-openshift</url>
     </scm>
     <properties>
-        <che.version>5.15.0-SNAPSHOT</che.version>
+        <che.version>6.8.0</che.version>
         <com.openshift.restclient.version>4.0.5.Final</com.openshift.restclient.version>
         <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>
     </properties>
@@ -91,6 +91,12 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin.openshift</groupId>
+                <artifactId>che-plugin-openshift-ext-client</artifactId>
+                <version>${project.version}</version>
+                <type>gwt-lib</type>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin.openshift</groupId>
                 <artifactId>che-plugin-openshift-ext-server</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -101,8 +107,20 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin.openshift</groupId>
+                <artifactId>che-plugin-openshift-ext-shared</artifactId>
+                <version>${project.version}</version>
+                <classifier>sources</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin.openshift</groupId>
                 <artifactId>che-plugin-openshift-oauth2</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin.openshift</groupId>
+                <artifactId>openshift-ide-gwt-app</artifactId>
+                <version>${project.version}</version>
+                <type>war</type>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
