@@ -1,91 +1,88 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Codenvy, S.A. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Codenvy, S.A. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.ide.ext.openshift.shared.dto;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import java.util.Map;
+import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface ObjectMeta {
-    Integer getGeneration();
+  Integer getGeneration();
 
-    void setGeneration(Integer generation);
+  void setGeneration(Integer generation);
 
-    ObjectMeta withGeneration(Integer generation);
+  ObjectMeta withGeneration(Integer generation);
 
-    Integer getDeletionGracePeriodSeconds();
+  Integer getDeletionGracePeriodSeconds();
 
-    void setDeletionGracePeriodSeconds(Integer deletionGracePeriodSeconds);
+  void setDeletionGracePeriodSeconds(Integer deletionGracePeriodSeconds);
 
-    ObjectMeta withDeletionGracePeriodSeconds(Integer deletionGracePeriodSeconds);
+  ObjectMeta withDeletionGracePeriodSeconds(Integer deletionGracePeriodSeconds);
 
-    String getUid();
+  String getUid();
 
-    void setUid(String uid);
+  void setUid(String uid);
 
-    ObjectMeta withUid(String uid);
+  ObjectMeta withUid(String uid);
 
-    String getResourceVersion();
+  String getResourceVersion();
 
-    void setResourceVersion(String resourceVersion);
+  void setResourceVersion(String resourceVersion);
 
-    ObjectMeta withResourceVersion(String resourceVersion);
+  ObjectMeta withResourceVersion(String resourceVersion);
 
-    String getName();
+  String getName();
 
-    void setName(String name);
+  void setName(String name);
 
-    ObjectMeta withName(String name);
+  ObjectMeta withName(String name);
 
-    String getNamespace();
+  String getNamespace();
 
-    void setNamespace(String namespace);
+  void setNamespace(String namespace);
 
-    ObjectMeta withNamespace(String namespace);
+  ObjectMeta withNamespace(String namespace);
 
-    String getCreationTimestamp();
+  String getCreationTimestamp();
 
-    void setCreationTimestamp(String creationTimestamp);
+  void setCreationTimestamp(String creationTimestamp);
 
-    ObjectMeta withCreationTimestamp(String creationTimestamp);
+  ObjectMeta withCreationTimestamp(String creationTimestamp);
 
-    Map<String, String> getAnnotations();
+  Map<String, String> getAnnotations();
 
-    void setAnnotations(Map<String, String> annotations);
+  void setAnnotations(Map<String, String> annotations);
 
-    ObjectMeta withAnnotations(Map<String, String> annotations);
+  ObjectMeta withAnnotations(Map<String, String> annotations);
 
-    String getGenerateName();
+  String getGenerateName();
 
-    void setGenerateName(String generateName);
+  void setGenerateName(String generateName);
 
-    ObjectMeta withGenerateName(String generateName);
+  ObjectMeta withGenerateName(String generateName);
 
-    String getSelfLink();
+  String getSelfLink();
 
-    void setSelfLink(String selfLink);
+  void setSelfLink(String selfLink);
 
-    ObjectMeta withSelfLink(String selfLink);
+  ObjectMeta withSelfLink(String selfLink);
 
-    String getDeletionTimestamp();
+  String getDeletionTimestamp();
 
-    void setDeletionTimestamp(String deletionTimestamp);
+  void setDeletionTimestamp(String deletionTimestamp);
 
-    ObjectMeta withDeletionTimestamp(String deletionTimestamp);
+  ObjectMeta withDeletionTimestamp(String deletionTimestamp);
 
-    Map<String, String> getLabels();
+  Map<String, String> getLabels();
 
-    void setLabels(Map<String, String> labels);
+  void setLabels(Map<String, String> labels);
 
-    ObjectMeta withLabels(Map<String, String> labels);
-
+  ObjectMeta withLabels(Map<String, String> labels);
 }

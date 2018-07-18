@@ -1,27 +1,24 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Codenvy, S.A. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Codenvy, S.A. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.ide.ext.openshift.server.rest;
 
+import static org.eclipse.che.ide.ext.openshift.server.DtoConverter.toDto;
+import static org.eclipse.che.ide.ext.openshift.server.DtoConverter.toOpenshiftResource;
 
 import com.openshift.restclient.IClient;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IDeploymentConfig;
-
-import org.eclipse.che.api.core.BadRequestException;
-import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.UnauthorizedException;
-import org.eclipse.che.ide.ext.openshift.server.ClientFactory;
-import org.eclipse.che.ide.ext.openshift.shared.dto.DeploymentConfig;
-
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -32,80 +29,89 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import org.eclipse.che.api.core.BadRequestException;
+import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.UnauthorizedException;
+import org.eclipse.che.ide.ext.openshift.server.ClientFactory;
+import org.eclipse.che.ide.ext.openshift.shared.dto.DeploymentConfig;
 
-import static org.eclipse.che.ide.ext.openshift.server.DtoConverter.toDto;
-import static org.eclipse.che.ide.ext.openshift.server.DtoConverter.toOpenshiftResource;
-
-/**
- * @author Sergii Leschenko
- */
+/** @author Sergii Leschenko */
 @Path("/openshift/namespace/{namespace}/deploymentconfig")
 public class DeploymentConfigService {
-    private final ClientFactory clientFactory;
+  private final ClientFactory clientFactory;
 
-    @Inject
-    public DeploymentConfigService(ClientFactory clientFactory) {
-        this.clientFactory = clientFactory;
+  @Inject
+  public DeploymentConfigService(ClientFactory clientFactory) {
+    this.clientFactory = clientFactory;
+  }
+
+  @POST
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  public DeploymentConfig createDeploymentConfig(
+      @PathParam("namespace") String namespace, DeploymentConfig deploymentConfig)
+      throws BadRequestException, UnauthorizedException, ServerException {
+    if (deploymentConfig.getKind() == null) {
+      deploymentConfig.setKind(ResourceKind.DEPLOYMENT_CONFIG);
+    }
+    if (!ResourceKind.DEPLOYMENT_CONFIG.equals(deploymentConfig.getKind())) {
+      throw new BadRequestException(
+          deploymentConfig.getKind() + " cannot be handled as a " + ResourceKind.DEPLOYMENT_CONFIG);
     }
 
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public DeploymentConfig createDeploymentConfig(@PathParam("namespace") String namespace,
-                                                   DeploymentConfig deploymentConfig)
-            throws BadRequestException, UnauthorizedException, ServerException {
-        if (deploymentConfig.getKind() == null) {
-            deploymentConfig.setKind(ResourceKind.DEPLOYMENT_CONFIG);
-        }
-        if (!ResourceKind.DEPLOYMENT_CONFIG.equals(deploymentConfig.getKind())) {
-            throw new BadRequestException(deploymentConfig.getKind() + " cannot be handled as a " + ResourceKind.DEPLOYMENT_CONFIG);
-        }
+    final IClient client = clientFactory.getOpenshiftClient();
+    final IDeploymentConfig openshiftDeploymentConfig =
+        toOpenshiftResource(client, deploymentConfig);
+    return toDto(DeploymentConfig.class, client.create(openshiftDeploymentConfig, namespace));
+  }
 
-        final IClient client = clientFactory.getOpenshiftClient();
-        final IDeploymentConfig openshiftDeploymentConfig = toOpenshiftResource(client, deploymentConfig);
-        return toDto(DeploymentConfig.class, client.create(openshiftDeploymentConfig, namespace));
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  public List<DeploymentConfig> getDeploymentConfigs(
+      @PathParam("namespace") String namespace, @QueryParam("application") String application)
+      throws UnauthorizedException, ServerException {
+    Map<String, String> labels = new HashMap<>();
+    if (application != null) {
+      labels.put("application", application);
     }
+    List<IDeploymentConfig> deploymentConfigs =
+        clientFactory.getOpenshiftClient().list(ResourceKind.DEPLOYMENT_CONFIG, namespace, labels);
+    return deploymentConfigs
+        .stream()
+        .map(imageStream -> toDto(DeploymentConfig.class, imageStream))
+        .collect(Collectors.toList());
+  }
 
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<DeploymentConfig> getDeploymentConfigs(@PathParam("namespace") String namespace,
-                                                       @QueryParam("application") String application) throws UnauthorizedException, ServerException {
-        Map<String, String> labels = new HashMap<>();
-        if (application != null) {
-            labels.put("application", application);
-        }
-        List<IDeploymentConfig> deploymentConfigs = clientFactory.getOpenshiftClient().list(ResourceKind.DEPLOYMENT_CONFIG, namespace, labels);
-        return deploymentConfigs.stream()
-                                .map(imageStream -> toDto(DeploymentConfig.class, imageStream))
-                                .collect(Collectors.toList());
+  @GET
+  @Path("/{deploymentConfig}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public DeploymentConfig getDeploymentConfig(
+      @PathParam("namespace") String namespace,
+      @PathParam("deploymentConfig") String deploymentConfig)
+      throws UnauthorizedException, ServerException {
+
+    return toDto(
+        DeploymentConfig.class,
+        clientFactory
+            .getOpenshiftClient()
+            .get(ResourceKind.DEPLOYMENT_CONFIG, deploymentConfig, namespace));
+  }
+
+  @PUT
+  @Path("/{deploymentConfig}")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  public DeploymentConfig updateDeploymentConfig(
+      @PathParam("namespace") String namespace,
+      @PathParam("deploymentConfig") String deploymentConfigName,
+      DeploymentConfig deploymentConfig)
+      throws ForbiddenException, UnauthorizedException, ServerException {
+    if (!deploymentConfigName.equals(deploymentConfig.getMetadata().getName())) {
+      throw new ForbiddenException("Name of resources can read only access mode");
     }
-
-    @GET
-    @Path("/{deploymentConfig}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public DeploymentConfig getDeploymentConfig(@PathParam("namespace") String namespace,
-                                                @PathParam("deploymentConfig") String deploymentConfig)
-            throws UnauthorizedException, ServerException {
-
-        return toDto(DeploymentConfig.class, clientFactory.getOpenshiftClient().get(ResourceKind.DEPLOYMENT_CONFIG, deploymentConfig, namespace));
-    }
-
-    @PUT
-    @Path("/{deploymentConfig}")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public DeploymentConfig updateDeploymentConfig(@PathParam("namespace") String namespace,
-                                                   @PathParam("deploymentConfig") String deploymentConfigName,
-                                                   DeploymentConfig deploymentConfig)
-            throws ForbiddenException, UnauthorizedException, ServerException {
-        if (!deploymentConfigName.equals(deploymentConfig.getMetadata().getName())) {
-            throw new ForbiddenException("Name of resources can read only access mode");
-        }
-        final IClient client = clientFactory.getOpenshiftClient();
-        return toDto(DeploymentConfig.class, client.update(toOpenshiftResource(client, deploymentConfig)));
-    }
+    final IClient client = clientFactory.getOpenshiftClient();
+    return toDto(
+        DeploymentConfig.class, client.update(toOpenshiftResource(client, deploymentConfig)));
+  }
 }

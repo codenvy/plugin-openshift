@@ -1,55 +1,52 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Codenvy, S.A. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Codenvy, S.A. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.ide.ext.openshift.shared.dto;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import java.util.List;
+import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface CustomBuildStrategy {
-    boolean getForcePull();
+  boolean getForcePull();
 
-    void setForcePull(boolean forcePull);
+  void setForcePull(boolean forcePull);
 
-    CustomBuildStrategy withForcePull(boolean forcePull);
+  CustomBuildStrategy withForcePull(boolean forcePull);
 
-    ObjectReference getFrom();
+  ObjectReference getFrom();
 
-    void setFrom(ObjectReference from);
+  void setFrom(ObjectReference from);
 
-    CustomBuildStrategy withFrom(ObjectReference from);
+  CustomBuildStrategy withFrom(ObjectReference from);
 
-    List<EnvVar> getEnv();
+  List<EnvVar> getEnv();
 
-    void setEnv(List<EnvVar> env);
+  void setEnv(List<EnvVar> env);
 
-    CustomBuildStrategy withEnv(List<EnvVar> env);
+  CustomBuildStrategy withEnv(List<EnvVar> env);
 
-    LocalObjectReference getPullSecret();
+  LocalObjectReference getPullSecret();
 
-    void setPullSecret(LocalObjectReference pullSecret);
+  void setPullSecret(LocalObjectReference pullSecret);
 
-    CustomBuildStrategy withPullSecret(LocalObjectReference pullSecret);
+  CustomBuildStrategy withPullSecret(LocalObjectReference pullSecret);
 
-    boolean getExposeDockerSocket();
+  boolean getExposeDockerSocket();
 
-    void setExposeDockerSocket(boolean exposeDockerSocket);
+  void setExposeDockerSocket(boolean exposeDockerSocket);
 
-    CustomBuildStrategy withExposeDockerSocket(boolean exposeDockerSocket);
+  CustomBuildStrategy withExposeDockerSocket(boolean exposeDockerSocket);
 
-    List<SecretSpec> getSecrets();
+  List<SecretSpec> getSecrets();
 
-    void setSecrets(List<SecretSpec> secrets);
+  void setSecrets(List<SecretSpec> secrets);
 
-    CustomBuildStrategy withSecrets(List<SecretSpec> secrets);
-
+  CustomBuildStrategy withSecrets(List<SecretSpec> secrets);
 }

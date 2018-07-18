@@ -1,47 +1,45 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Codenvy, S.A. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Codenvy, S.A. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.ide.ext.openshift.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface ContainerPort {
-    String getProtocol();
+  String getProtocol();
 
-    void setProtocol(String protocol);
+  void setProtocol(String protocol);
 
-    ContainerPort withProtocol(String protocol);
+  ContainerPort withProtocol(String protocol);
 
-    String getHostIP();
+  String getHostIP();
 
-    void setHostIP(String hostIP);
+  void setHostIP(String hostIP);
 
-    ContainerPort withHostIP(String hostIP);
+  ContainerPort withHostIP(String hostIP);
 
-    String getName();
+  String getName();
 
-    void setName(String name);
+  void setName(String name);
 
-    ContainerPort withName(String name);
+  ContainerPort withName(String name);
 
-    Integer getContainerPort();
+  Integer getContainerPort();
 
-    void setContainerPort(Integer containerPort);
+  void setContainerPort(Integer containerPort);
 
-    ContainerPort withContainerPort(Integer containerPort);
+  ContainerPort withContainerPort(Integer containerPort);
 
-    Integer getHostPort();
+  Integer getHostPort();
 
-    void setHostPort(Integer hostPort);
+  void setHostPort(Integer hostPort);
 
-    ContainerPort withHostPort(Integer hostPort);
-
+  ContainerPort withHostPort(Integer hostPort);
 }

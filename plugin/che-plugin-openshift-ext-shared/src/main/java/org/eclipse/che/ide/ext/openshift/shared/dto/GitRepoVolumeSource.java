@@ -1,29 +1,27 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Codenvy, S.A. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Codenvy, S.A. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.ide.ext.openshift.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface GitRepoVolumeSource {
-    String getRepository();
+  String getRepository();
 
-    void setRepository(String repository);
+  void setRepository(String repository);
 
-    GitRepoVolumeSource withRepository(String repository);
+  GitRepoVolumeSource withRepository(String repository);
 
-    String getRevision();
+  String getRevision();
 
-    void setRevision(String revision);
+  void setRevision(String revision);
 
-    GitRepoVolumeSource withRevision(String revision);
-
+  GitRepoVolumeSource withRevision(String revision);
 }

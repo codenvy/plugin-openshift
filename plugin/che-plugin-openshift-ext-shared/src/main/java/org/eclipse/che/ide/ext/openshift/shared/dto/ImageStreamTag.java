@@ -1,41 +1,39 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Codenvy, S.A. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Codenvy, S.A. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.ide.ext.openshift.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface ImageStreamTag {
-    Image getImage();
+  Image getImage();
 
-    void setImage(Image image);
+  void setImage(Image image);
 
-    ImageStreamTag withImage(Image image);
+  ImageStreamTag withImage(Image image);
 
-    ObjectMeta getMetadata();
+  ObjectMeta getMetadata();
 
-    void setMetadata(ObjectMeta metadata);
+  void setMetadata(ObjectMeta metadata);
 
-    ImageStreamTag withMetadata(ObjectMeta metadata);
+  ImageStreamTag withMetadata(ObjectMeta metadata);
 
-    String getApiVersion();
+  String getApiVersion();
 
-    void setApiVersion(String apiVersion);
+  void setApiVersion(String apiVersion);
 
-    ImageStreamTag withApiVersion(String apiVersion);
+  ImageStreamTag withApiVersion(String apiVersion);
 
-    String getKind();
+  String getKind();
 
-    void setKind(String kind);
+  void setKind(String kind);
 
-    ImageStreamTag withKind(String kind);
-
+  ImageStreamTag withKind(String kind);
 }

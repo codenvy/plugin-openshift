@@ -1,13 +1,12 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Codenvy, S.A. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Codenvy, S.A. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.ide.ext.openshift.client.importapp;
 
 import com.google.common.base.Strings;
@@ -30,7 +29,10 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.inject.Inject;
-
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftResources;
@@ -42,11 +44,6 @@ import org.eclipse.che.ide.ui.list.CategoryRenderer;
 import org.eclipse.che.ide.ui.menu.PositionController;
 import org.eclipse.che.ide.ui.window.Window;
 
-import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 /**
  * View implementation for {@ImportApplicationView}.
  *
@@ -55,293 +52,301 @@ import java.util.Map;
  */
 public class ImportApplicationViewImpl extends Window implements ImportApplicationView {
 
-    interface ImportApplicationViewUiBinder extends UiBinder<DockLayoutPanel, ImportApplicationViewImpl> {
-    }
+  interface ImportApplicationViewUiBinder
+      extends UiBinder<DockLayoutPanel, ImportApplicationViewImpl> {}
 
-    private static ImportApplicationViewUiBinder uiBinder = GWT.create(ImportApplicationViewUiBinder.class);
+  private static ImportApplicationViewUiBinder uiBinder =
+      GWT.create(ImportApplicationViewUiBinder.class);
 
-    private ActionDelegate delegate;
+  private ActionDelegate delegate;
 
-    private final OpenshiftResources openshiftResources;
+  private final OpenshiftResources openshiftResources;
 
-    @UiField(provided = true)
-    OpenshiftLocalizationConstant locale;
+  @UiField(provided = true)
+  OpenshiftLocalizationConstant locale;
 
-    @UiField
-    TextBox projectName;
+  @UiField TextBox projectName;
 
-    @UiField
-    Label projectNameErrorLabel;
+  @UiField Label projectNameErrorLabel;
 
-    @UiField
-    TextArea projectDescription;
+  @UiField TextArea projectDescription;
 
-    @UiField
-    Label branchName;
+  @UiField Label branchName;
 
-    @UiField
-    Label contextDir;
+  @UiField Label contextDir;
 
-    @UiField
-    Label sourceUrl;
+  @UiField Label sourceUrl;
 
-    @UiField
-    AbsolutePanel categoriesPanel;
+  @UiField AbsolutePanel categoriesPanel;
 
-    @UiField
-    Label loadingCategoriesLabel;
+  @UiField Label loadingCategoriesLabel;
 
-    @UiField
-    Label nothingToShowLabel;
+  @UiField Label nothingToShowLabel;
 
-    @UiField
-    FlowPanel branchPanel;
+  @UiField FlowPanel branchPanel;
 
-    @UiField
-    FlowPanel contextDirPanel;
+  @UiField FlowPanel contextDirPanel;
 
-    private Button importButton;
+  private Button importButton;
 
-    private Button cancelButton;
+  private Button cancelButton;
 
-    private CategoriesList buildConfigList;
+  private CategoriesList buildConfigList;
 
-    private Tooltip projectNameErrorTooltip;
+  private Tooltip projectNameErrorTooltip;
 
-    private final Category.CategoryEventDelegate<BuildConfig> buildConfigDelegate =
-            new Category.CategoryEventDelegate<BuildConfig>() {
-                @Override
-                public void onListItemClicked(Element listItemBase, BuildConfig itemData) {
-                    delegate.onBuildConfigSelected(itemData);
-                }
-            };
+  private final Category.CategoryEventDelegate<BuildConfig> buildConfigDelegate =
+      new Category.CategoryEventDelegate<BuildConfig>() {
+        @Override
+        public void onListItemClicked(Element listItemBase, BuildConfig itemData) {
+          delegate.onBuildConfigSelected(itemData);
+        }
+      };
 
-    private final CategoryRenderer<BuildConfig> buildConfigCategoryRenderer = new CategoryRenderer<BuildConfig>() {
+  private final CategoryRenderer<BuildConfig> buildConfigCategoryRenderer =
+      new CategoryRenderer<BuildConfig>() {
         @Override
         public void renderElement(Element element, BuildConfig data) {
-            element.setInnerText(data.getMetadata().getName());
+          element.setInnerText(data.getMetadata().getName());
         }
 
         @Override
         public SpanElement renderCategory(Category<BuildConfig> category) {
-            SpanElement element = Document.get().createSpanElement();
-            element.setInnerText(category.getTitle().toUpperCase());
-            return element;
+          SpanElement element = Document.get().createSpanElement();
+          element.setInnerText(category.getTitle().toUpperCase());
+          return element;
         }
-    };
+      };
 
-    @Inject
-    public ImportApplicationViewImpl(OpenshiftLocalizationConstant locale,
-                                     CoreLocalizationConstant constants,
-                                     org.eclipse.che.ide.Resources ideResources,
-                                     OpenshiftResources openshiftResources) {
-        this.locale = locale;
-        this.openshiftResources = openshiftResources;
+  @Inject
+  public ImportApplicationViewImpl(
+      OpenshiftLocalizationConstant locale,
+      CoreLocalizationConstant constants,
+      org.eclipse.che.ide.Resources ideResources,
+      OpenshiftResources openshiftResources) {
+    this.locale = locale;
+    this.openshiftResources = openshiftResources;
 
-        ensureDebugId("importApplication");
-        setTitle(locale.importApplicationViewTitle());
+    ensureDebugId("importApplication");
+    setTitle(locale.importApplicationViewTitle());
 
-        setWidget(uiBinder.createAndBindUi(this));
-        getWidget().getElement().getStyle().setPadding(0, Style.Unit.PX);
+    setWidget(uiBinder.createAndBindUi(this));
+    getWidget().getElement().getStyle().setPadding(0, Style.Unit.PX);
 
-        importButton = createPrimaryButton(locale.importApplicationImportButton(),
-                                           "importApplication-import-button", new ClickHandler() {
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        delegate.onImportApplicationClicked();
-                    }
-                });
-        addButtonToFooter(importButton);
-        importButton.addStyleName(ideResources.Css().buttonLoader());
+    importButton =
+        createPrimaryButton(
+            locale.importApplicationImportButton(),
+            "importApplication-import-button",
+            new ClickHandler() {
+              @Override
+              public void onClick(ClickEvent event) {
+                delegate.onImportApplicationClicked();
+              }
+            });
+    addButtonToFooter(importButton);
+    importButton.addStyleName(ideResources.Css().buttonLoader());
 
-        cancelButton = createButton(constants.cancel(), "importApplication-cancel-button", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
+    cancelButton =
+        createButton(
+            constants.cancel(),
+            "importApplication-cancel-button",
+            new ClickHandler() {
+              @Override
+              public void onClick(ClickEvent event) {
                 delegate.onCancelClicked();
-            }
-        });
-        addButtonToFooter(cancelButton);
+              }
+            });
+    addButtonToFooter(cancelButton);
 
-        buildConfigList = new CategoriesList(ideResources);
-        buildConfigList.setVisible(false);
-        categoriesPanel.add(buildConfigList);
+    buildConfigList = new CategoriesList(ideResources);
+    buildConfigList.setVisible(false);
+    categoriesPanel.add(buildConfigList);
+  }
+
+  @Override
+  public void showView() {
+    show();
+  }
+
+  @Override
+  public void closeView() {
+    hide();
+  }
+
+  @Override
+  public void setBlocked(boolean blocked) {
+    super.setBlocked(blocked);
+  }
+
+  @Override
+  public void showLoadingBuildConfigs(String message) {
+    nothingToShowLabel.setVisible(false);
+
+    if (message == null || message.isEmpty()) {
+      loadingCategoriesLabel.setVisible(false);
+      buildConfigList.setVisible(true);
+      return;
     }
 
-    @Override
-    public void showView() {
-        show();
+    buildConfigList.setVisible(false);
+    loadingCategoriesLabel.setText(message);
+    loadingCategoriesLabel.setVisible(true);
+  }
+
+  @Override
+  public void setBuildConfigs(Map<String, List<BuildConfig>> buildConfigs) {
+    loadingCategoriesLabel.setVisible(false);
+
+    buildConfigList.clear();
+    List<Category<?>> categoriesList = new ArrayList<>();
+    for (String categoryTitle : buildConfigs.keySet()) {
+      Category<BuildConfig> category =
+          new Category<BuildConfig>(
+              categoryTitle,
+              buildConfigCategoryRenderer,
+              buildConfigs.get(categoryTitle),
+              buildConfigDelegate);
+      categoriesList.add(category);
+    }
+    buildConfigList.render(categoriesList, true);
+
+    buildConfigList.setVisible(!buildConfigs.isEmpty());
+    nothingToShowLabel.setVisible(buildConfigs.isEmpty());
+  }
+
+  @Override
+  public void enableBuildConfigs(boolean enable) {
+    buildConfigList.setEnabled(enable);
+  }
+
+  @Override
+  public void enableImportButton(boolean enable) {
+    importButton.setEnabled(enable);
+  }
+
+  @Override
+  public void animateImportButton(boolean animate) {
+    if (animate && !importButton.getElement().hasAttribute("animated")) {
+      // save state and start animation
+      importButton.getElement().setAttribute("originText", importButton.getText());
+      importButton
+          .getElement()
+          .getStyle()
+          .setProperty("minWidth", importButton.getOffsetWidth() + "px");
+      importButton.setHTML("<i></i>");
+      importButton.getElement().setAttribute("animated", "true");
+    } else if (!animate && importButton.getElement().hasAttribute("animated")) {
+      // stop animation and restore state
+      importButton.setText(importButton.getElement().getAttribute("originText"));
+      importButton.getElement().removeAttribute("originText");
+      importButton.getElement().getStyle().clearProperty("minWidth");
+      importButton.getElement().removeAttribute("animated");
+    }
+  }
+
+  @Override
+  public void enableCancelButton(boolean enable) {
+    cancelButton.setEnabled(enable);
+  }
+
+  @Override
+  public void setProjectName(String name, boolean fireValueChanged) {
+    projectName.setValue(name);
+    if (fireValueChanged) {
+      delegate.onProjectNameChanged(name);
+    }
+  }
+
+  @Override
+  public void setProjectDescription(String description) {
+    projectDescription.setValue(description);
+  }
+
+  @Override
+  public void setApplicationInfo(BuildConfig buildConfig) {
+    if (buildConfig == null) {
+      sourceUrl.setText("");
+      contextDir.setText("");
+      branchName.setText("");
+      contextDirPanel.setVisible(false);
+      branchPanel.setVisible(false);
+      return;
     }
 
-    @Override
-    public void closeView() {
-        hide();
+    sourceUrl.setText(buildConfig.getSpec().getSource().getGit().getUri());
+    contextDir.setText(buildConfig.getSpec().getSource().getContextDir());
+    branchName.setText(buildConfig.getSpec().getSource().getGit().getRef());
+
+    contextDirPanel.setVisible(
+        buildConfig.getSpec().getSource().getContextDir() != null
+            && !buildConfig.getSpec().getSource().getContextDir().isEmpty());
+    branchPanel.setVisible(
+        buildConfig.getSpec().getSource().getGit().getRef() != null
+            && !buildConfig.getSpec().getSource().getGit().getRef().isEmpty());
+  }
+
+  @Override
+  public String getProjectName() {
+    return projectName.getValue();
+  }
+
+  @Override
+  public String getProjectDescription() {
+    return projectDescription.getValue();
+  }
+
+  @Override
+  public void setErrorMessage(String message) {
+    // TODO
+  }
+
+  @Override
+  public void showCheProjectNameError(@NotNull String labelMessage, String tooltipMessage) {
+    projectName.addStyleName(openshiftResources.css().inputError());
+    projectNameErrorLabel.setText(labelMessage);
+
+    if (projectNameErrorTooltip != null) {
+      projectNameErrorTooltip.destroy();
     }
 
-    @Override
-    public void setBlocked(boolean blocked) {
-        super.setBlocked(blocked);
+    if (!Strings.isNullOrEmpty(tooltipMessage)) {
+      projectNameErrorTooltip =
+          Tooltip.create(
+              (elemental.dom.Element) projectNameErrorLabel.getElement(),
+              PositionController.VerticalAlign.MIDDLE,
+              PositionController.HorizontalAlign.LEFT,
+              tooltipMessage);
+      projectNameErrorTooltip.setShowDelayDisabled(false);
     }
+  }
 
-    @Override
-    public void showLoadingBuildConfigs(String message) {
-        nothingToShowLabel.setVisible(false);
+  @Override
+  public void hideCheProjectNameError() {
+    projectName.removeStyleName(openshiftResources.css().inputError());
+    projectNameErrorLabel.setText("");
 
-        if (message == null || message.isEmpty()) {
-            loadingCategoriesLabel.setVisible(false);
-            buildConfigList.setVisible(true);
-            return;
-        }
-
-        buildConfigList.setVisible(false);
-        loadingCategoriesLabel.setText(message);
-        loadingCategoriesLabel.setVisible(true);
+    if (projectNameErrorTooltip != null) {
+      projectNameErrorTooltip.destroy();
     }
+  }
 
-    @Override
-    public void setBuildConfigs(Map<String, List<BuildConfig>> buildConfigs) {
-        loadingCategoriesLabel.setVisible(false);
+  @Override
+  public void enableNameField(boolean enable) {
+    projectName.setEnabled(enable);
+  }
 
-        buildConfigList.clear();
-        List<Category<?>> categoriesList = new ArrayList<>();
-        for (String categoryTitle : buildConfigs.keySet()) {
-            Category<BuildConfig> category = new Category<BuildConfig>(categoryTitle,
-                                                                       buildConfigCategoryRenderer,
-                                                                       buildConfigs.get(categoryTitle),
-                                                                       buildConfigDelegate);
-            categoriesList.add(category);
-        }
-        buildConfigList.render(categoriesList, true);
+  @Override
+  public void enableDescriptionField(boolean enable) {
+    projectDescription.setEnabled(enable);
+  }
 
-        buildConfigList.setVisible(!buildConfigs.isEmpty());
-        nothingToShowLabel.setVisible(buildConfigs.isEmpty());
-    }
+  @UiHandler({"projectName"})
+  public void onProjectNameChanged(KeyUpEvent event) {
+    delegate.onProjectNameChanged(projectName.getValue());
+  }
 
-    @Override
-    public void enableBuildConfigs(boolean enable) {
-        buildConfigList.setEnabled(enable);
-    }
-
-    @Override
-    public void enableImportButton(boolean enable) {
-        importButton.setEnabled(enable);
-    }
-
-    @Override
-    public void animateImportButton(boolean animate) {
-        if (animate && !importButton.getElement().hasAttribute("animated")) {
-            // save state and start animation
-            importButton.getElement().setAttribute("originText", importButton.getText());
-            importButton.getElement().getStyle().setProperty("minWidth", importButton.getOffsetWidth() + "px");
-            importButton.setHTML("<i></i>");
-            importButton.getElement().setAttribute("animated", "true");
-        } else if (!animate && importButton.getElement().hasAttribute("animated")) {
-            // stop animation and restore state
-            importButton.setText(importButton.getElement().getAttribute("originText"));
-            importButton.getElement().removeAttribute("originText");
-            importButton.getElement().getStyle().clearProperty("minWidth");
-            importButton.getElement().removeAttribute("animated");
-        }
-    }
-
-    @Override
-    public void enableCancelButton(boolean enable) {
-        cancelButton.setEnabled(enable);
-    }
-
-    @Override
-    public void setProjectName(String name, boolean fireValueChanged) {
-        projectName.setValue(name);
-        if (fireValueChanged) {
-            delegate.onProjectNameChanged(name);
-        }
-    }
-
-    @Override
-    public void setProjectDescription(String description) {
-        projectDescription.setValue(description);
-    }
-
-    @Override
-    public void setApplicationInfo(BuildConfig buildConfig) {
-        if (buildConfig == null) {
-            sourceUrl.setText("");
-            contextDir.setText("");
-            branchName.setText("");
-            contextDirPanel.setVisible(false);
-            branchPanel.setVisible(false);
-            return;
-        }
-
-        sourceUrl.setText(buildConfig.getSpec().getSource().getGit().getUri());
-        contextDir.setText(buildConfig.getSpec().getSource().getContextDir());
-        branchName.setText(buildConfig.getSpec().getSource().getGit().getRef());
-
-        contextDirPanel.setVisible(
-                buildConfig.getSpec().getSource().getContextDir() != null && !buildConfig.getSpec().getSource().getContextDir().isEmpty());
-        branchPanel.setVisible(buildConfig.getSpec().getSource().getGit().getRef() != null &&
-                               !buildConfig.getSpec().getSource().getGit().getRef().isEmpty());
-    }
-
-    @Override
-    public String getProjectName() {
-        return projectName.getValue();
-    }
-
-    @Override
-    public String getProjectDescription() {
-        return projectDescription.getValue();
-    }
-
-    @Override
-    public void setErrorMessage(String message) {
-        //TODO
-    }
-
-    @Override
-    public void showCheProjectNameError(@NotNull String labelMessage, String tooltipMessage) {
-        projectName.addStyleName(openshiftResources.css().inputError());
-        projectNameErrorLabel.setText(labelMessage);
-
-        if (projectNameErrorTooltip != null) {
-            projectNameErrorTooltip.destroy();
-        }
-
-        if (!Strings.isNullOrEmpty(tooltipMessage)) {
-            projectNameErrorTooltip = Tooltip.create((elemental.dom.Element)projectNameErrorLabel.getElement(),
-                                                     PositionController.VerticalAlign.MIDDLE,
-                                                     PositionController.HorizontalAlign.LEFT,
-                                                     tooltipMessage);
-            projectNameErrorTooltip.setShowDelayDisabled(false);
-        }
-    }
-
-    @Override
-    public void hideCheProjectNameError() {
-        projectName.removeStyleName(openshiftResources.css().inputError());
-        projectNameErrorLabel.setText("");
-
-        if (projectNameErrorTooltip != null) {
-            projectNameErrorTooltip.destroy();
-        }
-    }
-
-    @Override
-    public void enableNameField(boolean enable) {
-        projectName.setEnabled(enable);
-    }
-
-    @Override
-    public void enableDescriptionField(boolean enable) {
-        projectDescription.setEnabled(enable);
-    }
-
-    @UiHandler({"projectName"})
-    public void onProjectNameChanged(KeyUpEvent event) {
-        delegate.onProjectNameChanged(projectName.getValue());
-    }
-
-    @Override
-    public void setDelegate(ActionDelegate delegate) {
-        this.delegate = delegate;
-    }
+  @Override
+  public void setDelegate(ActionDelegate delegate) {
+    this.delegate = delegate;
+  }
 }

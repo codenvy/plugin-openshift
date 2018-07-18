@@ -1,18 +1,16 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Codenvy, S.A. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Codenvy, S.A. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.ide.ext.openshift.client;
 
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
-
 import org.eclipse.che.ide.ui.Styles;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -23,94 +21,98 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  */
 public interface OpenshiftResources extends ClientBundle {
 
-    @Source("actions/connect.svg")
-    SVGResource connect();
-    
-    @Source("actions/create-from-template.svg")
-    SVGResource createFromTemplate();
-    
-    @Source("actions/deploy-group.svg")
-    SVGResource deployGroup();
-    
-    @Source("actions/deploy-new-app.svg")
-    SVGResource deployNewApplication();
+  @Source("actions/connect.svg")
+  SVGResource connect();
 
-    @Source("actions/disconnect.svg")
-    SVGResource disconnect();
-    
-    @Source("actions/import-app.svg")
-    SVGResource importApplication();
-    
-    @Source("actions/link-to-app.svg")
-    SVGResource linkToExistingApplication();
-    
-    @Source("actions/show-app-url.svg")
-    SVGResource showApplicationUrl();
-    
-    @Source("actions/show-app-webhook.svg")
-    SVGResource showApplicationWebhooks();
-    
-    /** Returns the CSS resource for the Openshift extension. */
-    @Source({"openshift.css", "org/eclipse/che/ide/api/ui/style.css", "org/eclipse/che/ide/ui/Styles.css"})
-    Css css();
+  @Source("actions/create-from-template.svg")
+  SVGResource createFromTemplate();
 
-    /** The CssResource interface for the Machine extension. */
-    interface Css extends CssResource, Styles {
+  @Source("actions/deploy-group.svg")
+  SVGResource deployGroup();
 
-        String floatRight();
+  @Source("actions/deploy-new-app.svg")
+  SVGResource deployNewApplication();
 
-        String floatLeft();
+  @Source("actions/disconnect.svg")
+  SVGResource disconnect();
 
-        String marginV();
+  @Source("actions/import-app.svg")
+  SVGResource importApplication();
 
-        String marginH();
+  @Source("actions/link-to-app.svg")
+  SVGResource linkToExistingApplication();
 
-        String sectionTitle();
+  @Source("actions/show-app-url.svg")
+  SVGResource showApplicationUrl();
 
-        String sectionSeparator();
+  @Source("actions/show-app-webhook.svg")
+  SVGResource showApplicationWebhooks();
 
-        String configList();
+  /** Returns the CSS resource for the Openshift extension. */
+  @Source({
+    "openshift.css",
+    "org/eclipse/che/ide/api/ui/style.css",
+    "org/eclipse/che/ide/ui/Styles.css"
+  })
+  Css css();
 
-        String configDescription();
+  /** The CssResource interface for the Machine extension. */
+  interface Css extends CssResource, Styles {
 
-        String choiceTitle();
+    String floatRight();
 
-        String textInput();
+    String floatLeft();
 
-        String textInputTitle();
+    String marginV();
 
-        String projectApplicationBox();
+    String marginH();
 
-        String warningLabel();
+    String sectionTitle();
 
-        String goButton();
+    String sectionSeparator();
 
-        String smallButton();
+    String configList();
 
-        String applicationTable();
-        
-        String tableWithEmptyBorder();
+    String configDescription();
 
-        String deployApplicationTableError();
+    String choiceTitle();
 
-        String templateSection();
+    String textInput();
 
-        String templateSectionTitle();
+    String textInputTitle();
 
-        String templateSectionDescription();
+    String projectApplicationBox();
 
-        String templateSectionSecondary();
+    String warningLabel();
 
-        String templateSectionTags();
+    String goButton();
 
-        String labelErrorPosition();
+    String smallButton();
 
-        String labelErrorPositionTable();
+    String applicationTable();
 
-        String loadingCategoriesLabel();
+    String tableWithEmptyBorder();
 
-        String flashingLabel();
+    String deployApplicationTableError();
 
-        String applicationTableError();
-    }
+    String templateSection();
+
+    String templateSectionTitle();
+
+    String templateSectionDescription();
+
+    String templateSectionSecondary();
+
+    String templateSectionTags();
+
+    String labelErrorPosition();
+
+    String labelErrorPositionTable();
+
+    String loadingCategoriesLabel();
+
+    String flashingLabel();
+
+    String applicationTableError();
+  }
 }

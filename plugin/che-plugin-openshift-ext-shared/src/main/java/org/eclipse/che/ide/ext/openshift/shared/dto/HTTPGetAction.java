@@ -1,41 +1,39 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Codenvy, S.A. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Codenvy, S.A. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.ide.ext.openshift.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface HTTPGetAction {
-    String getPath();
+  String getPath();
 
-    void setPath(String path);
+  void setPath(String path);
 
-    HTTPGetAction withPath(String path);
+  HTTPGetAction withPath(String path);
 
-    String getScheme();
+  String getScheme();
 
-    void setScheme(String scheme);
+  void setScheme(String scheme);
 
-    HTTPGetAction withScheme(String scheme);
+  HTTPGetAction withScheme(String scheme);
 
-    Integer getPort();
+  Integer getPort();
 
-    void setPort(Integer port);
+  void setPort(Integer port);
 
-    HTTPGetAction withPort(Integer port);
+  HTTPGetAction withPort(Integer port);
 
-    String getHost();
+  String getHost();
 
-    void setHost(String host);
+  void setHost(String host);
 
-    HTTPGetAction withHost(String host);
-
+  HTTPGetAction withHost(String host);
 }

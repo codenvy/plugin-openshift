@@ -1,41 +1,39 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Codenvy, S.A. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Codenvy, S.A. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.ide.ext.openshift.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface GitBuildSource {
-    String getRef();
+  String getRef();
 
-    void setRef(String ref);
+  void setRef(String ref);
 
-    GitBuildSource withRef(String ref);
+  GitBuildSource withRef(String ref);
 
-    String getHttpProxy();
+  String getHttpProxy();
 
-    void setHttpProxy(String httpProxy);
+  void setHttpProxy(String httpProxy);
 
-    GitBuildSource withHttpProxy(String httpProxy);
+  GitBuildSource withHttpProxy(String httpProxy);
 
-    String getHttpsProxy();
+  String getHttpsProxy();
 
-    void setHttpsProxy(String httpsProxy);
+  void setHttpsProxy(String httpsProxy);
 
-    GitBuildSource withHttpsProxy(String httpsProxy);
+  GitBuildSource withHttpsProxy(String httpsProxy);
 
-    String getUri();
+  String getUri();
 
-    void setUri(String uri);
+  void setUri(String uri);
 
-    GitBuildSource withUri(String uri);
-
+  GitBuildSource withUri(String uri);
 }

@@ -1,65 +1,63 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Codenvy, S.A. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Codenvy, S.A. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.ide.ext.openshift.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface RollingDeploymentStrategyParams {
-    String getMaxSurge();
+  String getMaxSurge();
 
-    void setMaxSurge(String maxSurge);
+  void setMaxSurge(String maxSurge);
 
-    RollingDeploymentStrategyParams withMaxSurge(String maxSurge);
+  RollingDeploymentStrategyParams withMaxSurge(String maxSurge);
 
-    Integer getUpdatePeriodSeconds();
+  Integer getUpdatePeriodSeconds();
 
-    void setUpdatePeriodSeconds(Integer updatePeriodSeconds);
+  void setUpdatePeriodSeconds(Integer updatePeriodSeconds);
 
-    RollingDeploymentStrategyParams withUpdatePeriodSeconds(Integer updatePeriodSeconds);
+  RollingDeploymentStrategyParams withUpdatePeriodSeconds(Integer updatePeriodSeconds);
 
-    Integer getUpdatePercent();
+  Integer getUpdatePercent();
 
-    void setUpdatePercent(Integer updatePercent);
+  void setUpdatePercent(Integer updatePercent);
 
-    RollingDeploymentStrategyParams withUpdatePercent(Integer updatePercent);
+  RollingDeploymentStrategyParams withUpdatePercent(Integer updatePercent);
 
-    LifecycleHook getPre();
+  LifecycleHook getPre();
 
-    void setPre(LifecycleHook pre);
+  void setPre(LifecycleHook pre);
 
-    RollingDeploymentStrategyParams withPre(LifecycleHook pre);
+  RollingDeploymentStrategyParams withPre(LifecycleHook pre);
 
-    LifecycleHook getPost();
+  LifecycleHook getPost();
 
-    void setPost(LifecycleHook post);
+  void setPost(LifecycleHook post);
 
-    RollingDeploymentStrategyParams withPost(LifecycleHook post);
+  RollingDeploymentStrategyParams withPost(LifecycleHook post);
 
-    String getMaxUnavailable();
+  String getMaxUnavailable();
 
-    void setMaxUnavailable(String maxUnavailable);
+  void setMaxUnavailable(String maxUnavailable);
 
-    RollingDeploymentStrategyParams withMaxUnavailable(String maxUnavailable);
+  RollingDeploymentStrategyParams withMaxUnavailable(String maxUnavailable);
 
-    Integer getTimeoutSeconds();
+  Integer getTimeoutSeconds();
 
-    void setTimeoutSeconds(Integer timeoutSeconds);
+  void setTimeoutSeconds(Integer timeoutSeconds);
 
-    RollingDeploymentStrategyParams withTimeoutSeconds(Integer timeoutSeconds);
+  RollingDeploymentStrategyParams withTimeoutSeconds(Integer timeoutSeconds);
 
-    Integer getIntervalSeconds();
+  Integer getIntervalSeconds();
 
-    void setIntervalSeconds(Integer intervalSeconds);
+  void setIntervalSeconds(Integer intervalSeconds);
 
-    RollingDeploymentStrategyParams withIntervalSeconds(Integer intervalSeconds);
-
+  RollingDeploymentStrategyParams withIntervalSeconds(Integer intervalSeconds);
 }

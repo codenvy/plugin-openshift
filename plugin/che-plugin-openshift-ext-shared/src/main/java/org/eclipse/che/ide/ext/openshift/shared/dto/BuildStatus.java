@@ -1,73 +1,71 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Codenvy, S.A. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Codenvy, S.A. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.ide.ext.openshift.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface BuildStatus {
-    enum Phase {
-        New,
-        Pending,
-        Running,
-        Complete,
-        Failed
-    }
+  enum Phase {
+    New,
+    Pending,
+    Running,
+    Complete,
+    Failed
+  }
 
-    Phase getPhase();
+  Phase getPhase();
 
-    void setPhase(Phase phase);
+  void setPhase(Phase phase);
 
-    BuildStatus withPhase(Phase phase);
+  BuildStatus withPhase(Phase phase);
 
-    String getReason();
+  String getReason();
 
-    void setReason(String reason);
+  void setReason(String reason);
 
-    BuildStatus withReason(String reason);
+  BuildStatus withReason(String reason);
 
-    String getCompletionTimestamp();
+  String getCompletionTimestamp();
 
-    void setCompletionTimestamp(String completionTimestamp);
+  void setCompletionTimestamp(String completionTimestamp);
 
-    BuildStatus withCompletionTimestamp(String completionTimestamp);
+  BuildStatus withCompletionTimestamp(String completionTimestamp);
 
-    boolean getCancelled();
+  boolean getCancelled();
 
-    void setCancelled(boolean cancelled);
+  void setCancelled(boolean cancelled);
 
-    BuildStatus withCancelled(boolean cancelled);
+  BuildStatus withCancelled(boolean cancelled);
 
-    String getMessage();
+  String getMessage();
 
-    void setMessage(String message);
+  void setMessage(String message);
 
-    BuildStatus withMessage(String message);
+  BuildStatus withMessage(String message);
 
-    ObjectReference getConfig();
+  ObjectReference getConfig();
 
-    void setConfig(ObjectReference config);
+  void setConfig(ObjectReference config);
 
-    BuildStatus withConfig(ObjectReference config);
+  BuildStatus withConfig(ObjectReference config);
 
-    String getStartTimestamp();
+  String getStartTimestamp();
 
-    void setStartTimestamp(String startTimestamp);
+  void setStartTimestamp(String startTimestamp);
 
-    BuildStatus withStartTimestamp(String startTimestamp);
+  BuildStatus withStartTimestamp(String startTimestamp);
 
-    String getOutputDockerImageReference();
+  String getOutputDockerImageReference();
 
-    void setOutputDockerImageReference(String outputDockerImageReference);
+  void setOutputDockerImageReference(String outputDockerImageReference);
 
-    BuildStatus withOutputDockerImageReference(String outputDockerImageReference);
-
+  BuildStatus withOutputDockerImageReference(String outputDockerImageReference);
 }

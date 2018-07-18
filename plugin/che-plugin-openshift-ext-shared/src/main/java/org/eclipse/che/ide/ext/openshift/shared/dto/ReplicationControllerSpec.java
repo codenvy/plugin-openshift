@@ -1,37 +1,34 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Codenvy, S.A. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Codenvy, S.A. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.ide.ext.openshift.shared.dto;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import java.util.Map;
+import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface ReplicationControllerSpec {
-    PodTemplateSpec getTemplate();
+  PodTemplateSpec getTemplate();
 
-    void setTemplate(PodTemplateSpec template);
+  void setTemplate(PodTemplateSpec template);
 
-    ReplicationControllerSpec withTemplate(PodTemplateSpec template);
+  ReplicationControllerSpec withTemplate(PodTemplateSpec template);
 
-    Integer getReplicas();
+  Integer getReplicas();
 
-    void setReplicas(Integer replicas);
+  void setReplicas(Integer replicas);
 
-    ReplicationControllerSpec withReplicas(Integer replicas);
+  ReplicationControllerSpec withReplicas(Integer replicas);
 
-    Map<String, String> getSelector();
+  Map<String, String> getSelector();
 
-    void setSelector(Map<String, String> selector);
+  void setSelector(Map<String, String> selector);
 
-    ReplicationControllerSpec withSelector(Map<String, String> selector);
-
+  ReplicationControllerSpec withSelector(Map<String, String> selector);
 }

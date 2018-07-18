@@ -1,53 +1,51 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Codenvy, S.A. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Codenvy, S.A. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.ide.ext.openshift.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface BuildSource {
-    LocalObjectReference getSourceSecret();
+  LocalObjectReference getSourceSecret();
 
-    void setSourceSecret(LocalObjectReference sourceSecret);
+  void setSourceSecret(LocalObjectReference sourceSecret);
 
-    BuildSource withSourceSecret(LocalObjectReference sourceSecret);
+  BuildSource withSourceSecret(LocalObjectReference sourceSecret);
 
-    GitBuildSource getGit();
+  GitBuildSource getGit();
 
-    void setGit(GitBuildSource git);
+  void setGit(GitBuildSource git);
 
-    BuildSource withGit(GitBuildSource git);
+  BuildSource withGit(GitBuildSource git);
 
-    BinaryBuildSource getBinary();
+  BinaryBuildSource getBinary();
 
-    void setBinary(BinaryBuildSource binary);
+  void setBinary(BinaryBuildSource binary);
 
-    BuildSource withBinary(BinaryBuildSource binary);
+  BuildSource withBinary(BinaryBuildSource binary);
 
-    String getDockerfile();
+  String getDockerfile();
 
-    void setDockerfile(String dockerfile);
+  void setDockerfile(String dockerfile);
 
-    BuildSource withDockerfile(String dockerfile);
+  BuildSource withDockerfile(String dockerfile);
 
-    String getType();
+  String getType();
 
-    void setType(String type);
+  void setType(String type);
 
-    BuildSource withType(String type);
+  BuildSource withType(String type);
 
-    String getContextDir();
+  String getContextDir();
 
-    void setContextDir(String contextDir);
+  void setContextDir(String contextDir);
 
-    BuildSource withContextDir(String contextDir);
-
+  BuildSource withContextDir(String contextDir);
 }

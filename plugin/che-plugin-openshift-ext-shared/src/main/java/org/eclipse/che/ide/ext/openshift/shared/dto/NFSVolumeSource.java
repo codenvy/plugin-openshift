@@ -1,35 +1,33 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Codenvy, S.A. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Codenvy, S.A. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.ide.ext.openshift.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface NFSVolumeSource {
-    String getServer();
+  String getServer();
 
-    void setServer(String server);
+  void setServer(String server);
 
-    NFSVolumeSource withServer(String server);
+  NFSVolumeSource withServer(String server);
 
-    String getPath();
+  String getPath();
 
-    void setPath(String path);
+  void setPath(String path);
 
-    NFSVolumeSource withPath(String path);
+  NFSVolumeSource withPath(String path);
 
-    boolean getReadOnly();
+  boolean getReadOnly();
 
-    void setReadOnly(boolean readOnly);
+  void setReadOnly(boolean readOnly);
 
-    NFSVolumeSource withReadOnly(boolean readOnly);
-
+  NFSVolumeSource withReadOnly(boolean readOnly);
 }

@@ -1,67 +1,64 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Codenvy, S.A. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Codenvy, S.A. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.ide.ext.openshift.shared.dto;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import java.util.List;
+import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface RBDVolumeSource {
-    String getImage();
+  String getImage();
 
-    void setImage(String image);
+  void setImage(String image);
 
-    RBDVolumeSource withImage(String image);
+  RBDVolumeSource withImage(String image);
 
-    String getPool();
+  String getPool();
 
-    void setPool(String pool);
+  void setPool(String pool);
 
-    RBDVolumeSource withPool(String pool);
+  RBDVolumeSource withPool(String pool);
 
-    LocalObjectReference getSecretRef();
+  LocalObjectReference getSecretRef();
 
-    void setSecretRef(LocalObjectReference secretRef);
+  void setSecretRef(LocalObjectReference secretRef);
 
-    RBDVolumeSource withSecretRef(LocalObjectReference secretRef);
+  RBDVolumeSource withSecretRef(LocalObjectReference secretRef);
 
-    boolean getReadOnly();
+  boolean getReadOnly();
 
-    void setReadOnly(boolean readOnly);
+  void setReadOnly(boolean readOnly);
 
-    RBDVolumeSource withReadOnly(boolean readOnly);
+  RBDVolumeSource withReadOnly(boolean readOnly);
 
-    String getFsType();
+  String getFsType();
 
-    void setFsType(String fsType);
+  void setFsType(String fsType);
 
-    RBDVolumeSource withFsType(String fsType);
+  RBDVolumeSource withFsType(String fsType);
 
-    String getUser();
+  String getUser();
 
-    void setUser(String user);
+  void setUser(String user);
 
-    RBDVolumeSource withUser(String user);
+  RBDVolumeSource withUser(String user);
 
-    String getKeyring();
+  String getKeyring();
 
-    void setKeyring(String keyring);
+  void setKeyring(String keyring);
 
-    RBDVolumeSource withKeyring(String keyring);
+  RBDVolumeSource withKeyring(String keyring);
 
-    List<String> getMonitors();
+  List<String> getMonitors();
 
-    void setMonitors(List<String> monitors);
+  void setMonitors(List<String> monitors);
 
-    RBDVolumeSource withMonitors(List<String> monitors);
-
+  RBDVolumeSource withMonitors(List<String> monitors);
 }

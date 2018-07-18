@@ -1,59 +1,57 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Codenvy, S.A. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Codenvy, S.A. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.ide.ext.openshift.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface BuildSpec {
-    BuildOutput getOutput();
+  BuildOutput getOutput();
 
-    void setOutput(BuildOutput output);
+  void setOutput(BuildOutput output);
 
-    BuildSpec withOutput(BuildOutput output);
+  BuildSpec withOutput(BuildOutput output);
 
-    Integer getCompletionDeadlineSeconds();
+  Integer getCompletionDeadlineSeconds();
 
-    void setCompletionDeadlineSeconds(Integer completionDeadlineSeconds);
+  void setCompletionDeadlineSeconds(Integer completionDeadlineSeconds);
 
-    BuildSpec withCompletionDeadlineSeconds(Integer completionDeadlineSeconds);
+  BuildSpec withCompletionDeadlineSeconds(Integer completionDeadlineSeconds);
 
-    ResourceRequirements getResources();
+  ResourceRequirements getResources();
 
-    void setResources(ResourceRequirements resources);
+  void setResources(ResourceRequirements resources);
 
-    BuildSpec withResources(ResourceRequirements resources);
+  BuildSpec withResources(ResourceRequirements resources);
 
-    String getServiceAccount();
+  String getServiceAccount();
 
-    void setServiceAccount(String serviceAccount);
+  void setServiceAccount(String serviceAccount);
 
-    BuildSpec withServiceAccount(String serviceAccount);
+  BuildSpec withServiceAccount(String serviceAccount);
 
-    BuildSource getSource();
+  BuildSource getSource();
 
-    void setSource(BuildSource source);
+  void setSource(BuildSource source);
 
-    BuildSpec withSource(BuildSource source);
+  BuildSpec withSource(BuildSource source);
 
-    BuildStrategy getStrategy();
+  BuildStrategy getStrategy();
 
-    void setStrategy(BuildStrategy strategy);
+  void setStrategy(BuildStrategy strategy);
 
-    BuildSpec withStrategy(BuildStrategy strategy);
+  BuildSpec withStrategy(BuildStrategy strategy);
 
-    SourceRevision getRevision();
+  SourceRevision getRevision();
 
-    void setRevision(SourceRevision revision);
+  void setRevision(SourceRevision revision);
 
-    BuildSpec withRevision(SourceRevision revision);
-
+  BuildSpec withRevision(SourceRevision revision);
 }

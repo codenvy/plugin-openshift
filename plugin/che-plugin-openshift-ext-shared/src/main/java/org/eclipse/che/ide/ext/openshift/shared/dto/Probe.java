@@ -1,47 +1,45 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Codenvy, S.A. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Codenvy, S.A. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.ide.ext.openshift.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface Probe {
-    TCPSocketAction getTcpSocket();
+  TCPSocketAction getTcpSocket();
 
-    void setTcpSocket(TCPSocketAction tcpSocket);
+  void setTcpSocket(TCPSocketAction tcpSocket);
 
-    Probe withTcpSocket(TCPSocketAction tcpSocket);
+  Probe withTcpSocket(TCPSocketAction tcpSocket);
 
-    Integer getTimeoutSeconds();
+  Integer getTimeoutSeconds();
 
-    void setTimeoutSeconds(Integer timeoutSeconds);
+  void setTimeoutSeconds(Integer timeoutSeconds);
 
-    Probe withTimeoutSeconds(Integer timeoutSeconds);
+  Probe withTimeoutSeconds(Integer timeoutSeconds);
 
-    Integer getInitialDelaySeconds();
+  Integer getInitialDelaySeconds();
 
-    void setInitialDelaySeconds(Integer initialDelaySeconds);
+  void setInitialDelaySeconds(Integer initialDelaySeconds);
 
-    Probe withInitialDelaySeconds(Integer initialDelaySeconds);
+  Probe withInitialDelaySeconds(Integer initialDelaySeconds);
 
-    ExecAction getExec();
+  ExecAction getExec();
 
-    void setExec(ExecAction exec);
+  void setExec(ExecAction exec);
 
-    Probe withExec(ExecAction exec);
+  Probe withExec(ExecAction exec);
 
-    HTTPGetAction getHttpGet();
+  HTTPGetAction getHttpGet();
 
-    void setHttpGet(HTTPGetAction httpGet);
+  void setHttpGet(HTTPGetAction httpGet);
 
-    Probe withHttpGet(HTTPGetAction httpGet);
-
+  Probe withHttpGet(HTTPGetAction httpGet);
 }

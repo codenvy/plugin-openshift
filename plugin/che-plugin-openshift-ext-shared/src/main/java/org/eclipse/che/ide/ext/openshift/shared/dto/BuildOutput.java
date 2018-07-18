@@ -1,29 +1,27 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Codenvy, S.A. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Codenvy, S.A. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.ide.ext.openshift.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface BuildOutput {
-    ObjectReference getTo();
+  ObjectReference getTo();
 
-    void setTo(ObjectReference to);
+  void setTo(ObjectReference to);
 
-    BuildOutput withTo(ObjectReference to);
+  BuildOutput withTo(ObjectReference to);
 
-    LocalObjectReference getPushSecret();
+  LocalObjectReference getPushSecret();
 
-    void setPushSecret(LocalObjectReference pushSecret);
+  void setPushSecret(LocalObjectReference pushSecret);
 
-    BuildOutput withPushSecret(LocalObjectReference pushSecret);
-
+  BuildOutput withPushSecret(LocalObjectReference pushSecret);
 }

@@ -1,25 +1,22 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Codenvy, S.A. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Codenvy, S.A. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.ide.ext.openshift.server;
-
-import org.eclipse.che.api.project.server.type.ProjectTypeDef;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_APPLICATION_VARIABLE_NAME;
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_DISPLAY_NAME;
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 
 /**
  * The openshift project type definition.
@@ -28,11 +25,11 @@ import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConst
  */
 @Singleton
 public class OpenshiftProjectType extends ProjectTypeDef {
-    @Inject
-    public OpenshiftProjectType() {
-        super(OPENSHIFT_PROJECT_TYPE_ID, OPENSHIFT_PROJECT_TYPE_DISPLAY_NAME, false, true);
+  @Inject
+  public OpenshiftProjectType() {
+    super(OPENSHIFT_PROJECT_TYPE_ID, OPENSHIFT_PROJECT_TYPE_DISPLAY_NAME, false, true);
 
-        addVariableDefinition(OPENSHIFT_NAMESPACE_VARIABLE_NAME, "Openshift namespace", true);
-        addVariableDefinition(OPENSHIFT_APPLICATION_VARIABLE_NAME, "Openshift application name", true);
-    }
+    addVariableDefinition(OPENSHIFT_NAMESPACE_VARIABLE_NAME, "Openshift namespace", true);
+    addVariableDefinition(OPENSHIFT_APPLICATION_VARIABLE_NAME, "Openshift application name", true);
+  }
 }

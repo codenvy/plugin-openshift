@@ -1,116 +1,113 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Codenvy, S.A. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Codenvy, S.A. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.ide.ext.openshift.shared.dto;
-
-import org.eclipse.che.dto.shared.DTO;
 
 import java.util.List;
 import java.util.Map;
+import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface PodSpec {
-    String getDnsPolicy();
+  String getDnsPolicy();
 
-    void setDnsPolicy(String dnsPolicy);
+  void setDnsPolicy(String dnsPolicy);
 
-    PodSpec withDnsPolicy(String dnsPolicy);
+  PodSpec withDnsPolicy(String dnsPolicy);
 
-    String getNodeName();
+  String getNodeName();
 
-    void setNodeName(String nodeName);
+  void setNodeName(String nodeName);
 
-    PodSpec withNodeName(String nodeName);
+  PodSpec withNodeName(String nodeName);
 
-    Integer getTerminationGracePeriodSeconds();
+  Integer getTerminationGracePeriodSeconds();
 
-    void setTerminationGracePeriodSeconds(Integer terminationGracePeriodSeconds);
+  void setTerminationGracePeriodSeconds(Integer terminationGracePeriodSeconds);
 
-    PodSpec withTerminationGracePeriodSeconds(Integer terminationGracePeriodSeconds);
+  PodSpec withTerminationGracePeriodSeconds(Integer terminationGracePeriodSeconds);
 
-    String getServiceAccountName();
+  String getServiceAccountName();
 
-    void setServiceAccountName(String serviceAccountName);
+  void setServiceAccountName(String serviceAccountName);
 
-    PodSpec withServiceAccountName(String serviceAccountName);
+  PodSpec withServiceAccountName(String serviceAccountName);
 
-    boolean getHostNetwork();
+  boolean getHostNetwork();
 
-    void setHostNetwork(boolean hostNetwork);
+  void setHostNetwork(boolean hostNetwork);
 
-    PodSpec withHostNetwork(boolean hostNetwork);
+  PodSpec withHostNetwork(boolean hostNetwork);
 
-    List<LocalObjectReference> getImagePullSecrets();
+  List<LocalObjectReference> getImagePullSecrets();
 
-    void setImagePullSecrets(List<LocalObjectReference> imagePullSecrets);
+  void setImagePullSecrets(List<LocalObjectReference> imagePullSecrets);
 
-    PodSpec withImagePullSecrets(List<LocalObjectReference> imagePullSecrets);
+  PodSpec withImagePullSecrets(List<LocalObjectReference> imagePullSecrets);
 
-    List<Volume> getVolumes();
+  List<Volume> getVolumes();
 
-    void setVolumes(List<Volume> volumes);
+  void setVolumes(List<Volume> volumes);
 
-    PodSpec withVolumes(List<Volume> volumes);
+  PodSpec withVolumes(List<Volume> volumes);
 
-    boolean getHostIPC();
+  boolean getHostIPC();
 
-    void setHostIPC(boolean hostIPC);
+  void setHostIPC(boolean hostIPC);
 
-    PodSpec withHostIPC(boolean hostIPC);
+  PodSpec withHostIPC(boolean hostIPC);
 
-    String getServiceAccount();
+  String getServiceAccount();
 
-    void setServiceAccount(String serviceAccount);
+  void setServiceAccount(String serviceAccount);
 
-    PodSpec withServiceAccount(String serviceAccount);
+  PodSpec withServiceAccount(String serviceAccount);
 
-    PodSecurityContext getSecurityContext();
+  PodSecurityContext getSecurityContext();
 
-    void setSecurityContext(PodSecurityContext securityContext);
+  void setSecurityContext(PodSecurityContext securityContext);
 
-    PodSpec withSecurityContext(PodSecurityContext securityContext);
+  PodSpec withSecurityContext(PodSecurityContext securityContext);
 
-    String getRestartPolicy();
+  String getRestartPolicy();
 
-    void setRestartPolicy(String restartPolicy);
+  void setRestartPolicy(String restartPolicy);
 
-    PodSpec withRestartPolicy(String restartPolicy);
+  PodSpec withRestartPolicy(String restartPolicy);
 
-    Map<String, String> getNodeSelector();
+  Map<String, String> getNodeSelector();
 
-    void setNodeSelector(Map<String, String> nodeSelector);
+  void setNodeSelector(Map<String, String> nodeSelector);
 
-    PodSpec withNodeSelector(Map<String, String> nodeSelector);
+  PodSpec withNodeSelector(Map<String, String> nodeSelector);
 
-    String getHost();
+  String getHost();
 
-    void setHost(String host);
+  void setHost(String host);
 
-    PodSpec withHost(String host);
+  PodSpec withHost(String host);
 
-    List<Container> getContainers();
+  List<Container> getContainers();
 
-    void setContainers(List<Container> containers);
+  void setContainers(List<Container> containers);
 
-    PodSpec withContainers(List<Container> containers);
+  PodSpec withContainers(List<Container> containers);
 
-    Integer getActiveDeadlineSeconds();
+  Integer getActiveDeadlineSeconds();
 
-    void setActiveDeadlineSeconds(Integer activeDeadlineSeconds);
+  void setActiveDeadlineSeconds(Integer activeDeadlineSeconds);
 
-    PodSpec withActiveDeadlineSeconds(Integer activeDeadlineSeconds);
+  PodSpec withActiveDeadlineSeconds(Integer activeDeadlineSeconds);
 
-    boolean getHostPID();
+  boolean getHostPID();
 
-    void setHostPID(boolean hostPID);
+  void setHostPID(boolean hostPID);
 
-    PodSpec withHostPID(boolean hostPID);
-
+  PodSpec withHostPID(boolean hostPID);
 }

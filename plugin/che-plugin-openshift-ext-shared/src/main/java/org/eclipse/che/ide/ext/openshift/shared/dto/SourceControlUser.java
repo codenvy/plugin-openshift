@@ -1,29 +1,27 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Codenvy, S.A. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Codenvy, S.A. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.ide.ext.openshift.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface SourceControlUser {
-    String getName();
+  String getName();
 
-    void setName(String name);
+  void setName(String name);
 
-    SourceControlUser withName(String name);
+  SourceControlUser withName(String name);
 
-    String getEmail();
+  String getEmail();
 
-    void setEmail(String email);
+  void setEmail(String email);
 
-    SourceControlUser withEmail(String email);
-
+  SourceControlUser withEmail(String email);
 }

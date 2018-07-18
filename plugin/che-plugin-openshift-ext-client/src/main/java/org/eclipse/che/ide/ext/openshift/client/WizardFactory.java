@@ -1,13 +1,12 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Codenvy, S.A. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Codenvy, S.A. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.ide.ext.openshift.client;
 
 import org.eclipse.che.ide.ext.openshift.client.dto.NewApplicationRequest;
@@ -22,7 +21,7 @@ import org.eclipse.che.ide.ext.openshift.client.service.add.wizard.CreateService
  * @author Alexander Andrienko
  */
 public interface WizardFactory {
-    CreateProjectWizard newProjectWizard(NewApplicationRequest newApplicationRequest);
+  CreateProjectWizard newProjectWizard(NewApplicationRequest newApplicationRequest);
 
-    CreateServiceWizard newServiceWizard(NewServiceRequest newServiceRequest);
+  CreateServiceWizard newServiceWizard(NewServiceRequest newServiceRequest);
 }

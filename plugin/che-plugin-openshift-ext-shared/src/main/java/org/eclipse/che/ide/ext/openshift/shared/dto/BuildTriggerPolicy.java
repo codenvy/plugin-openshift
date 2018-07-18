@@ -1,41 +1,39 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Codenvy, S.A. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Codenvy, S.A. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.ide.ext.openshift.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface BuildTriggerPolicy {
-    ImageChangeTrigger getImageChange();
+  ImageChangeTrigger getImageChange();
 
-    void setImageChange(ImageChangeTrigger imageChange);
+  void setImageChange(ImageChangeTrigger imageChange);
 
-    BuildTriggerPolicy withImageChange(ImageChangeTrigger imageChange);
+  BuildTriggerPolicy withImageChange(ImageChangeTrigger imageChange);
 
-    WebHookTrigger getGithub();
+  WebHookTrigger getGithub();
 
-    void setGithub(WebHookTrigger github);
+  void setGithub(WebHookTrigger github);
 
-    BuildTriggerPolicy withGithub(WebHookTrigger github);
+  BuildTriggerPolicy withGithub(WebHookTrigger github);
 
-    String getType();
+  String getType();
 
-    void setType(String type);
+  void setType(String type);
 
-    BuildTriggerPolicy withType(String type);
+  BuildTriggerPolicy withType(String type);
 
-    WebHookTrigger getGeneric();
+  WebHookTrigger getGeneric();
 
-    void setGeneric(WebHookTrigger generic);
+  void setGeneric(WebHookTrigger generic);
 
-    BuildTriggerPolicy withGeneric(WebHookTrigger generic);
-
+  BuildTriggerPolicy withGeneric(WebHookTrigger generic);
 }

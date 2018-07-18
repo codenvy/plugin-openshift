@@ -1,59 +1,57 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Codenvy, S.A. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Codenvy, S.A. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.ide.ext.openshift.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface Parameter {
-    String getDisplayName();
+  String getDisplayName();
 
-    void setDisplayName(String displayName);
+  void setDisplayName(String displayName);
 
-    Parameter withDisplayName(String displayName);
+  Parameter withDisplayName(String displayName);
 
-    String getName();
+  String getName();
 
-    void setName(String name);
+  void setName(String name);
 
-    Parameter withName(String name);
+  Parameter withName(String name);
 
-    String getDescription();
+  String getDescription();
 
-    void setDescription(String description);
+  void setDescription(String description);
 
-    Parameter withDescription(String description);
+  Parameter withDescription(String description);
 
-    String getFrom();
+  String getFrom();
 
-    void setFrom(String from);
+  void setFrom(String from);
 
-    Parameter withFrom(String from);
+  Parameter withFrom(String from);
 
-    String getValue();
+  String getValue();
 
-    void setValue(String value);
+  void setValue(String value);
 
-    Parameter withValue(String value);
+  Parameter withValue(String value);
 
-    String getGenerate();
+  String getGenerate();
 
-    void setGenerate(String generate);
+  void setGenerate(String generate);
 
-    Parameter withGenerate(String generate);
+  Parameter withGenerate(String generate);
 
-    boolean getRequired();
+  boolean getRequired();
 
-    void setRequired(boolean required);
+  void setRequired(boolean required);
 
-    Parameter withRequired(boolean required);
-
+  Parameter withRequired(boolean required);
 }

@@ -1,49 +1,46 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Codenvy, S.A. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Codenvy, S.A. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.ide.ext.openshift.shared.dto;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import java.util.List;
+import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface CephFSVolumeSource {
-    LocalObjectReference getSecretRef();
+  LocalObjectReference getSecretRef();
 
-    void setSecretRef(LocalObjectReference secretRef);
+  void setSecretRef(LocalObjectReference secretRef);
 
-    CephFSVolumeSource withSecretRef(LocalObjectReference secretRef);
+  CephFSVolumeSource withSecretRef(LocalObjectReference secretRef);
 
-    String getSecretFile();
+  String getSecretFile();
 
-    void setSecretFile(String secretFile);
+  void setSecretFile(String secretFile);
 
-    CephFSVolumeSource withSecretFile(String secretFile);
+  CephFSVolumeSource withSecretFile(String secretFile);
 
-    boolean getReadOnly();
+  boolean getReadOnly();
 
-    void setReadOnly(boolean readOnly);
+  void setReadOnly(boolean readOnly);
 
-    CephFSVolumeSource withReadOnly(boolean readOnly);
+  CephFSVolumeSource withReadOnly(boolean readOnly);
 
-    String getUser();
+  String getUser();
 
-    void setUser(String user);
+  void setUser(String user);
 
-    CephFSVolumeSource withUser(String user);
+  CephFSVolumeSource withUser(String user);
 
-    List<String> getMonitors();
+  List<String> getMonitors();
 
-    void setMonitors(List<String> monitors);
+  void setMonitors(List<String> monitors);
 
-    CephFSVolumeSource withMonitors(List<String> monitors);
-
+  CephFSVolumeSource withMonitors(List<String> monitors);
 }

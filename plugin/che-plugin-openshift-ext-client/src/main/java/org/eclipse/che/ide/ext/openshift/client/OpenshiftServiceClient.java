@@ -1,15 +1,15 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Codenvy, S.A. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Codenvy, S.A. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.ide.ext.openshift.client;
 
+import java.util.List;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Build;
 import org.eclipse.che.ide.ext.openshift.shared.dto.BuildConfig;
@@ -25,81 +25,71 @@ import org.eclipse.che.ide.ext.openshift.shared.dto.Service;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Template;
 import org.eclipse.che.ide.ext.openshift.shared.dto.WebHook;
 
-import java.util.List;
-
-/**
- * @author Sergii Leschenko
- */
+/** @author Sergii Leschenko */
 public interface OpenshiftServiceClient {
-    Promise<OpenshiftServerInfo> getServerInfo();
+  Promise<OpenshiftServerInfo> getServerInfo();
 
-    /** Templates */
+  /** Templates */
+  Promise<List<Template>> getTemplates(String namespace);
 
-    Promise<List<Template>> getTemplates(String namespace);
+  Promise<Template> processTemplate(String namespace, Template template);
 
-    Promise<Template> processTemplate(String namespace, Template template);
+  /** Projects */
+  Promise<List<Project>> getProjects();
 
-    /** Projects */
+  Promise<Project> createProject(ProjectRequest request);
 
-    Promise<List<Project>> getProjects();
+  Promise<Void> deleteProject(String project);
 
-    Promise<Project> createProject(ProjectRequest request);
+  /** BuildConfigs */
+  Promise<BuildConfig> createBuildConfig(BuildConfig config);
 
-    Promise<Void> deleteProject(String project);
+  Promise<BuildConfig> updateBuildConfig(BuildConfig config);
 
-    /** BuildConfigs */
+  Promise<List<BuildConfig>> getBuildConfigs(String namespace);
 
-    Promise<BuildConfig> createBuildConfig(BuildConfig config);
+  Promise<List<BuildConfig>> getBuildConfigs(String namespace, String application);
 
-    Promise<BuildConfig> updateBuildConfig(BuildConfig config);
+  Promise<List<WebHook>> getWebhooks(String namespace, String buildConfig);
 
-    Promise<List<BuildConfig>> getBuildConfigs(String namespace);
+  Promise<List<Build>> getBuilds(String namespace, String application);
 
-    Promise<List<BuildConfig>> getBuildConfigs(String namespace, String application);
+  Promise<Build> startBuild(String namespace, String buildConfig);
 
-    Promise<List<WebHook>> getWebhooks(String namespace, String buildConfig);
+  /** ImageStreams */
+  Promise<ImageStream> createImageStream(ImageStream stream);
 
-    Promise<List<Build>> getBuilds(String namespace, String application);
+  Promise<List<ImageStream>> getImageStreams(String namespace, String application);
 
-    Promise<Build> startBuild(String namespace, String buildConfig);
+  Promise<ImageStream> getImageStream(String namespace, String imageStream);
 
-    /** ImageStreams */
+  Promise<ImageStream> updateImageStream(ImageStream imageStream);
 
-    Promise<ImageStream> createImageStream(ImageStream stream);
+  Promise<ImageStreamTag> getImageStreamTag(String namespace, String imageStream, String tag);
 
-    Promise<List<ImageStream>> getImageStreams(String namespace, String application);
+  /** DeploymentConfigs */
+  Promise<DeploymentConfig> createDeploymentConfig(DeploymentConfig config);
 
-    Promise<ImageStream> getImageStream(String namespace, String imageStream);
+  Promise<DeploymentConfig> updateDeploymentConfig(DeploymentConfig deploymentConfig);
 
-    Promise<ImageStream> updateImageStream(ImageStream imageStream);
+  Promise<List<DeploymentConfig>> getDeploymentConfigs(String namespace, String application);
 
-    Promise<ImageStreamTag> getImageStreamTag(String namespace, String imageStream, String tag);
+  /** Routes */
+  Promise<Route> createRoute(Route route);
 
-    /** DeploymentConfigs */
+  Promise<Route> updateRoute(Route route);
 
-    Promise<DeploymentConfig> createDeploymentConfig(DeploymentConfig config);
+  Promise<List<Route>> getRoutes(String namespace, String application);
 
-    Promise<DeploymentConfig> updateDeploymentConfig(DeploymentConfig deploymentConfig);
+  /** Services */
+  Promise<Service> createService(Service service);
 
-    Promise<List<DeploymentConfig>> getDeploymentConfigs(String namespace, String application);
+  Promise<Service> updateService(Service service);
 
-    /** Routes */
+  Promise<List<ReplicationController>> getReplicationControllers(
+      String namespace, String application);
 
-    Promise<Route> createRoute(Route route);
+  Promise<ReplicationController> updateReplicationController(ReplicationController controller);
 
-    Promise<Route> updateRoute(Route route);
-
-    Promise<List<Route>> getRoutes(String namespace, String application);
-
-    /** Services */
-
-    Promise<Service> createService(Service service);
-
-    Promise<Service> updateService(Service service);
-
-    Promise<List<ReplicationController>> getReplicationControllers(String namespace, String application);
-
-    Promise<ReplicationController> updateReplicationController(ReplicationController controller);
-
-    Promise<List<Service>> getServices(String namespace, String application);
+  Promise<List<Service>> getServices(String namespace, String application);
 }

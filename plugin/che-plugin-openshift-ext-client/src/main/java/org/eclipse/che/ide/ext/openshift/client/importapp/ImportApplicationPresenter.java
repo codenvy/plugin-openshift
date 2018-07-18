@@ -1,17 +1,26 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Codenvy, S.A. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Codenvy, S.A. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.ide.ext.openshift.client.importapp;
 
-import com.google.inject.Inject;
+import static java.util.Collections.singletonList;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_APPLICATION_VARIABLE_NAME;
+import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
+import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID;
 
+import com.google.inject.Inject;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
@@ -42,18 +51,6 @@ import org.eclipse.che.ide.ext.openshift.shared.dto.Project;
 import org.eclipse.che.ide.projectimport.wizard.ProjectResolver;
 import org.eclipse.che.ide.resource.Path;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_APPLICATION_VARIABLE_NAME;
-import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
-import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID;
-
 /**
  * Presenter, which handles logic for importing OpenShift application to Che.
  *
@@ -61,318 +58,342 @@ import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConst
  * @author Vitaliy Guliy
  * @author Vlad Zhukovskyi
  */
-public class ImportApplicationPresenter extends ValidateAuthenticationPresenter implements ImportApplicationView.ActionDelegate {
+public class ImportApplicationPresenter extends ValidateAuthenticationPresenter
+    implements ImportApplicationView.ActionDelegate {
 
-    private final ImportApplicationView          view;
-    private final OpenshiftLocalizationConstant  locale;
-    private final OpenshiftServiceClient         openShiftClient;
-    private final DtoFactory                     dtoFactory;
-    private final ProjectNotificationSubscriber  importProjectNotificationSubscriber;
-    private final List<String>                   cheProjects;
-    private final List<Project>                  projectList;
-    private final Map<String, List<BuildConfig>> buildConfigMap;
-    private final NotificationManager            notificationManager;
-    private final BuildsPresenter                buildsPresenter;
-    private final ApplicationManager             applicationManager;
-    private       ProjectResolver                projectResolver;
-    private final AppContext                     appContext;
-    private       BuildConfig                    selectedBuildConfig;
+  private final ImportApplicationView view;
+  private final OpenshiftLocalizationConstant locale;
+  private final OpenshiftServiceClient openShiftClient;
+  private final DtoFactory dtoFactory;
+  private final ProjectNotificationSubscriber importProjectNotificationSubscriber;
+  private final List<String> cheProjects;
+  private final List<Project> projectList;
+  private final Map<String, List<BuildConfig>> buildConfigMap;
+  private final NotificationManager notificationManager;
+  private final BuildsPresenter buildsPresenter;
+  private final ApplicationManager applicationManager;
+  private ProjectResolver projectResolver;
+  private final AppContext appContext;
+  private BuildConfig selectedBuildConfig;
 
+  @Inject
+  public ImportApplicationPresenter(
+      OpenshiftLocalizationConstant locale,
+      ImportApplicationView view,
+      OpenshiftServiceClient openShiftClient,
+      NotificationManager notificationManager,
+      OpenshiftAuthenticator openshiftAuthenticator,
+      OpenshiftAuthorizationHandler openshiftAuthorizationHandler,
+      ImportProjectNotificationSubscriberFactory importProjectNotificationSubscriberFactory,
+      DtoFactory dtoFactory,
+      BuildsPresenter buildsPresenter,
+      ApplicationManager applicationManager,
+      AppContext appContext,
+      ProjectResolver projectResolver) {
+    super(openshiftAuthenticator, openshiftAuthorizationHandler, locale, notificationManager);
+    this.view = view;
+    this.applicationManager = applicationManager;
+    this.projectResolver = projectResolver;
+    this.view.setDelegate(this);
+    this.openShiftClient = openShiftClient;
+    this.dtoFactory = dtoFactory;
+    this.notificationManager = notificationManager;
+    this.importProjectNotificationSubscriber =
+        importProjectNotificationSubscriberFactory.createSubscriber();
+    this.locale = locale;
+    this.buildsPresenter = buildsPresenter;
+    this.appContext = appContext;
+    projectList = new ArrayList<>();
+    buildConfigMap = new HashMap<>();
+    cheProjects = new ArrayList<>();
+  }
 
-    @Inject
-    public ImportApplicationPresenter(OpenshiftLocalizationConstant locale, ImportApplicationView view,
-                                      OpenshiftServiceClient openShiftClient,
-                                      NotificationManager notificationManager,
-                                      OpenshiftAuthenticator openshiftAuthenticator,
-                                      OpenshiftAuthorizationHandler openshiftAuthorizationHandler,
-                                      ImportProjectNotificationSubscriberFactory importProjectNotificationSubscriberFactory,
-                                      DtoFactory dtoFactory,
-                                      BuildsPresenter buildsPresenter,
-                                      ApplicationManager applicationManager,
-                                      AppContext appContext,
-                                      ProjectResolver projectResolver) {
-        super(openshiftAuthenticator, openshiftAuthorizationHandler, locale, notificationManager);
-        this.view = view;
-        this.applicationManager = applicationManager;
-        this.projectResolver = projectResolver;
-        this.view.setDelegate(this);
-        this.openShiftClient = openShiftClient;
-        this.dtoFactory = dtoFactory;
-        this.notificationManager = notificationManager;
-        this.importProjectNotificationSubscriber = importProjectNotificationSubscriberFactory.createSubscriber();
-        this.locale = locale;
-        this.buildsPresenter = buildsPresenter;
-        this.appContext = appContext;
-        projectList = new ArrayList<>();
-        buildConfigMap = new HashMap<>();
-        cheProjects = new ArrayList<>();
+  @Override
+  protected void onSuccessAuthentication() {
+    projectList.clear();
+    buildConfigMap.clear();
+    selectedBuildConfig = null;
+
+    view.setErrorMessage("");
+    view.setProjectName("", false);
+    view.setProjectDescription("");
+    view.setApplicationInfo(null);
+
+    view.enableImportButton(false);
+    view.animateImportButton(false);
+    view.enableCancelButton(true);
+
+    view.setBuildConfigs(buildConfigMap);
+    view.enableBuildConfigs(true);
+
+    view.enableNameField(false);
+    view.enableDescriptionField(false);
+
+    view.showView();
+
+    view.showLoadingBuildConfigs("Loading projects...");
+
+    loadCheProjects();
+  }
+
+  /** Load che projects for following verifications. */
+  private void loadCheProjects() {
+    cheProjects.clear();
+    for (org.eclipse.che.ide.api.resources.Project project : appContext.getProjects()) {
+      cheProjects.add(project.getName());
     }
 
-    @Override
-    protected void onSuccessAuthentication() {
-        projectList.clear();
-        buildConfigMap.clear();
-        selectedBuildConfig = null;
+    loadOpenShiftProjects();
+  }
 
-        view.setErrorMessage("");
-        view.setProjectName("", false);
-        view.setProjectDescription("");
-        view.setApplicationInfo(null);
+  private Operation<PromiseError> handleError() {
+    return new Operation<PromiseError>() {
+      @Override
+      public void apply(PromiseError arg) throws OperationException {
+        final ServiceError serviceError =
+            dtoFactory.createDtoFromJson(arg.getMessage(), ServiceError.class);
+        notificationManager.notify(serviceError.getMessage(), FAIL, EMERGE_MODE);
+      }
+    };
+  }
 
-        view.enableImportButton(false);
-        view.animateImportButton(false);
-        view.enableCancelButton(true);
-
-        view.setBuildConfigs(buildConfigMap);
-        view.enableBuildConfigs(true);
-
-        view.enableNameField(false);
-        view.enableDescriptionField(false);
-
-        view.showView();
-
-        view.showLoadingBuildConfigs("Loading projects...");
-
-        loadCheProjects();
-    }
-
-    /**
-     * Load che projects for following verifications.
-     */
-    private void loadCheProjects() {
-        cheProjects.clear();
-        for (org.eclipse.che.ide.api.resources.Project project : appContext.getProjects()) {
-            cheProjects.add(project.getName());
-        }
-
-        loadOpenShiftProjects();
-    }
-
-    private Operation<PromiseError> handleError() {
-        return new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError arg) throws OperationException {
-                final ServiceError serviceError = dtoFactory.createDtoFromJson(arg.getMessage(), ServiceError.class);
-                notificationManager.notify(serviceError.getMessage(), FAIL, EMERGE_MODE);
-            }
-        };
-    }
-
-    /**
-     * Load OpenShift Project and Application data.
-     */
-    private void loadOpenShiftProjects() {
-        openShiftClient.getProjects().then(new Operation<List<Project>>() {
-            @Override
-            public void apply(List<Project> result) throws OperationException {
+  /** Load OpenShift Project and Application data. */
+  private void loadOpenShiftProjects() {
+    openShiftClient
+        .getProjects()
+        .then(
+            new Operation<List<Project>>() {
+              @Override
+              public void apply(List<Project> result) throws OperationException {
                 if (result.isEmpty()) {
-                    view.setBuildConfigs(buildConfigMap);
-                    return;
+                  view.setBuildConfigs(buildConfigMap);
+                  return;
                 }
 
                 projectList.addAll(result);
                 for (Project project : result) {
-                    getBuildConfigs(project.getMetadata().getName());
+                  getBuildConfigs(project.getMetadata().getName());
                 }
-            }
-        }).catchError(handleError());
-    }
+              }
+            })
+        .catchError(handleError());
+  }
 
-    /**
-     * Get OpenShift Build Configs by namespace.
-     *
-     * @param namespace
-     *         namespace
-     */
-    private void getBuildConfigs(final String namespace) {
-        openShiftClient.getBuildConfigs(namespace).then(new Operation<List<BuildConfig>>() {
-            @Override
-            public void apply(List<BuildConfig> result) throws OperationException {
+  /**
+   * Get OpenShift Build Configs by namespace.
+   *
+   * @param namespace namespace
+   */
+  private void getBuildConfigs(final String namespace) {
+    openShiftClient
+        .getBuildConfigs(namespace)
+        .then(
+            new Operation<List<BuildConfig>>() {
+              @Override
+              public void apply(List<BuildConfig> result) throws OperationException {
                 buildConfigMap.put(namespace, result);
 
                 if (buildConfigMap.size() == projectList.size()) {
-                    view.setBuildConfigs(buildConfigMap);
+                  view.setBuildConfigs(buildConfigMap);
                 }
-            }
-        }).catchError(handleError());
+              }
+            })
+        .catchError(handleError());
+  }
+
+  @Override
+  public void onImportApplicationClicked() {
+    view.enableBuildConfigs(false);
+    view.enableNameField(false);
+    view.enableDescriptionField(false);
+
+    view.enableImportButton(false);
+    view.animateImportButton(true);
+
+    view.enableCancelButton(false);
+    view.setBlocked(true);
+
+    importProject();
+  }
+
+  /** Fills project data and imports project. */
+  private void importProject() {
+    final Map<String, String> importOptions = new HashMap<String, String>();
+    String branch = selectedBuildConfig.getSpec().getSource().getGit().getRef();
+    if (branch != null && !branch.isEmpty()) {
+      importOptions.put("branch", selectedBuildConfig.getSpec().getSource().getGit().getRef());
     }
 
-    @Override
-    public void onImportApplicationClicked() {
-        view.enableBuildConfigs(false);
-        view.enableNameField(false);
-        view.enableDescriptionField(false);
-
-        view.enableImportButton(false);
-        view.animateImportButton(true);
-
-        view.enableCancelButton(false);
-        view.setBlocked(true);
-
-        importProject();
+    String contextDir = selectedBuildConfig.getSpec().getSource().getContextDir();
+    if (contextDir != null && !contextDir.isEmpty()) {
+      importOptions.put("keepDir", contextDir);
     }
 
-    /**
-     * Fills project data and imports project.
-     */
-    private void importProject() {
-        final Map<String, String> importOptions = new HashMap<String, String>();
-        String branch = selectedBuildConfig.getSpec().getSource().getGit().getRef();
-        if (branch != null && !branch.isEmpty()) {
-            importOptions.put("branch", selectedBuildConfig.getSpec().getSource().getGit().getRef());
-        }
+    importProjectNotificationSubscriber.subscribe(view.getProjectName());
 
-        String contextDir = selectedBuildConfig.getSpec().getSource().getContextDir();
-        if (contextDir != null && !contextDir.isEmpty()) {
-            importOptions.put("keepDir", contextDir);
-        }
+    MutableProjectConfig importConfig = new MutableProjectConfig();
+    importConfig.setName(view.getProjectName());
+    importConfig.setPath(Path.valueOf(view.getProjectName()).makeAbsolute().toString());
+    importConfig.setSource(
+        new SourceStorage() {
+          @Override
+          public String getType() {
+            return "git";
+          }
 
-        importProjectNotificationSubscriber.subscribe(view.getProjectName());
+          @Override
+          public String getLocation() {
+            return selectedBuildConfig.getSpec().getSource().getGit().getUri();
+          }
 
-        MutableProjectConfig importConfig = new MutableProjectConfig();
-        importConfig.setName(view.getProjectName());
-        importConfig.setPath(Path.valueOf(view.getProjectName()).makeAbsolute().toString());
-        importConfig.setSource(new SourceStorage() {
-            @Override
-            public String getType() {
-                return "git";
-            }
-
-            @Override
-            public String getLocation() {
-                return selectedBuildConfig.getSpec().getSource().getGit().getUri();
-            }
-
-            @Override
-            public Map<String, String> getParameters() {
-                return importOptions;
-            }
+          @Override
+          public Map<String, String> getParameters() {
+            return importOptions;
+          }
         });
 
-        importOSProject(importConfig)
-                .thenPromise(new Function<org.eclipse.che.ide.api.resources.Project, Promise<org.eclipse.che.ide.api.resources.Project>>() {
-                    @Override
-                    public Promise<org.eclipse.che.ide.api.resources.Project> apply(org.eclipse.che.ide.api.resources.Project project)
-                            throws FunctionException {
-                        return setupOSMixin(project, selectedBuildConfig);
-                    }
-                })
-                .thenPromise(new Function<org.eclipse.che.ide.api.resources.Project, Promise<org.eclipse.che.ide.api.resources.Project>>() {
-                    @Override
-                    public Promise<org.eclipse.che.ide.api.resources.Project> apply(org.eclipse.che.ide.api.resources.Project project)
-                            throws FunctionException {
-                        return projectResolver.resolve(project);
-                    }
-                })
-                .then(new Operation<org.eclipse.che.ide.api.resources.Project>() {
-                    @Override
-                    public void apply(org.eclipse.che.ide.api.resources.Project project) throws OperationException {
-                        view.animateImportButton(false);
-                        view.setBlocked(false);
-                        view.closeView();
+    importOSProject(importConfig)
+        .thenPromise(
+            new Function<
+                org.eclipse.che.ide.api.resources.Project,
+                Promise<org.eclipse.che.ide.api.resources.Project>>() {
+              @Override
+              public Promise<org.eclipse.che.ide.api.resources.Project> apply(
+                  org.eclipse.che.ide.api.resources.Project project) throws FunctionException {
+                return setupOSMixin(project, selectedBuildConfig);
+              }
+            })
+        .thenPromise(
+            new Function<
+                org.eclipse.che.ide.api.resources.Project,
+                Promise<org.eclipse.che.ide.api.resources.Project>>() {
+              @Override
+              public Promise<org.eclipse.che.ide.api.resources.Project> apply(
+                  org.eclipse.che.ide.api.resources.Project project) throws FunctionException {
+                return projectResolver.resolve(project);
+              }
+            })
+        .then(
+            new Operation<org.eclipse.che.ide.api.resources.Project>() {
+              @Override
+              public void apply(org.eclipse.che.ide.api.resources.Project project)
+                  throws OperationException {
+                view.animateImportButton(false);
+                view.setBlocked(false);
+                view.closeView();
 
-                        final String namespace = project.getAttributes().get(OPENSHIFT_NAMESPACE_VARIABLE_NAME).get(0);
+                final String namespace =
+                    project.getAttributes().get(OPENSHIFT_NAMESPACE_VARIABLE_NAME).get(0);
 
-                        buildsPresenter.newApplicationCreated(namespace);
+                buildsPresenter.newApplicationCreated(namespace);
 
-                        importProjectNotificationSubscriber.onSuccess();
+                importProjectNotificationSubscriber.onSuccess();
 
-                        updateApplicationLabel(selectedBuildConfig);
-                    }
-                })
-                .catchError(new Operation<PromiseError>() {
-                    @Override
-                    public void apply(PromiseError error) throws OperationException {
-                        createProjectFailure(error.getCause());
-                    }
-                });
+                updateApplicationLabel(selectedBuildConfig);
+              }
+            })
+        .catchError(
+            new Operation<PromiseError>() {
+              @Override
+              public void apply(PromiseError error) throws OperationException {
+                createProjectFailure(error.getCause());
+              }
+            });
+  }
+
+  private Promise<org.eclipse.che.ide.api.resources.Project> importOSProject(
+      ProjectConfig importConfig) {
+    return appContext.getWorkspaceRoot().importProject().withBody(importConfig).send();
+  }
+
+  private Promise<org.eclipse.che.ide.api.resources.Project> setupOSMixin(
+      org.eclipse.che.ide.api.resources.Project project, BuildConfig buildConfig) {
+    MutableProjectConfig updateConfig = new MutableProjectConfig(project);
+
+    Map<String, List<String>> attributes = new HashMap<>();
+    attributes.put(
+        OPENSHIFT_APPLICATION_VARIABLE_NAME, singletonList(buildConfig.getMetadata().getName()));
+    attributes.put(
+        OPENSHIFT_NAMESPACE_VARIABLE_NAME, singletonList(buildConfig.getMetadata().getNamespace()));
+
+    updateConfig.getMixins().add(OPENSHIFT_PROJECT_TYPE_ID);
+
+    updateConfig.getAttributes().putAll(attributes);
+    updateConfig.setDescription(view.getProjectDescription());
+    updateConfig.setType(Constants.BLANK_ID);
+
+    return project.update().withBody(updateConfig).send();
+  }
+
+  /**
+   * Handles errors when creating a project.
+   *
+   * @param exception cause
+   */
+  private void createProjectFailure(Throwable exception) {
+    view.animateImportButton(false);
+    view.enableImportButton(true);
+    view.enableCancelButton(true);
+    view.setBlocked(false);
+
+    view.enableNameField(true);
+    view.enableDescriptionField(true);
+
+    view.setErrorMessage(exception.getMessage());
+    importProjectNotificationSubscriber.onFailure(exception.getMessage());
+  }
+
+  @Override
+  public void onCancelClicked() {
+    view.closeView();
+  }
+
+  @Override
+  public void onBuildConfigSelected(BuildConfig buildConfig) {
+    selectedBuildConfig = buildConfig;
+
+    if (buildConfig != null) {
+      view.enableNameField(true);
+      view.enableDescriptionField(true);
+
+      view.setProjectName(buildConfig.getMetadata().getName(), true);
+      view.setApplicationInfo(buildConfig);
     }
 
-    private Promise<org.eclipse.che.ide.api.resources.Project> importOSProject(ProjectConfig importConfig) {
-        return appContext.getWorkspaceRoot().importProject().withBody(importConfig).send();
+    view.enableImportButton(
+        (buildConfig != null && view.getProjectName() != null && !view.getProjectName().isEmpty()));
+  }
+
+  @Override
+  public void onProjectNameChanged(String name) {
+    view.enableImportButton(
+        selectedBuildConfig != null & isCheProjectNameValid(view.getProjectName()));
+  }
+
+  private boolean isCheProjectNameValid(String projectName) {
+    if (cheProjects.contains(projectName)) {
+      view.showCheProjectNameError(locale.existingProjectNameError(), null);
+      return false;
     }
-
-    private Promise<org.eclipse.che.ide.api.resources.Project> setupOSMixin(org.eclipse.che.ide.api.resources.Project project,
-                                                                            BuildConfig buildConfig) {
-        MutableProjectConfig updateConfig = new MutableProjectConfig(project);
-
-        Map<String, List<String>> attributes = new HashMap<>();
-        attributes.put(OPENSHIFT_APPLICATION_VARIABLE_NAME, singletonList(buildConfig.getMetadata().getName()));
-        attributes.put(OPENSHIFT_NAMESPACE_VARIABLE_NAME, singletonList(buildConfig.getMetadata().getNamespace()));
-
-        updateConfig.getMixins().add(OPENSHIFT_PROJECT_TYPE_ID);
-
-        updateConfig.getAttributes().putAll(attributes);
-        updateConfig.setDescription(view.getProjectDescription());
-        updateConfig.setType(Constants.BLANK_ID);
-
-        return project.update().withBody(updateConfig).send();
+    if (!OpenshiftValidator.isProjectNameValid(projectName)) {
+      view.showCheProjectNameError(
+          locale.invalidProjectNameError(), locale.invalidProjectNameDetailError());
+      return false;
     }
+    view.hideCheProjectNameError();
+    return true;
+  }
 
-    /**
-     * Handles errors when creating a project.
-     *
-     * @param exception
-     *         cause
-     */
-    private void createProjectFailure(Throwable exception) {
-        view.animateImportButton(false);
-        view.enableImportButton(true);
-        view.enableCancelButton(true);
-        view.setBlocked(false);
-
-        view.enableNameField(true);
-        view.enableDescriptionField(true);
-
-        view.setErrorMessage(exception.getMessage());
-        importProjectNotificationSubscriber.onFailure(exception.getMessage());
-    }
-
-    @Override
-    public void onCancelClicked() {
-        view.closeView();
-    }
-
-    @Override
-    public void onBuildConfigSelected(BuildConfig buildConfig) {
-        selectedBuildConfig = buildConfig;
-
-        if (buildConfig != null) {
-            view.enableNameField(true);
-            view.enableDescriptionField(true);
-
-            view.setProjectName(buildConfig.getMetadata().getName(), true);
-            view.setApplicationInfo(buildConfig);
-        }
-
-        view.enableImportButton((buildConfig != null && view.getProjectName() != null && !view.getProjectName().isEmpty()));
-    }
-
-    @Override
-    public void onProjectNameChanged(String name) {
-        view.enableImportButton(selectedBuildConfig != null & isCheProjectNameValid(view.getProjectName()));
-    }
-
-    private boolean isCheProjectNameValid(String projectName) {
-        if (cheProjects.contains(projectName)) {
-            view.showCheProjectNameError(locale.existingProjectNameError(), null);
-            return false;
-        }
-        if (!OpenshiftValidator.isProjectNameValid(projectName)) {
-            view.showCheProjectNameError(locale.invalidProjectNameError(), locale.invalidProjectNameDetailError());
-            return false;
-        }
-        view.hideCheProjectNameError();
-        return true;
-    }
-
-    private void updateApplicationLabel(final BuildConfig buildConfig) {
-        applicationManager.findApplication(buildConfig)
-                          .thenPromise(new Function<Application, Promise<Application>>() {
-                              @Override
-                              public Promise<Application> apply(Application application) {
-                                  return applicationManager.updateOpenshiftApplication(application, buildConfig.getMetadata().getName());
-                              }
-                          });
-    }
+  private void updateApplicationLabel(final BuildConfig buildConfig) {
+    applicationManager
+        .findApplication(buildConfig)
+        .thenPromise(
+            new Function<Application, Promise<Application>>() {
+              @Override
+              public Promise<Application> apply(Application application) {
+                return applicationManager.updateOpenshiftApplication(
+                    application, buildConfig.getMetadata().getName());
+              }
+            });
+  }
 }

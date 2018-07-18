@@ -1,37 +1,34 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Codenvy, S.A. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Codenvy, S.A. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.ide.ext.openshift.client.dto;
 
 import org.eclipse.che.dto.shared.DTO;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Build;
 
-/**
- * @author Sergii Leschenko
- */
+/** @author Sergii Leschenko */
 @DTO
 public interface BuildChangeEvent {
-    enum EventType {
-        ADDED,
-        MODIFIED;
-    }
+  enum EventType {
+    ADDED,
+    MODIFIED;
+  }
 
-    EventType getType();
+  EventType getType();
 
-    void setType(EventType type);
+  void setType(EventType type);
 
-    BuildChangeEvent withType(EventType type);
+  BuildChangeEvent withType(EventType type);
 
-    Build getObject();
+  Build getObject();
 
-    void setObject(Build object);
+  void setObject(Build object);
 
-    BuildChangeEvent withObject(Build object);
+  BuildChangeEvent withObject(Build object);
 }

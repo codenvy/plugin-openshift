@@ -1,127 +1,124 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Codenvy, S.A. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Codenvy, S.A. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.ide.ext.openshift.shared.dto;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import java.util.List;
+import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface Container {
-    String getImage();
+  String getImage();
 
-    void setImage(String image);
+  void setImage(String image);
 
-    Container withImage(String image);
+  Container withImage(String image);
 
-    Probe getLivenessProbe();
+  Probe getLivenessProbe();
 
-    void setLivenessProbe(Probe livenessProbe);
+  void setLivenessProbe(Probe livenessProbe);
 
-    Container withLivenessProbe(Probe livenessProbe);
+  Container withLivenessProbe(Probe livenessProbe);
 
-    String getImagePullPolicy();
+  String getImagePullPolicy();
 
-    void setImagePullPolicy(String imagePullPolicy);
+  void setImagePullPolicy(String imagePullPolicy);
 
-    Container withImagePullPolicy(String imagePullPolicy);
+  Container withImagePullPolicy(String imagePullPolicy);
 
-    boolean getStdin();
+  boolean getStdin();
 
-    void setStdin(boolean stdin);
+  void setStdin(boolean stdin);
 
-    Container withStdin(boolean stdin);
+  Container withStdin(boolean stdin);
 
-    String getTerminationMessagePath();
+  String getTerminationMessagePath();
 
-    void setTerminationMessagePath(String terminationMessagePath);
+  void setTerminationMessagePath(String terminationMessagePath);
 
-    Container withTerminationMessagePath(String terminationMessagePath);
+  Container withTerminationMessagePath(String terminationMessagePath);
 
-    String getWorkingDir();
+  String getWorkingDir();
 
-    void setWorkingDir(String workingDir);
+  void setWorkingDir(String workingDir);
 
-    Container withWorkingDir(String workingDir);
+  Container withWorkingDir(String workingDir);
 
-    ResourceRequirements getResources();
+  ResourceRequirements getResources();
 
-    void setResources(ResourceRequirements resources);
+  void setResources(ResourceRequirements resources);
 
-    Container withResources(ResourceRequirements resources);
+  Container withResources(ResourceRequirements resources);
 
-    SecurityContext getSecurityContext();
+  SecurityContext getSecurityContext();
 
-    void setSecurityContext(SecurityContext securityContext);
+  void setSecurityContext(SecurityContext securityContext);
 
-    Container withSecurityContext(SecurityContext securityContext);
+  Container withSecurityContext(SecurityContext securityContext);
 
-    List<ContainerPort> getPorts();
+  List<ContainerPort> getPorts();
 
-    void setPorts(List<ContainerPort> ports);
+  void setPorts(List<ContainerPort> ports);
 
-    Container withPorts(List<ContainerPort> ports);
+  Container withPorts(List<ContainerPort> ports);
 
-    List<EnvVar> getEnv();
+  List<EnvVar> getEnv();
 
-    void setEnv(List<EnvVar> env);
+  void setEnv(List<EnvVar> env);
 
-    Container withEnv(List<EnvVar> env);
+  Container withEnv(List<EnvVar> env);
 
-    List<String> getCommand();
+  List<String> getCommand();
 
-    void setCommand(List<String> command);
+  void setCommand(List<String> command);
 
-    Container withCommand(List<String> command);
+  Container withCommand(List<String> command);
 
-    List<VolumeMount> getVolumeMounts();
+  List<VolumeMount> getVolumeMounts();
 
-    void setVolumeMounts(List<VolumeMount> volumeMounts);
+  void setVolumeMounts(List<VolumeMount> volumeMounts);
 
-    Container withVolumeMounts(List<VolumeMount> volumeMounts);
+  Container withVolumeMounts(List<VolumeMount> volumeMounts);
 
-    List<String> getArgs();
+  List<String> getArgs();
 
-    void setArgs(List<String> args);
+  void setArgs(List<String> args);
 
-    Container withArgs(List<String> args);
+  Container withArgs(List<String> args);
 
-    Lifecycle getLifecycle();
+  Lifecycle getLifecycle();
 
-    void setLifecycle(Lifecycle lifecycle);
+  void setLifecycle(Lifecycle lifecycle);
 
-    Container withLifecycle(Lifecycle lifecycle);
+  Container withLifecycle(Lifecycle lifecycle);
 
-    String getName();
+  String getName();
 
-    void setName(String name);
+  void setName(String name);
 
-    Container withName(String name);
+  Container withName(String name);
 
-    boolean getTty();
+  boolean getTty();
 
-    void setTty(boolean tty);
+  void setTty(boolean tty);
 
-    Container withTty(boolean tty);
+  Container withTty(boolean tty);
 
-    Probe getReadinessProbe();
+  Probe getReadinessProbe();
 
-    void setReadinessProbe(Probe readinessProbe);
+  void setReadinessProbe(Probe readinessProbe);
 
-    Container withReadinessProbe(Probe readinessProbe);
+  Container withReadinessProbe(Probe readinessProbe);
 
-    boolean getStdinOnce();
+  boolean getStdinOnce();
 
-    void setStdinOnce(boolean stdinOnce);
+  void setStdinOnce(boolean stdinOnce);
 
-    Container withStdinOnce(boolean stdinOnce);
-
+  Container withStdinOnce(boolean stdinOnce);
 }

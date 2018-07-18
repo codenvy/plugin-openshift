@@ -1,47 +1,45 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Codenvy, S.A. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Codenvy, S.A. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.ide.ext.openshift.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface RouteSpec {
-    String getPath();
+  String getPath();
 
-    void setPath(String path);
+  void setPath(String path);
 
-    RouteSpec withPath(String path);
+  RouteSpec withPath(String path);
 
-    RoutePort getPort();
+  RoutePort getPort();
 
-    void setPort(RoutePort port);
+  void setPort(RoutePort port);
 
-    RouteSpec withPort(RoutePort port);
+  RouteSpec withPort(RoutePort port);
 
-    String getHost();
+  String getHost();
 
-    void setHost(String host);
+  void setHost(String host);
 
-    RouteSpec withHost(String host);
+  RouteSpec withHost(String host);
 
-    TLSConfig getTls();
+  TLSConfig getTls();
 
-    void setTls(TLSConfig tls);
+  void setTls(TLSConfig tls);
 
-    RouteSpec withTls(TLSConfig tls);
+  RouteSpec withTls(TLSConfig tls);
 
-    ObjectReference getTo();
+  ObjectReference getTo();
 
-    void setTo(ObjectReference to);
+  void setTo(ObjectReference to);
 
-    RouteSpec withTo(ObjectReference to);
-
+  RouteSpec withTo(ObjectReference to);
 }

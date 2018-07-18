@@ -1,47 +1,45 @@
-/*******************************************************************************
- * Copyright (c) 2012-2017 Codenvy, S.A.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * ***************************************************************************** Copyright (c)
+ * 2012-2017 Codenvy, S.A. All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
+ * <p>Contributors: Codenvy, S.A. - initial API and implementation
+ * *****************************************************************************
+ */
 package org.eclipse.che.ide.ext.openshift.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface Service {
-    ObjectMeta getMetadata();
+  ObjectMeta getMetadata();
 
-    void setMetadata(ObjectMeta metadata);
+  void setMetadata(ObjectMeta metadata);
 
-    Service withMetadata(ObjectMeta metadata);
+  Service withMetadata(ObjectMeta metadata);
 
-    String getApiVersion();
+  String getApiVersion();
 
-    void setApiVersion(String apiVersion);
+  void setApiVersion(String apiVersion);
 
-    Service withApiVersion(String apiVersion);
+  Service withApiVersion(String apiVersion);
 
-    String getKind();
+  String getKind();
 
-    void setKind(String kind);
+  void setKind(String kind);
 
-    Service withKind(String kind);
+  Service withKind(String kind);
 
-    ServiceSpec getSpec();
+  ServiceSpec getSpec();
 
-    void setSpec(ServiceSpec spec);
+  void setSpec(ServiceSpec spec);
 
-    Service withSpec(ServiceSpec spec);
+  Service withSpec(ServiceSpec spec);
 
-    ServiceStatus getStatus();
+  ServiceStatus getStatus();
 
-    void setStatus(ServiceStatus status);
+  void setStatus(ServiceStatus status);
 
-    Service withStatus(ServiceStatus status);
-
+  Service withStatus(ServiceStatus status);
 }
